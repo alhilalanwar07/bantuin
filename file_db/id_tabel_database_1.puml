@@ -1,0 +1,205 @@
+@startuml diagram_er_bantuindong
+!theme plain
+skinparam {
+  Shadowing false
+  ArrowColor #666
+  BorderColor #666
+  FontSize 14
+}
+
+skinparam linetype ortho
+
+' ---------------------------
+' Tabel Autentikasi
+entity Pengguna {
+  * id : bigint <<PK, AI>>
+  --
+  email : varchar(100) <<unik, not null>>
+  password_hash : varchar(255) <<not null>>
+  peran : enum('konsumen','penyedia') <<not null>>
+  terverifikasi : boolean <<default:false>>
+  terakhir_login : timestamp <<nullable>>
+  dibuat_pada : timestamp <<default:current_timestamp>>
+  diperbarui_pada : timestamp <<on_update:current_timestamp>>
+}
+
+' ---------------------------
+' Tabel Profil
+entity ProfilKonsumen {
+  * id : bigint <<PK, AI>>
+  --
+  + pengguna_id : bigint <<FK, unik>>
+  nama_lengkap : varchar(100) <<not null>>
+  no_hp : varchar(20) <<not null>>
+  alamat : text <<not null>>
+  jenis_kelamin : enum('L','P','Lainnya') <<default:'Lainnya'>>
+  foto_profil : varchar(255) <<nullable>>
+  dibuat_pada : timestamp <<default:current_timestamp>>
+  diperbarui_pada : timestamp <<on_update:current_timestamp>>
+}
+
+entity ProfilPenyedia {
+  * id : bigint <<PK, AI>>
+  --
+  + pengguna_id : bigint <<FK, unik>>
+  nama_lengkap : varchar(100) <<not null>>
+  no_hp : varchar(20) <<not null>>
+  alamat : text <<not null>>
+  jenis_kelamin : enum('L','P','Lainnya') <<default:'Lainnya'>>
+  longitude : decimal(10,7) <<nullable>>
+  latitude : decimal(10,7) <<nullable>>
+  disetujui : boolean <<default:false>>
+  tanggal_persetujuan : date <<nullable>>
+  dibuat_pada : timestamp <<default:current_timestamp>>
+  diperbarui_pada : timestamp <<on_update:current_timestamp>>
+}
+
+' ---------------------------
+' Tabel Layanan
+entity KategoriLayanan {
+  * id : bigint <<PK, AI>>
+  --
+  nama : varchar(100) <<unik, not null>>
+  ikon : varchar(255) <<nullable>>
+  deskripsi : text <<nullable>>
+  dibuat_pada : timestamp <<default:current_timestamp>>
+  diperbarui_pada : timestamp <<on_update:current_timestamp>>
+}
+
+entity SertifikasiPenyedia {
+  * id : bigint <<PK, AI>>
+  --
+  + penyedia_id : bigint <<FK>>
+  + kategori_id : bigint <<FK>>
+  file_sertifikat : varchar(255) <<not null>>
+  tahun_terbit : year(4) <<not null>>
+  penerbit : varchar(100) <<not null>>
+  nama_sertifikasi : varchar(100) <<not null>>
+  terverifikasi : boolean <<default:false>>
+  dibuat_pada : timestamp <<default:current_timestamp>>
+  diperbarui_pada : timestamp <<on_update:current_timestamp>>
+}
+
+' ---------------------------
+' Tabel Transaksi
+entity StatusPengerjaan {
+  * id : bigint <<PK, AI>>
+  --
+  nama : enum('menunggu','penjemputan','negosiasi','diproses','dikerjakan','selesai','dibatalkan') <<not null>>
+  kode_warna : varchar(7) <<default:'#CCCCCC'>>
+  deskripsi : varchar(255) <<nullable>>
+  dibuat_pada : timestamp <<default:current_timestamp>>
+  diperbarui_pada : timestamp <<on_update:current_timestamp>>
+}
+
+entity Transaksi {
+  * id : bigint <<PK, AI>>
+  --
+  kode_tiket : uuid <<unik, not null>>
+  + konsumen_id : bigint <<FK>>
+  + penyedia_id : bigint <<FK>>
+  + kategori_id : bigint <<FK>>
+  alamat_layanan : text <<not null>>
+  longitude : decimal(10,7) <<not null>>
+  latitude : decimal(10,7) <<not null>>
+  waktu_pengerjaan : datetime <<not null>>
+  maksimal_bayar : decimal(12,2) <<not null>>
+  harga_setuju : decimal(12,2) <<nullable>>
+  + status_id : bigint <<FK>>
+  deskripsi_pekerjaan : text <<not null>>
+  dibuat_pada : timestamp <<default:current_timestamp>>
+  diperbarui_pada : timestamp <<on_update:current_timestamp>>
+}
+
+' ---------------------------
+' Tabel Dokumentasi
+entity DokumenTransaksi {
+  * id : bigint <<PK, AI>>
+  --
+  + kode_tiket : uuid <<FK>>
+  jenis_dokumen : enum('sebelum','sesudah','proses','lain') <<not null>>
+  url_file : varchar(255) <<not null>>
+  tipe_file : varchar(50) <<not null>>
+  diupload_pada : timestamp <<default:current_timestamp>>
+}
+
+' ---------------------------
+' Tabel Komunikasi
+entity Obrolan {
+  * id : bigint <<PK, AI>>
+  --
+  + kode_tiket : uuid <<FK>>
+  + pengirim_id : bigint <<not null>> <<comment:'ID Pengguna'>>
+  pesan : text <<not null>>
+  sudah_dibaca : boolean <<default:false>>
+  dibuat_pada : timestamp <<default:current_timestamp>>
+}
+
+' ---------------------------
+' Tabel Penilaian
+entity RatingLayanan {
+  * id : bigint <<PK, AI>>
+  --
+  + kode_tiket : uuid <<FK, unik>>
+  nilai : tinyint <<range:1-5, not null>>
+  ulasan : text <<nullable>>
+  anonim : boolean <<default:false>>
+  dibuat_pada : timestamp <<default:current_timestamp>>
+}
+
+' ---------------------------
+' Tabel Iklan
+entity Iklan {
+  * id : bigint <<PK, AI>>
+  --
+  url_banner : varchar(255) <<not null>>
+  durasi_hari : smallint <<not null>>
+  jenis_iklan : enum('banner','popup','unggulan') <<not null>>
+  status : enum('aktif','nonaktif') <<default:'nonaktif'>>
+  status_bayar : enum('pending','lunas','gagal') <<default:'pending'>>
+  mulai_tayang : date <<not null>>
+  akhir_tayang : date <<not null>>
+  jumlah_klik : int <<default:0>>
+  dibuat_pada : timestamp <<default:current_timestamp>>
+  diperbarui_pada : timestamp <<on_update:current_timestamp>>
+}
+
+entity Pengiklan {
+  * id : bigint <<PK, AI>>
+  --
+  nama_lengkap : varchar(100) <<not null>>
+  no_hp : varchar(20) <<not null>>
+  email : varchar(100) <<not null>>
+  perusahaan : varchar(100) <<nullable>>
+  alamat : text <<nullable>>
+  dibuat_pada : timestamp <<default:current_timestamp>>
+  diperbarui_pada : timestamp <<on_update:current_timestamp>>
+}
+
+' ---------------------------
+' Relasi Antar Tabel
+
+' Autentikasi ke Profil
+Pengguna ||--o| ProfilKonsumen : "1:1"
+Pengguna ||--o| ProfilPenyedia : "1:1"
+
+' Profil ke Transaksi
+ProfilKonsumen ||--o{ Transaksi : "1:N"
+ProfilPenyedia ||--o{ Transaksi : "1:N"
+
+' Kategori ke Transaksi
+KategoriLayanan ||--o{ Transaksi : "1:N"
+
+' Status ke Transaksi
+StatusPengerjaan ||--o{ Transaksi : "1:N"
+
+' Penyedia ke Sertifikasi
+ProfilPenyedia ||--o{ SertifikasiPenyedia : "1:N"
+KategoriLayanan ||--o{ SertifikasiPenyedia : "1:N"
+
+' Transaksi ke Data Terkait
+Transaksi ||--o{ DokumenTransaksi : "1:N"
+Transaksi ||--o{ Obrolan : "1:N"
+Transaksi ||--o| RatingLayanan : "1:1"
+
+@enduml

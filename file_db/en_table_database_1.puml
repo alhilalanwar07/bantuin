@@ -1,0 +1,213 @@
+@startuml bantuindong_er_diagram
+
+' perbesar ukuran font
+skinparam defaultFontSize 13
+
+' ---------------------------
+' Authentication Tables
+entity User {
+  * id : bigint <<PK, AI>>
+  --
+  email : varchar(100) <<unique, not null>>
+  password_hash : varchar(255) <<not null>>
+  role : enum('consumer','provider') <<not null>>
+  is_verified : boolean <<default:false>>
+  last_login : timestamp <<nullable>>
+  created_at : timestamp <<default:current_timestamp>>
+  updated_at : timestamp <<on_update:current_timestamp>>
+}
+
+' ---------------------------
+' Profile Tables
+entity ConsumerProfile {
+  * id : bigint <<PK, AI>>
+  --
+  + user_id : bigint <<FK, unique>>
+  full_name : varchar(100) <<not null>>
+  phone : varchar(20) <<not null>>
+  address : text <<not null>>
+  gender : enum('M','F','Other') <<default:'Other'>>
+  profile_picture : varchar(255) <<nullable>>
+  created_at : timestamp <<default:current_timestamp>>
+  updated_at : timestamp <<on_update:current_timestamp>>
+}
+
+entity ProviderProfile {
+  * id : bigint <<PK, AI>>
+  --
+  + user_id : bigint <<FK, unique>>
+  full_name : varchar(100) <<not null>>
+  phone : varchar(20) <<not null>>
+  address : text <<not null>>
+  gender : enum('M','F','Other') <<default:'Other'>>
+  longitude : decimal(10,7) <<nullable>>
+  latitude : decimal(10,7) <<nullable>>
+  is_approved : boolean <<default:false>>
+  approval_date : date <<nullable>>
+  created_at : timestamp <<default:current_timestamp>>
+  updated_at : timestamp <<on_update:current_timestamp>>
+}
+
+' ---------------------------
+' Service Tables
+entity ServiceCategory {
+  * id : bigint <<PK, AI>>
+  --
+  name : varchar(100) <<unique, not null>>
+  icon : varchar(255) <<nullable>>
+  description : text <<nullable>>
+  created_at : timestamp <<default:current_timestamp>>
+  updated_at : timestamp <<on_update:current_timestamp>>
+}
+
+entity ProviderCertification {
+  * id : bigint <<PK, AI>>
+  --
+  + provider_id : bigint <<FK>>
+  + category_id : bigint <<FK>>
+  certificate_file : varchar(255) <<not null>>
+  issue_year : year(4) <<not null>>
+  issuing_authority : varchar(100) <<not null>>
+  certification_name : varchar(100) <<not null>>
+  is_verified : boolean <<default:false>>
+  created_at : timestamp <<default:current_timestamp>>
+  updated_at : timestamp <<on_update:current_timestamp>>
+}
+
+' ---------------------------
+' Transaction Tables
+entity ServiceStatus {
+  * id : bigint <<PK, AI>>
+  --
+  name : enum('pending','pickup','negotiation','processing','in_progress','completed','cancelled') <<not null>>
+  color_code : varchar(7) <<default:'#CCCCCC'>>
+  description : varchar(255) <<nullable>>
+  created_at : timestamp <<default:current_timestamp>>
+  updated_at : timestamp <<on_update:current_timestamp>>
+}
+
+entity ServiceTransaction {
+  * id : bigint <<PK, AI>>
+  --
+  ticket_uuid : uuid <<unique, not null>>
+  + consumer_id : bigint <<FK>>
+  + provider_id : bigint <<FK>>
+  + category_id : bigint <<FK>>
+  service_address : text <<not null>>
+  longitude : decimal(10,7) <<not null>>
+  latitude : decimal(10,7) <<not null>>
+  service_time : datetime <<not null>>
+  max_payment : decimal(12,2) <<not null>>
+  agreed_price : decimal(12,2) <<nullable>>
+  + status_id : bigint <<FK>>
+  work_description : text <<not null>>
+  created_at : timestamp <<default:current_timestamp>>
+  updated_at : timestamp <<on_update:current_timestamp>>
+}
+
+' ---------------------------
+' Documentation Tables
+entity TransactionDocument {
+  * id : bigint <<PK, AI>>
+  --
+  + ticket_uuid : uuid <<FK>>
+  document_type : enum('before','after','progress','other') <<not null>>
+  file_url : varchar(255) <<not null>>
+  file_type : varchar(50) <<not null>>
+  uploaded_at : timestamp <<default:current_timestamp>>
+}
+
+' ---------------------------
+' Communication Tables
+entity ServiceChat {
+  * id : bigint <<PK, AI>>
+  --
+  + ticket_uuid : uuid <<FK>>
+  + sender_id : bigint <<not null>> <<comment:'user_id'>>
+  message : text <<not null>>
+  is_read : boolean <<default:false>>
+  created_at : timestamp <<default:current_timestamp>>
+}
+
+' ---------------------------
+' Rating Tables
+entity ServiceRating {
+  * id : bigint <<PK, AI>>
+  --
+  + ticket_uuid : uuid <<FK, unique>>
+  rating : tinyint <<range:1-5, not null>>
+  review : text <<nullable>>
+  is_anonymous : boolean <<default:false>>
+  created_at : timestamp <<default:current_timestamp>>
+}
+
+' ---------------------------
+' Advertisement Tables
+entity Advertisement {
+  * id : bigint <<PK, AI>>
+  --
+  banner_url : varchar(255) <<not null>>
+  duration_days : smallint <<not null>>
+  ad_type : enum('banner','popup','featured') <<not null>>
+  status : enum('active','inactive') <<default:'inactive'>>
+  payment_status : enum('pending','paid','failed') <<default:'pending'>>
+  start_date : date <<not null>>
+  end_date : date <<not null>>
+  click_count : int <<default:0>>
+  created_at : timestamp <<default:current_timestamp>>
+  updated_at : timestamp <<on_update:current_timestamp>>
+}
+
+entity Advertiser {
+  * id : bigint <<PK, AI>>
+  --
+  full_name : varchar(100) <<not null>>
+  phone : varchar(20) <<not null>>
+  email : varchar(100) <<not null>>
+  company : varchar(100) <<nullable>>
+  address : text <<nullable>>
+  created_at : timestamp <<default:current_timestamp>>
+  updated_at : timestamp <<on_update:current_timestamp>>
+}
+
+' ---------------------------
+' Relationships
+
+' Authentication to Profiles
+User ||--o| ConsumerProfile : "1:1"
+User ||--o| ProviderProfile : "1:1"
+
+' Profiles to Transactions
+ConsumerProfile ||--o{ ServiceTransaction : "1:N"
+ProviderProfile ||--o{ ServiceTransaction : "1:N"
+
+' Categories to Transactions
+ServiceCategory ||--o{ ServiceTransaction : "1:N"
+
+' Status to Transactions
+ServiceStatus ||--o{ ServiceTransaction : "1:N"
+
+' Provider to Certifications
+ProviderProfile ||--o{ ProviderCertification : "1:N"
+ServiceCategory ||--o{ ProviderCertification : "1:N"
+
+' Transaction to Related Data
+ServiceTransaction ||--o{ TransactionDocument : "1:N"
+ServiceTransaction ||--o{ ServiceChat : "1:N"
+ServiceTransaction ||--o| ServiceRating : "1:1"
+
+' Index Notes
+note top of ServiceTransaction
+  <<Indexes>>
+  idx_consumer_status (consumer_id, status_id)
+  idx_provider_date (provider_id, created_at)
+  idx_category_status (category_id, status_id)
+end note
+
+note right of ProviderProfile
+  <<Geospatial Query>>
+  Will use (longitude, latitude)
+  for location-based searches
+end note
+
+@enduml

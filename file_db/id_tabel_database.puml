@@ -1,0 +1,207 @@
+@startuml id__bantuindong
+' ---------------------------
+' Tabel Users (untuk autentikasi)
+entity Users {
+  * id : BIGINT (PK)
+  --
+  email : VARCHAR(100)
+  password : VARCHAR(255)
+  role : ENUM('pengguna', 'penyedia')
+  created_at : TIMESTAMP
+  updated_at : TIMESTAMP
+}
+
+' ---------------------------
+' Tabel Pengguna Jasa (profil pengguna)
+entity pengguna_jasas {
+  * id : BIGINT (PK)
+  --
+  user_id : BIGINT (FK)
+  nama_lengkap : VARCHAR(100)
+  no_hp : VARCHAR(20)
+  alamat : TEXT
+  jenis_kelamin : ENUM('L','P')
+  created_at : TIMESTAMP
+  updated_at : TIMESTAMP
+}
+
+' ---------------------------
+' Tabel Penyedia Jasa (profil penyedia)
+entity penyedia_jasas {
+  * id : BIGINT (PK)
+  --
+  user_id : BIGINT (FK)
+  nama_lengkap : VARCHAR(100)
+  no_hp : VARCHAR(20)
+  alamat : TEXT
+  jenis_kelamin : ENUM('L','P')
+  longitude : DECIMAL(10,7)
+  latitude : DECIMAL(10,7)
+  created_at : TIMESTAMP
+  updated_at : TIMESTAMP
+}
+
+' ---------------------------
+' Tabel Kategori Keahlian
+entity kategori_keahlians {
+  * id : BIGINT (PK)
+  --
+  nama : VARCHAR(100)
+  created_at : TIMESTAMP
+  updated_at : TIMESTAMP
+}
+
+' ---------------------------
+' Tabel User Kategori Keahlian (sertifikasi penyedia jasa)
+entity user_kategori_keahlians {
+  * id : BIGINT (PK)
+  --
+  dokumen_sertifikat : VARCHAR
+  tahun_diperoleh : YEAR
+  penerbit_sertifikat : VARCHAR(100)
+  nama_keahlian : VARCHAR(100)
+  penyedia_jasa_id : BIGINT (FK)
+  kategori_keahlian_id : BIGINT (FK)
+  created_at : TIMESTAMP
+  updated_at : TIMESTAMP
+}
+
+' ---------------------------
+' Tabel Status Pengerjaan (dengan warna)
+entity status_pengerjaans {
+  * id : BIGINT (PK)
+  --
+  nama : ENUM('menunggu permintaan','angkut','dalam negosiasi','diproses','dalam pengerjaan','selesai','batalkan')
+  warna : VARCHAR(7)
+  created_at : TIMESTAMP
+  updated_at : TIMESTAMP
+}
+
+' ---------------------------
+' Tabel Transaksis
+entity transaksis {
+  * id : BIGINT (PK)
+  --
+  no_tiket : UUID
+  pengguna_jasa_id : BIGINT (FK)
+  penyedia_jasa_id : BIGINT (FK)
+  kategori_keahlian_id : BIGINT (FK)
+  alamat : TEXT
+  longitude : DECIMAL(10,7)
+  latitude : DECIMAL(10,7)
+  waktu_pengerjaan : DATETIME
+  max_pembayaran : BIGINT
+  harga_disepakati : BIGINT
+  status_pengerjaan_id : BIGINT (FK)
+  deskripsi_pekerjaan : TEXT
+  created_at : TIMESTAMP
+  updated_at : TIMESTAMP
+}
+
+' ---------------------------
+' Tabel Dokumentasi Transaksi
+entity dokumentasi_transaksis {
+  * id : BIGINT (PK)
+  --
+  no_tiket : UUID (FK)
+  foto1 : VARCHAR
+  foto2 : VARCHAR
+  foto3 : VARCHAR
+  foto4 : VARCHAR
+  created_at : TIMESTAMP
+  updated_at : TIMESTAMP
+}
+
+' ---------------------------
+' Tabel Dokumentasi Pengerjaan
+entity dokumentasi_pengerjaans {
+  * id : BIGINT (PK)
+  --
+  no_tiket : UUID (FK)
+  foto_sebelum_pekerjaan : VARCHAR
+  foto_setelah_pekerjaan : VARCHAR
+  created_at : TIMESTAMP
+  updated_at : TIMESTAMP
+}
+
+' ---------------------------
+' Tabel Chats
+entity chats {
+  * id : BIGINT (PK)
+  --
+  no_tiket : UUID (FK)
+  pengguna_jasa_id : BIGINT (FK)
+  penyedia_jasa_id : BIGINT (FK)
+  komentar : TEXT
+  created_at : TIMESTAMP
+  updated_at : TIMESTAMP
+}
+
+' ---------------------------
+' Tabel Periklanans
+entity periklanans {
+  * id : BIGINT (PK)
+  --
+  banner : VARCHAR
+  durasi : INT
+  kategori_iklan : VARCHAR(100)
+  status_iklan : ENUM('aktif','nonaktif')
+  status_pembayaran : ENUM('belum','lunas')
+  tanggal_tayang : DATE
+  tanggal_berakhir : DATE
+  created_at : TIMESTAMP
+  updated_at : TIMESTAMP
+}
+
+' ---------------------------
+' Tabel Pelanggan Iklan
+entity pelanggan_iklans {
+  * id : BIGINT (PK)
+  --
+  nama_lengkap : VARCHAR(100)
+  no_hp : VARCHAR(20)
+  email : VARCHAR(100)
+  alamat : TEXT
+  created_at : TIMESTAMP
+  updated_at : TIMESTAMP
+}
+
+' ---------------------------
+' Tabel Bintangs
+entity bintangs {
+  * id : BIGINT (PK)
+  --
+  no_tiket : UUID (FK)
+  jumlah : TINYINT UNSIGNED
+  created_at : TIMESTAMP
+  updated_at : TIMESTAMP
+}
+
+' ---------------------------
+' Relasi antar tabel
+
+' Relasi Users ke profil pengguna/penyedia (1:1)
+Users ||--o{ pengguna_jasas : "user_id"
+Users ||--o{ penyedia_jasas : "user_id"
+
+' Relasi Profil ke Transaksi
+pengguna_jasas ||--o{ transaksis : "pengguna_jasa_id"
+penyedia_jasas ||--o{ transaksis : "penyedia_jasa_id"
+
+' Relasi Kategori Keahlian ke Transaksi
+kategori_keahlians ||--o{ transaksis : "kategori_keahlian_id"
+
+' Relasi Status Pengerjaan ke Transaksi
+status_pengerjaans ||--o{ transaksis : "status_pengerjaan_id"
+
+' Relasi Transaksis ke Dokumentasi dan Chat
+transaksis ||--|| dokumentasi_transaksis : "no_tiket"
+transaksis ||--|| dokumentasi_pengerjaans : "no_tiket"
+transaksis ||--|| chats : "no_tiket"
+transaksis ||--o{ bintangs : "no_tiket"
+
+' Relasi Penyedia Jasa dan Kategori Keahlian ke User Kategori Keahlian
+penyedia_jasas ||--o{ user_kategori_keahlians : "penyedia_jasa_id"
+kategori_keahlians ||--o{ user_kategori_keahlians : "kategori_keahlian_id"
+
+@enduml

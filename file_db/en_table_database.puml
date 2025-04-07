@@ -1,0 +1,207 @@
+@startuml en_bantuindong
+' ---------------------------
+' Table: Users (Authentication)
+entity Users {
+  * id : BIGINT (PK)
+  --
+  email : VARCHAR(100)
+  password : VARCHAR(255)
+  role : ENUM('client', 'provider')
+  created_at : TIMESTAMP
+  updated_at : TIMESTAMP
+}
+
+' ---------------------------
+' Table: Service Users (Client Profiles)
+entity service_users {
+  * id : BIGINT (PK)
+  --
+  user_id : BIGINT (FK)
+  full_name : VARCHAR(100)
+  phone : VARCHAR(20)
+  address : TEXT
+  gender : ENUM('M','F')
+  created_at : TIMESTAMP
+  updated_at : TIMESTAMP
+}
+
+' ---------------------------
+' Table: Service Providers (Provider Profiles)
+entity service_providers {
+  * id : BIGINT (PK)
+  --
+  user_id : BIGINT (FK)
+  full_name : VARCHAR(100)
+  phone : VARCHAR(20)
+  address : TEXT
+  gender : ENUM('M','F')
+  longitude : DECIMAL(10,7)
+  latitude : DECIMAL(10,7)
+  created_at : TIMESTAMP
+  updated_at : TIMESTAMP
+}
+
+' ---------------------------
+' Table: Skill Categories
+entity skill_categories {
+  * id : BIGINT (PK)
+  --
+  name : VARCHAR(100)
+  created_at : TIMESTAMP
+  updated_at : TIMESTAMP
+}
+
+' ---------------------------
+' Table: Provider Certifications (Service Provider Skills)
+entity provider_certifications {
+  * id : BIGINT (PK)
+  --
+  certificate_document : VARCHAR
+  year_obtained : YEAR
+  certificate_issuer : VARCHAR(100)
+  skill_name : VARCHAR(100)
+  provider_id : BIGINT (FK)
+  skill_category_id : BIGINT (FK)
+  created_at : TIMESTAMP
+  updated_at : TIMESTAMP
+}
+
+' ---------------------------
+' Table: Job Statuses (with Color)
+entity job_statuses {
+  * id : BIGINT (PK)
+  --
+  name : ENUM('waiting','pickup','negotiating','processing','in_progress','completed','cancelled')
+  color : VARCHAR(7)
+  created_at : TIMESTAMP
+  updated_at : TIMESTAMP
+}
+
+' ---------------------------
+' Table: Transactions
+entity transactions {
+  * id : BIGINT (PK)
+  --
+  ticket_no : UUID
+  client_id : BIGINT (FK)
+  provider_id : BIGINT (FK)
+  skill_category_id : BIGINT (FK)
+  address : TEXT
+  longitude : DECIMAL(10,7)
+  latitude : DECIMAL(10,7)
+  work_time : DATETIME
+  max_payment : BIGINT
+  agreed_price : BIGINT
+  job_status_id : BIGINT (FK)
+  job_description : TEXT
+  created_at : TIMESTAMP
+  updated_at : TIMESTAMP
+}
+
+' ---------------------------
+' Table: Transaction Documentations
+entity transaction_documentations {
+  * id : BIGINT (PK)
+  --
+  ticket_no : UUID (FK)
+  photo1 : VARCHAR
+  photo2 : VARCHAR
+  photo3 : VARCHAR
+  photo4 : VARCHAR
+  created_at : TIMESTAMP
+  updated_at : TIMESTAMP
+}
+
+' ---------------------------
+' Table: Work Documentations
+entity work_documentations {
+  * id : BIGINT (PK)
+  --
+  ticket_no : UUID (FK)
+  before_work_photo : VARCHAR
+  after_work_photo : VARCHAR
+  created_at : TIMESTAMP
+  updated_at : TIMESTAMP
+}
+
+' ---------------------------
+' Table: Chats
+entity chats {
+  * id : BIGINT (PK)
+  --
+  ticket_no : UUID (FK)
+  client_id : BIGINT (FK)
+  provider_id : BIGINT (FK)
+  comment : TEXT
+  created_at : TIMESTAMP
+  updated_at : TIMESTAMP
+}
+
+' ---------------------------
+' Table: Advertisements
+entity advertisements {
+  * id : BIGINT (PK)
+  --
+  banner : VARCHAR
+  duration_days : INT
+  ad_category : VARCHAR(100)
+  ad_status : ENUM('active','inactive')
+  payment_status : ENUM('pending','paid')
+  start_date : DATE
+  end_date : DATE
+  created_at : TIMESTAMP
+  updated_at : TIMESTAMP
+}
+
+' ---------------------------
+' Table: Advertising Customers
+entity advertising_customers {
+  * id : BIGINT (PK)
+  --
+  full_name : VARCHAR(100)
+  phone : VARCHAR(20)
+  email : VARCHAR(100)
+  address : TEXT
+  created_at : TIMESTAMP
+  updated_at : TIMESTAMP
+}
+
+' ---------------------------
+' Table: Ratings
+entity ratings {
+  * id : BIGINT (PK)
+  --
+  ticket_no : UUID (FK)
+  stars : TINYINT UNSIGNED
+  created_at : TIMESTAMP
+  updated_at : TIMESTAMP
+}
+
+' ---------------------------
+' Relationships
+
+' Users to Profiles (1:1)
+Users ||--o{ service_users : "user_id"
+Users ||--o{ service_providers : "user_id"
+
+' Profiles to Transactions
+service_users ||--o{ transactions : "client_id"
+service_providers ||--o{ transactions : "provider_id"
+
+' Skill Categories to Transactions
+skill_categories ||--o{ transactions : "skill_category_id"
+
+' Job Statuses to Transactions
+job_statuses ||--o{ transactions : "job_status_id"
+
+' Transactions to Documentations and Chats
+transactions ||--|| transaction_documentations : "ticket_no"
+transactions ||--|| work_documentations : "ticket_no"
+transactions ||--|| chats : "ticket_no"
+transactions ||--o{ ratings : "ticket_no"
+
+' Providers to Provider Certifications
+service_providers ||--o{ provider_certifications : "provider_id"
+skill_categories ||--o{ provider_certifications : "skill_category_id"
+
+@enduml

@@ -64,7 +64,7 @@ class UserController extends Controller
             
 
             return response()->json([
-                'message' => 'User created successfully',
+                'message' => 'Verifikasi email kamu untuk menyelesaikan pendaftaran',
                 'status' => true,
                 'user' => $user,
             ], 201);

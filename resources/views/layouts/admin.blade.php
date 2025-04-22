@@ -6,7 +6,7 @@
         @yield('title', config('app.name'))
     </title>
     <meta content="width=device-width, initial-scale=1.0, shrink-to-fit=no" name="viewport" />
-    <link rel="icon" href="{{ url('/') }}/assets/img/logo/favicon.ico" type="image/x-icon" />
+    <link rel="icon" href="{{ url('/') }}/favicon.ico" type="image/x-icon" />
 
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
 

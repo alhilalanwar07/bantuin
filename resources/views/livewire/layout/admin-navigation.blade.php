@@ -19,7 +19,7 @@ new class extends Component {
             <!-- Logo Header -->
             <div class="logo-header" data-background-color="dark">
                 <a href="#" class="logo">
-                    <img src="{{ url('/') }}/assets/img/logo/koltim-2.png" alt="kolaka timur" height="30" />
+                    <img src="{{ url('/') }}/assets/img/logo/logo_bantuindong_12.webp" alt="bantuindong" height="30" />
                 </a>
                 <div class="nav-toggle">
                     <button class="btn btn-toggle toggle-sidebar">
@@ -49,6 +49,30 @@ new class extends Component {
                             <i class="fa fa-ellipsis-h"></i>
                         </span>
                         <h4 class="text-section">Masters</h4>
+                    </li>
+                    <li class="nav-item {{ Route::is('admin.manajemen-user') ? 'active text-info' : '' }}">
+                        <a class="nav-link" href="{{ route('admin.manajemen-user') }}" wire:navigate>
+                            <i class="fas fa-users"></i>
+                            <p>Manajemen User</p>
+                        </a>
+                    </li>
+                    <li class="nav-section">
+                        <span class="sidebar-mini-icon">
+                            <i class="fa fa-ellipsis-h"></i>
+                        </span>
+                        <h4 class="text-section">Advertisement</h4>
+                    </li>
+                    <li class="nav-item {{ Route::is('admin.customer') ? 'active text-info' : '' }}">
+                        <a class="nav-link" href="{{ route('admin.customer') }}" wire:navigate>
+                            <i class="fas fa-users"></i>
+                            <p>Customers</p>
+                        </a>
+                    </li>
+                    <li class="nav-item {{ Route::is('admin.advertisement')? 'active text-info' : '' }}">
+                        <a class="nav-link" href="{{ route('admin.advertisement') }}" wire:navigate>
+                        <i class="fa fa-address-book" aria-hidden="true"></i>
+                            <p>Advertisement</p>
+                        </a>
                     </li>
                     <li class="nav-section">
                         <span class="sidebar-mini-icon">

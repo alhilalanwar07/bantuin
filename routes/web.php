@@ -15,3 +15,10 @@ Route::middleware('auth')->prefix('admin')->group(function () {
     Route::view('customer', 'admin/customer')->name('admin.customer');
     Route::view('advertisement', 'admin/advertisement')->name('admin.advertisement');
 });
+
+Route::get('/email/verify/{id}/{hash}', function (EmailVerificationRequest $request) {
+    $request->fulfill();
+
+    // Biasanya redirect ke halaman login / dashboard
+    return redirect('/email-verified-success');
+})->middleware(['auth', 'signed'])->name('verification.verify');

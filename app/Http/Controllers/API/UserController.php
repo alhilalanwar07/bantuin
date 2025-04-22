@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Hash;
 use DB;
+use Illuminate\Auth\Events\Registered;
 
 class UserController extends Controller
 {
@@ -31,13 +32,15 @@ class UserController extends Controller
             'email'    => 'required|string|email|max:255|unique:users',
             'phone'    => 'required|string|max:20',
             'address'  => 'required|string',
-            'gender'  => 'required|in:M,F',
+            'gender'   => 'required|in:M,F',
             'password' => 'required|string|min:6',
         ]);
 
 
         try {
-            DB::transaction(function () {
+            $user = null;
+
+            DB::transaction(function () use ($request) { // Pass $request into the closure
                 //save to user table
                 $user = new User;
                 $user->name = $request->name;
@@ -55,11 +58,11 @@ class UserController extends Controller
                 $customer->gender = $request->gender;
                 $customer->save();
 
-                //send email verification
-                // $user->sendEmailVerificationNotification();
-
             });
-    
+            // send email verification
+            $user->sendEmailVerificationNotification();
+            
+
             return response()->json([
                 'message' => 'User created successfully',
                 'status' => true,

@@ -10,7 +10,7 @@ use App\Http\Controllers\API\AdvertisementController;
 use App\Http\Controllers\API\RatingController;
 use App\Http\Controllers\API\NotificationController;
 use App\Http\Controllers\API\ProviderCertificationController;
-use App\Http\Controllers\Api\UserController;
+use App\Http\Controllers\API\UserController;
 
 // route test
 Route::get('/test', function () {

@@ -17,6 +17,9 @@ Route::get('/test', function () {
     return response()->json(['message' => 'API is working']);
 });
 
+Route::post('/register-customer', [UserController::class, 'registerCustomer']);
+Route::post('/login-customer', [UserController::class, 'loginCustomer']);
+
 
 // Service Provider Routes
 Route::apiResource('providers', ServiceProviderController::class);

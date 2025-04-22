@@ -2,9 +2,10 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Models\Customer;
 use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Hash;
 
 class UserController extends Controller
@@ -21,20 +22,88 @@ class UserController extends Controller
         return response()->json($user);
     }
 
-    // Menambahkan user baru
-    public function store(Request $request)
+    // add new user as customer
+    public function registerCustomer(Request $request)
     {
         $validated = $request->validate([
             'name'     => 'required|string|max:255',
             'email'    => 'required|string|email|max:255|unique:users',
+            'phone'    => 'required|string|max:20',
+            'address'  => 'required|string',
+            'gender'  => 'required|in:M,F',
             'password' => 'required|string|min:6',
         ]);
 
         $validated['password'] = Hash::make($validated['password']);
 
-        $user = User::create($validated);
 
-        return response()->json($user, 201);
+        try {
+            DB::transaction(function () {
+                //save to user table
+                $user = new User;
+                $user->name = $validated['name'];
+                $user->email = $validated['email'];
+                $user->password = $validated['password'];
+                $user->role = 'customer';
+                $user->save();
+
+                //save to customer table
+                $customer = new Customer;
+                $customer->user_id = $user->id;
+                $customer->name = $validated['name'];
+                $customer->phone = $validated['phone'];
+                $customer->address = $validated['address'];
+                $customer->gender = $validated['gender'];
+                $customer->save();
+
+                //send email verification
+                $user->sendEmailVerificationNotification();
+
+            });
+    
+            return response()->json([
+                'message' => 'User created successfully',
+                'status' => true,
+                'user' => $user,
+            ], 201);
+            DB::commit();
+        } catch (\Throwable $th) {
+            return response()->json([
+                'message' => 'Failed to create user',
+                'error' => $th->getMessage()
+            ], 500);
+            DB::rollBack();
+        }
+    
+    }
+
+    //login user customer 
+    public function loginCustomer(Request $request)
+    {
+        $request->validate([
+            'email' => 'required|string|email',
+            'password' => 'required'
+        ]);
+
+        $user = User::where('email', $request->email)->whereIn('role',['customer'])->where('status','active')->first();
+        if (!$user || ! Hash::check($request->password, $user->password)) {
+            return response()->json([
+                'success' => false,
+                'data' => null,
+                'message' => 'Kombinasi email dan password tidak sesuai',
+            ], 422);
+        }
+
+        $token = $user->createToken('API Token')->plainTextToken;
+        $customer = Customer::where('user_id', $user->id)->first()->name;
+
+        return response()->json([
+            'success' => true,
+            'access_token' => $token,
+            'token_type' => 'Bearer',
+            'user' => $user,
+            'message' => 'Selamat datang kembali '.$customer,
+        ]);
     }
 
     // Memperbarui user

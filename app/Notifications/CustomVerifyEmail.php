@@ -58,8 +58,8 @@ class CustomVerifyEmail extends BaseVerifyEmail
             ->greeting('Halo ' . $notifiable->name . ' 👋')
             ->line('Terima kasih yah sudah menjadi bagian dari kami! Silakan klik tombol di bawah ini untuk memverifikasi email kamu.')
             ->action('Verifikasi Email', $verificationUrl)
-            ->line('Kalau kamu tidak merasa mendaftar, abaikan email ini ya. ')
-            ->salutation('Salam hangat, Tim BantuinDong');
+            ->line('Kalau kamu tidak merasa mendaftar, abaikan email ini ya. ');
+            // ->salutation('Salam hangat, Tim BantuinDong');
 
     }
 

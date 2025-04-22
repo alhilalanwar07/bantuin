@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\{Route, Auth};
+use Illuminate\Foundation\Auth\EmailVerificationRequest;
 
 // disable register, reset password
 Auth::routes(['register' => false, 'reset' => false]);

@@ -58,9 +58,9 @@ class UserController extends Controller
                 $customer->gender = $request->gender;
                 $customer->save();
 
+                // send email verification
+                $user->sendEmailVerificationNotification();
             });
-            // send email verification
-            $user->sendEmailVerificationNotification();
             
 
             return response()->json([

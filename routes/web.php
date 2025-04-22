@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\{Route, Auth};
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
+use App\Models\User;
 
 // disable register, reset password
 Auth::routes(['register' => false, 'reset' => false]);
@@ -17,9 +18,24 @@ Route::middleware('auth')->prefix('admin')->group(function () {
     Route::view('advertisement', 'admin/advertisement')->name('admin.advertisement');
 });
 
-Route::get('/email/verify/{id}/{hash}', function (EmailVerificationRequest $request) {
-    $request->fulfill();
 
-    // Biasanya redirect ke halaman login / dashboard
-    return redirect('/email-verified-success');
-})->middleware(['auth', 'signed'])->name('verification.verify');
+Route::get('/email/verify/{id}/{hash}', function ($id, $hash) {
+    $user = User::find($id);
+
+    if (! $user) {
+        return response()->json(['message' => 'User tidak ditemukan.'], 404);
+    }
+
+    if (! hash_equals(sha1($user->getEmailForVerification()), $hash)) {
+        return response()->json(['message' => 'Link verifikasi tidak valid.'], 403);
+    }
+
+    if ($user->hasVerifiedEmail()) {
+        return response()->json(['message' => 'Email sudah diverifikasi sebelumnya.']);
+    }
+
+    $user->markEmailAsVerified();
+
+    return response()->json(['message' => 'Email berhasil diverifikasi!']);
+})->middleware(['signed'])->name('verification.verify');
+

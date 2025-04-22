@@ -26,7 +26,7 @@ class UserController extends Controller
     // add new user as customer
     public function registerCustomer(Request $request)
     {
-        $validated = $request->validate([
+        $request->validate([
             'name'     => 'required|string|max:255',
             'email'    => 'required|string|email|max:255|unique:users',
             'phone'    => 'required|string|max:20',
@@ -35,26 +35,24 @@ class UserController extends Controller
             'password' => 'required|string|min:6',
         ]);
 
-        $validated['password'] = Hash::make($validated['password']);
-
 
         try {
             DB::transaction(function () {
                 //save to user table
                 $user = new User;
-                $user->name = $validated['name'];
-                $user->email = $validated['email'];
-                $user->password = $validated['password'];
+                $user->name = $request->name;
+                $user->email = $request->email;
+                $user->password = Hash::make($request->password);
                 $user->role = 'customer';
                 $user->save();
 
                 //save to customer table
                 $customer = new Customer;
                 $customer->user_id = $user->id;
-                $customer->name = $validated['name'];
-                $customer->phone = $validated['phone'];
-                $customer->address = $validated['address'];
-                $customer->gender = $validated['gender'];
+                $customer->name = $request->name;
+                $customer->phone = $request->phone;
+                $customer->address = $request->address;
+                $customer->gender = $request->gender;
                 $customer->save();
 
                 //send email verification

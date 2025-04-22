@@ -7,6 +7,7 @@ use App\Models\Customer;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Hash;
+use DB;
 
 class UserController extends Controller
 {
@@ -57,7 +58,7 @@ class UserController extends Controller
                 $customer->save();
 
                 //send email verification
-                $user->sendEmailVerificationNotification();
+                // $user->sendEmailVerificationNotification();
 
             });
     

@@ -87,7 +87,18 @@ class UserController extends Controller
             'password' => 'required'
         ]);
 
-        $user = User::where('email', $request->email)->whereIn('role',['customer'])->where('status','active')->first();
+        $user = User::where('email', $request->email)->whereIn('role',['customer'])->first();
+
+        
+        
+        if ($user && !$user->hasVerifiedEmail()) {
+            return response()->json([
+                'success' => false,
+                'data' => null,
+                'message' => 'Silakan verifikasi email Anda terlebih dahulu',
+            ], 422);
+        }
+        
         if (!$user || ! Hash::check($request->password, $user->password)) {
             return response()->json([
                 'success' => false,

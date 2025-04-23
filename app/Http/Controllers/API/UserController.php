@@ -92,13 +92,16 @@ class UserController extends Controller
         
         
         if ($user && !$user->hasVerifiedEmail()) {
+
+            $user->sendEmailVerificationNotification();
+            
             return response()->json([
                 'success' => false,
                 'data' => null,
-                'message' => 'Silakan verifikasi email Anda terlebih dahulu',
+                'message' => 'Silakan verifikasi email Anda terlebih dahulu, cek kotak masuk email Anda',
             ], 422);
         }
-        
+
         if (!$user || ! Hash::check($request->password, $user->password)) {
             return response()->json([
                 'success' => false,

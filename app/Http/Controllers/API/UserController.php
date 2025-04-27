@@ -253,7 +253,7 @@ class UserController extends Controller
     {
         $data = Specialization::orderBy('name')->get();
 
-        return respons()->json([
+        return response()->json([
             'status' => true,
             'data' => $data,
             'message' => 'List of specializations',

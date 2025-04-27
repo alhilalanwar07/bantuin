@@ -21,7 +21,11 @@ Route::post('/register-customer', [UserController::class, 'registerCustomer']);
 Route::post('/register-service-provider', [UserController::class, 'registerServiceProvider']);
 Route::post('/login-customer', [UserController::class, 'loginCustomer']);
 Route::post('/login-vendor', [UserController::class, 'loginVendor']);
+Route::get('/list-specializations', [UserController::class, 'listSpecializations']);
 
+Route::group(['middleware' => 'auth:sanctum'], function(){
+    //
+});
 
 // Service Provider Routes
 Route::apiResource('providers', ServiceProviderController::class);

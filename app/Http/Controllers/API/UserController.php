@@ -247,4 +247,16 @@ class UserController extends Controller
         $user->delete();
         return response()->json(null, 204);
     }
+
+    public function listSpecializations(Request $request)
+    {
+        $sprecializations = Specialitation::all();
+
+        return respons()->json([
+            'status' => true,
+            'data' => $sprecializations,
+            'message' => 'List of specializations',
+        ], 200);
+    
+    }
 }

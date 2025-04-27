@@ -19,6 +19,7 @@ class ServiceProvider extends Model
         'longitude',
         'is_available',
         'account_balance',
+        'specialization_id',
     ];
 
     protected $casts = [

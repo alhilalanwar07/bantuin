@@ -227,7 +227,7 @@ class UserController extends Controller
     //vendor profile
     public function profilVendor(Request $request)
     {
-        $user = User::where('id', $request->user()->id)->whereIn('role',['vendor'])->where('status','active')->first();
+        $user = User::where('id', $request->user()->id)->whereIn('role',['vendor'])->where('is_active',1)->first();
         
         $vendor = Serviceprovider::join('specializations', 'specializations.id', '=', 'service_providers.specialization_id')
             ->select('service_providers.*', 'specializations.name as specialization_name')

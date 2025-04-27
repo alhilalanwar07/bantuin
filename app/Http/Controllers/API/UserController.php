@@ -251,11 +251,11 @@ class UserController extends Controller
 
     public function listSpecializations(Request $request)
     {
-        $sprecializations = Specialization::orderBy('name')->get();
+        $data = Specialization::orderBy('name')->get();
 
         return respons()->json([
             'status' => true,
-            'data' => $sprecializations,
+            'data' => $data,
             'message' => 'List of specializations',
         ], 200);
     

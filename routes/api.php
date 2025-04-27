@@ -24,7 +24,10 @@ Route::post('/login-vendor', [UserController::class, 'loginVendor']);
 Route::get('/list-specializations', [UserController::class, 'listSpecializations']);
 
 Route::group(['middleware' => 'auth:sanctum'], function(){
-    //
+    Route::get('/profil-vendor', [UserController::class, 'profilVendor']);
+    Route::get('/profil-costumer', [UserController::class, 'profilCostumer']);
+    Route::post('/fcm-token', [AuthController::class, 'storeFcmToken']);
+    Route::get('/logout', [AuthController::class, 'logout']);
 });
 
 // Service Provider Routes

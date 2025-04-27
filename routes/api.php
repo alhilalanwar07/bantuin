@@ -18,7 +18,9 @@ Route::get('/test', function () {
 });
 
 Route::post('/register-customer', [UserController::class, 'registerCustomer']);
+Route::post('/register-service-provider', [UserController::class, 'registerServiceProvider']);
 Route::post('/login-customer', [UserController::class, 'loginCustomer']);
+Route::post('/login-vendor', [UserController::class, 'loginVendor']);
 
 
 // Service Provider Routes

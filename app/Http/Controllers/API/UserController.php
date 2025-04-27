@@ -6,6 +6,7 @@ use DB;
 use App\Models\User;
 use App\Models\Customer;
 use Illuminate\Http\Request;
+use App\Models\Specialization;
 use App\Models\ServiceProvider;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Hash;
@@ -250,7 +251,7 @@ class UserController extends Controller
 
     public function listSpecializations(Request $request)
     {
-        $sprecializations = Specialitation::all();
+        $sprecializations = Specialization::orderBy('name')->get();
 
         return respons()->json([
             'status' => true,

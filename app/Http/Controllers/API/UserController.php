@@ -229,8 +229,9 @@ class UserController extends Controller
     {
         $user = User::where('id', $request->user()->id)->whereIn('role',['vendor'])->where('is_active',1)->first();
         
-        $vendor = Serviceprovider::join('specializations', 'specializations.id', '=', 'service_providers.specialization_id')
-            ->select('service_providers.*', 'specializations.name as specialization_name')
+        $vendor = Serviceprovider::join('users', 'users.id', '=', 'service_providers.user_id')
+            ->join('specializations', 'specializations.id', '=', 'service_providers.specialization_id')
+            ->select('service_providers.*', 'specializations.name as specialization_name','users.profile_photo')
             ->where('service_providers.user_id', $request->user()->id)
             ->first();
         

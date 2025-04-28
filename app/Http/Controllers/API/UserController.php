@@ -90,7 +90,7 @@ class UserController extends Controller
             'phone'    => 'required|string|max:20',
             'address'  => 'required|string',
             'gender'   => 'required|in:M,F',
-            'specialization' => 'required',
+            // 'specialization' => 'required',
             'password' => 'required|string|min:6',
         ]);
 
@@ -114,7 +114,7 @@ class UserController extends Controller
                 $vendor->phone = $request->phone;
                 $vendor->address = $request->address;
                 $vendor->gender = $request->gender;
-                $vendor->specialization_id = $request->specialization;
+                // $vendor->specialization_id = $request->specialization;
                 $vendor->save();
 
                 // send email verification
@@ -230,8 +230,9 @@ class UserController extends Controller
         $user = User::where('id', $request->user()->id)->whereIn('role',['vendor'])->where('is_active',1)->first();
         
         $vendor = Serviceprovider::join('users', 'users.id', '=', 'service_providers.user_id')
-            ->join('specializations', 'specializations.id', '=', 'service_providers.specialization_id')
-            ->select('service_providers.*', 'specializations.name as specialization_name','users.profile_photo')
+            // ->join('specializations', 'specializations.id', '=', 'service_providers.specialization_id')
+            // ->select('service_providers.*', 'specializations.name as specialization_name','users.profile_photo')
+            ->select('service_providers.*', 'users.profile_photo')
             ->where('service_providers.user_id', $request->user()->id)
             ->first();
         

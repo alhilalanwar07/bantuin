@@ -26,10 +26,10 @@ Route::get('/list-specializations', [UserController::class, 'listSpecializations
 Route::group(['middleware' => 'auth:sanctum'], function(){
     Route::get('/profil-vendor', [UserController::class, 'profilVendor']);
     Route::get('/profil-costumer', [UserController::class, 'profilCostumer']);
-    Route::post('/fcm-token', [AuthController::class, 'storeFcmToken']);
-    Route::get('/logout', [AuthController::class, 'logout']);
-    Route::post('/upload-certificate', [AuthController::class, 'simpanSertifikat']);
-    Route::post('/tambah-keahlian', [AuthController::class, 'tambahKeahlian']);
+    Route::post('/fcm-token', [UserController::class, 'storeFcmToken']);
+    Route::get('/logout', [UserController::class, 'logout']);
+    Route::post('/upload-certificate', [UserController::class, 'simpanSertifikat']);
+    Route::post('/tambah-keahlian', [UserController::class, 'tambahKeahlian']);
 });
 
 // Service Provider Routes

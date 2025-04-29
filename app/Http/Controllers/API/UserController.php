@@ -307,14 +307,16 @@ class UserController extends Controller
             $user = $request->user();
             $provider = ServiceProvider::where('user_id', $user->id)->firstOrFail();
 
+            
+
             // Simpan data keahlian
             $keahlian = new ProviderCertification();
             $keahlian->provider_id = $provider->id;
             $keahlian->specialization_id = $request->keahlian;
             $keahlian->skill_name = $skill->name;
             $keahlian->certificate_file = $path;
-            $keahlian->issue_year = $request->tahun_terbit;
-            $keahlian->issuer = $request->penerbit;
+            $keahlian->issue_year = $request->tahun_terbit ?: null;
+            $keahlian->issuer = $request->penerbit ?: null;
             $keahlian->is_verified = 0; // Default belum diverifikasi
             $keahlian->save();
 
@@ -334,25 +336,25 @@ class UserController extends Controller
        
     }
 
-    // public function simpanSertifikat(Request $request)
-    // {
-    //     // $request->validate([
-    //     //     'dokumen' => 'required|file|mimes:pdf|max:2048',
-    //     // ]);
+    public function simpanSertifikat(Request $request)
+    {
+        // $request->validate([
+        //     'dokumen' => 'required|file|mimes:pdf|max:2048',
+        // ]);
 
-    //     if($request->file('dokumen')){
-    //         $file = $request->file('dokumen');
-    //         $path = $file->store('dokumen', 'public');
+        if($request->file('dokumen')){
+            $file = $request->file('dokumen');
+            $path = $file->store('dokumen', 'public');
 
-    //     }
+        }
 
 
-    //     return response()->json([
-    //         'status' => true,
-    //         'message' => 'Sertifikat berhasil diunggah',
-    //         'data' => [
-    //         'sertifikat' => $file,
-    //         ],
-    //     ], 200);
-    // }
+        return response()->json([
+            'status' => true,
+            'message' => 'Sertifikat berhasil diunggah',
+            'data' => [
+            'sertifikat' => $file,
+            ],
+        ], 200);
+    }
 }

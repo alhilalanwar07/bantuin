@@ -395,9 +395,9 @@ class UserController extends Controller
             $fileName = uniqid() . '.jpeg';
             $filePath = 'user/' . $fileName;
 
-            $user = $request->user();
-            $user->profile_photo = $filePath;
-            $user->save();
+            $request->user()->update([
+                'profile_photo' => $filePath,
+            ]);
 
             //simpan ke storage ke path public
             Storage::disk('public')->put($filePath, $image);

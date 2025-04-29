@@ -10,6 +10,7 @@ use App\Models\Specialization;
 use App\Models\ServiceProvider;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Hash;
+use App\Models\ProviderCertification;
 use Illuminate\Auth\Events\Registered;
 
 class UserController extends Controller
@@ -277,5 +278,47 @@ class UserController extends Controller
             'message' => 'List of specializations',
         ], 200);
     
+    }
+
+    public function tambahKeahlian(Request $request)
+    {
+        $request->validate([
+            'specialization_id' => 'required|exists:specializations,id',
+        ]);
+
+        $user = $request->user();
+
+        $keahlian = new ProviderCertification();
+        $keahlian->provider_id = $user->id;
+        $keahlian->specialization_id = $request->keahlian;
+        $keahlian->certificate_file = $request->sertifikat;
+        $keahlian->issue_year = $request->tahun_terbit;
+        $keahlian->issuer = $request->penerbit;
+        $keahlian->is_verified = 0; // Set default value for is_verified
+        $keahlian->save();
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Keahlian berhasil ditambahkan',
+            'data' => $keahlian,
+        ], 200);
+    }
+
+    public function simpanSertifikat(Request $request)
+    {
+        $request->validate([
+            'dokumen' => 'required|file|mimes:pdf|max:2048',
+        ]);
+
+        $file = $request->file('dokumen');
+        $path = $file->store('dokumen', 'public');
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Sertifikat berhasil diunggah',
+            'data' => [
+            'sertifikat' => $file,
+            ],
+        ], 200);
     }
 }

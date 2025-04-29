@@ -296,6 +296,8 @@ class UserController extends Controller
             if ($request->hasFile('certificate')) {
                 $file = $request->file('certificate');
                 $path = $file->store('dokumen', 'public');
+            }else{
+                $path = null;
             }
 
             // Ambil data keahlian
@@ -332,25 +334,25 @@ class UserController extends Controller
        
     }
 
-    public function simpanSertifikat(Request $request)
-    {
-        // $request->validate([
-        //     'dokumen' => 'required|file|mimes:pdf|max:2048',
-        // ]);
+    // public function simpanSertifikat(Request $request)
+    // {
+    //     // $request->validate([
+    //     //     'dokumen' => 'required|file|mimes:pdf|max:2048',
+    //     // ]);
 
-        if($request->file('dokumen')){
-            $file = $request->file('dokumen');
-            $path = $file->store('dokumen', 'public');
+    //     if($request->file('dokumen')){
+    //         $file = $request->file('dokumen');
+    //         $path = $file->store('dokumen', 'public');
 
-        }
+    //     }
 
 
-        return response()->json([
-            'status' => true,
-            'message' => 'Sertifikat berhasil diunggah',
-            'data' => [
-            'sertifikat' => $file,
-            ],
-        ], 200);
-    }
+    //     return response()->json([
+    //         'status' => true,
+    //         'message' => 'Sertifikat berhasil diunggah',
+    //         'data' => [
+    //         'sertifikat' => $file,
+    //         ],
+    //     ], 200);
+    // }
 }

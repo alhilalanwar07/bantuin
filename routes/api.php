@@ -30,6 +30,7 @@ Route::group(['middleware' => 'auth:sanctum'], function(){
     Route::get('/logout', [UserController::class, 'logout']);
     Route::post('/upload-sertifikat', [UserController::class, 'simpanSertifikat']);
     Route::post('/tambah-keahlian', [UserController::class, 'tambahKeahlian']);
+    Route::get('/list-keahlian-vendor', [UserController::class, 'listKeahlianVendor']);
 });
 
 // Service Provider Routes

@@ -344,25 +344,41 @@ class UserController extends Controller
        
     }
 
-    public function simpanSertifikat(Request $request)
+    // public function simpanSertifikat(Request $request)
+    // {
+    //     // $request->validate([
+    //     //     'dokumen' => 'required|file|mimes:pdf|max:2048',
+    //     // ]);
+
+    //     if($request->file('dokumen')){
+    //         $file = $request->file('dokumen');
+    //         $path = $file->store('dokumen', 'public');
+
+    //     }
+
+
+    //     return response()->json([
+    //         'status' => true,
+    //         'message' => 'Sertifikat berhasil diunggah',
+    //         'data' => [
+    //         'sertifikat' => $file,
+    //         ],
+    //     ], 200);
+    // }
+
+    public function listKeahlianVendor(Request $request)
     {
-        // $request->validate([
-        //     'dokumen' => 'required|file|mimes:pdf|max:2048',
-        // ]);
+        $user = $request->user();
+        $vendor = ServiceProvider::where('user_id', $user->id)->firstOrFail();
 
-        if($request->file('dokumen')){
-            $file = $request->file('dokumen');
-            $path = $file->store('dokumen', 'public');
-
-        }
-
+        $keahlian = ProviderCertification::with('specialization')
+            ->where('provider_id', $vendor->id)
+            ->get();
 
         return response()->json([
             'status' => true,
-            'message' => 'Sertifikat berhasil diunggah',
-            'data' => [
-            'sertifikat' => $file,
-            ],
+            'data' => $keahlian,
+            'message' => 'List keahlian vendor',
         ], 200);
     }
 }

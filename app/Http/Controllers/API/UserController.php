@@ -283,7 +283,7 @@ class UserController extends Controller
     public function tambahKeahlian(Request $request)
     {
         $request->validate([
-            'specialization_id' => 'required|exists:specializations,id',
+            'keahlian' => 'required|exists:specializations,id',
         ]);
 
         $user = $request->user();
@@ -306,12 +306,16 @@ class UserController extends Controller
 
     public function simpanSertifikat(Request $request)
     {
-        $request->validate([
-            'dokumen' => 'required|file|mimes:pdf|max:2048',
-        ]);
+        // $request->validate([
+        //     'dokumen' => 'required|file|mimes:pdf|max:2048',
+        // ]);
 
-        $file = $request->file('dokumen');
-        $path = $file->store('dokumen', 'public');
+        if($request->file('dokumen')){
+            $file = $request->file('dokumen');
+            $path = $file->store('dokumen', 'public');
+
+        }
+
 
         return response()->json([
             'status' => true,

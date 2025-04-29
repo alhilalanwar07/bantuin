@@ -286,9 +286,6 @@ class UserController extends Controller
             // Validasi input
             $request->validate([
                 'keahlian' => 'required|exists:specializations,id',
-                // 'certificate' => 'nullable|file|mimes:pdf|max:2048',
-                // 'tahun_terbit' => 'required|digits:4|integer|min:1900|max:' . date('Y'),
-                // 'penerbit' => 'required|string|max:255',
             ]);
 
             // Proses file sertifikat jika ada
@@ -309,7 +306,18 @@ class UserController extends Controller
 
             
 
-            // Simpan data keahlian
+            // Simpan data keahlian tapi jika keahlian untuk provider sudah ada berikan peringatan
+            $keahlian = ProviderCertification::where('provider_id', $provider->id)
+                ->where('specialization_id', $request->keahlian)
+                ->first();
+
+            if ($keahlian) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Tidak dapat menyimpan, keahlian ini sudah ada sebelumnya, silahkan pilih keahlian lain, atau edit keahlian yang sudah ada',
+                    'data' => $keahlian,
+                ], 422);
+            }
             $keahlian = new ProviderCertification();
             $keahlian->provider_id = $provider->id;
             $keahlian->specialization_id = $request->keahlian;

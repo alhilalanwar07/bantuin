@@ -404,7 +404,7 @@ class UserController extends Controller
             
             return response()->json([
                 'success' => true,
-                'data' => $request->user(),
+                'data' => $filePath,
                 'message' => 'Profile photo berhasil diupload'
             ]);
         

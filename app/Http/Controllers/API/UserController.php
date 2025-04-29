@@ -386,7 +386,6 @@ class UserController extends Controller
 
     public function uploadFoto(Request $request)
     {
-        
 
         DB::beginTransaction();
         try {
@@ -396,7 +395,7 @@ class UserController extends Controller
             $fileName = uniqid() . '.jpeg';
             $filePath = 'user/' . $fileName;
 
-            $user = User::find($request->user()->id);
+            $user = User::where('id', $request->user()->id)->first();
             $user->profile_photo = $filePath;
             $user->save();
 

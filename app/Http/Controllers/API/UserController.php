@@ -314,9 +314,9 @@ class UserController extends Controller
             $keahlian->provider_id = $provider->id;
             $keahlian->specialization_id = $request->keahlian;
             $keahlian->skill_name = $skill->name;
-            $keahlian->certificate_file = $path ?: null;
-            $keahlian->issue_year = $request->tahun_terbit ?: null;
-            $keahlian->issuer = $request->penerbit ?: null;
+            $keahlian->certificate_file = $path ?: NULL;
+            $keahlian->issue_year = $request->tahun_terbit ?: NULL;
+            $keahlian->issuer = $request->penerbit ?: NULL;
             $keahlian->is_verified = 0; // Default belum diverifikasi
             $keahlian->save();
 

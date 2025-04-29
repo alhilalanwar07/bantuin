@@ -286,11 +286,14 @@ class UserController extends Controller
             'keahlian' => 'required|exists:specializations,id',
         ]);
 
+        $skill = Specialization::find($request->keahlian);
+
         $user = $request->user();
 
         $keahlian = new ProviderCertification();
         $keahlian->provider_id = $user->id;
         $keahlian->specialization_id = $request->keahlian;
+        $keahlian->skill_name  = $skill->name;
         $keahlian->certificate_file = $request->sertifikat;
         $keahlian->issue_year = $request->tahun_terbit;
         $keahlian->issuer = $request->penerbit;

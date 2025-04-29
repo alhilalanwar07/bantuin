@@ -12,6 +12,7 @@ class ProviderCertification extends Model
 
     protected $fillable = [
         'provider_id',
+        'specialization_id',
         'skill_name',
         'certificate_file',
         'issue_year',

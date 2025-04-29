@@ -371,7 +371,8 @@ class UserController extends Controller
         $user = $request->user();
         $vendor = ServiceProvider::where('user_id', $user->id)->firstOrFail();
 
-        $keahlian = ProviderCertification::with('specialization')
+        $keahlian = ProviderCertification::join('specializations', 'specializations.id', '=', 'provider_certifications.specialization_id')
+            ->select('provider_certifications.*', 'specializations.icon as icon')
             ->where('provider_id', $vendor->id)
             ->get();
 

@@ -282,36 +282,54 @@ class UserController extends Controller
 
     public function tambahKeahlian(Request $request)
     {
-        $request->validate([
-            'keahlian' => 'required|exists:specializations,id',
-        ]);
+        try {
+            // Validasi input
+            $request->validate([
+                'keahlian' => 'required|exists:specializations,id',
+                // 'certificate' => 'nullable|file|mimes:pdf|max:2048',
+                // 'tahun_terbit' => 'required|digits:4|integer|min:1900|max:' . date('Y'),
+                // 'penerbit' => 'required|string|max:255',
+            ]);
 
-         if($request->file('sertifikat')){
-            $file = $request->file('sertifikat');
-            $path = $file->store('dokumen', 'public');
+            // Proses file sertifikat jika ada
+            $path = null;
+            if ($request->hasFile('certificate')) {
+                $file = $request->file('certificate');
+                $path = $file->store('dokumen', 'public');
+            }
 
+            // Ambil data keahlian
+            $skill = Specialization::findOrFail($request->keahlian);
+
+            // Ambil data user dan provider
+            $user = $request->user();
+            $provider = ServiceProvider::where('user_id', $user->id)->firstOrFail();
+
+            // Simpan data keahlian
+            $keahlian = new ProviderCertification();
+            $keahlian->provider_id = $provider->id;
+            $keahlian->specialization_id = $request->keahlian;
+            $keahlian->skill_name = $skill->name;
+            $keahlian->certificate_file = $path;
+            $keahlian->issue_year = $request->tahun_terbit;
+            $keahlian->issuer = $request->penerbit;
+            $keahlian->is_verified = 0; // Default belum diverifikasi
+            $keahlian->save();
+
+            return response()->json([
+                'status' => true,
+                'message' => 'Keahlian berhasil ditambahkan',
+                'data' => $keahlian,
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Terjadi kesalahan saat menambahkan keahlian',
+                'error' => $e->getMessage(),
+            ], 500);
         }
 
-        $skill = Specialization::find($request->keahlian);
-
-        $user = $request->user();
-        $provider = ServiceProvider::where('user_id', $user->id)->first();
-
-        $keahlian = new ProviderCertification();
-        $keahlian->provider_id = $provider->id;
-        $keahlian->specialization_id = $request->keahlian;
-        $keahlian->skill_name  = $skill->name;
-        $keahlian->certificate_file = $path;
-        $keahlian->issue_year = $request->tahun_terbit;
-        $keahlian->issuer = $request->penerbit;
-        $keahlian->is_verified = 0; // Set default value for is_verified
-        $keahlian->save();
-
-        return response()->json([
-            'status' => true,
-            'message' => 'Keahlian berhasil ditambahkan',
-            'data' => $keahlian,
-        ], 200);
+       
     }
 
     public function simpanSertifikat(Request $request)

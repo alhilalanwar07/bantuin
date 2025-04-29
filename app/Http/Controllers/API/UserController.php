@@ -387,18 +387,17 @@ class UserController extends Controller
     public function uploadFoto(Request $request)
     {
 
-        DB::beginTransaction();
         try {
+            DB::beginTransaction();
             
             //decode base64 jadi binary
             $image = base64_decode($request->foto);
             $fileName = uniqid() . '.jpeg';
             $filePath = 'user/' . $fileName;
 
-            User ::where('id', $request->user()->id)
-            ->update([
-                'profile_photo' => $filePath
-            ]);
+            $user = User::find($request->user()->id);
+            $user->profile_photo = $filePath;
+            $user->save();
 
             //simpan ke storage ke path public
             Storage::disk('public')->put($filePath, $image);

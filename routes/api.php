@@ -31,6 +31,7 @@ Route::group(['middleware' => 'auth:sanctum'], function(){
     Route::post('/upload-sertifikat', [UserController::class, 'simpanSertifikat']);
     Route::post('/tambah-keahlian', [UserController::class, 'tambahKeahlian']);
     Route::get('/list-keahlian-vendor', [UserController::class, 'listKeahlianVendor']);
+    Route::post('/upload-foto', [UserController::class, 'uploadFoto']);
 });
 
 // Service Provider Routes

@@ -382,4 +382,40 @@ class UserController extends Controller
             'message' => 'List keahlian vendor',
         ], 200);
     }
+
+    public function uploadFoto(Request $request)
+    {
+        //decode base64 jadi binary
+        $image = base64_decode($request->foto);
+        $fileName = uniqid() . '.jpeg';
+        $filePath = 'user/' . $fileName;
+
+
+        //simpan ke storage ke path public
+        Storage::disk('public')->put($filePath, $image);
+
+        DB::beginTransaction();
+        try {
+            $user = User::find($request->user()->id);
+            $user->profile_photo = $filePath;
+            $user->save();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Profile photo berhasil diupload'
+            ]);
+        
+            DB::commit();
+        } catch (\Throwable $th) {
+            DB::rollback();
+            return response()->json([
+                'success' => false,
+                'message' => 'Foto gagal diupload'
+            ]);
+
+        }
+
+
+        
+    }
 }

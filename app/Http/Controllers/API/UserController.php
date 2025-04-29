@@ -289,9 +289,10 @@ class UserController extends Controller
         $skill = Specialization::find($request->keahlian);
 
         $user = $request->user();
+        $provider = ServiceProvider::where('user_id', $user->id)->first();
 
         $keahlian = new ProviderCertification();
-        $keahlian->provider_id = $user->id;
+        $keahlian->provider_id = $provider->id;
         $keahlian->specialization_id = $request->keahlian;
         $keahlian->skill_name  = $skill->name;
         $keahlian->certificate_file = $request->sertifikat;

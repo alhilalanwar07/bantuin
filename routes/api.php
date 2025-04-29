@@ -28,7 +28,7 @@ Route::group(['middleware' => 'auth:sanctum'], function(){
     Route::get('/profil-costumer', [UserController::class, 'profilCostumer']);
     Route::post('/fcm-token', [UserController::class, 'storeFcmToken']);
     Route::get('/logout', [UserController::class, 'logout']);
-    Route::post('/upload-certificate', [UserController::class, 'simpanSertifikat']);
+    Route::post('/upload-sertifikat', [UserController::class, 'simpanSertifikat']);
     Route::post('/tambah-keahlian', [UserController::class, 'tambahKeahlian']);
 });
 

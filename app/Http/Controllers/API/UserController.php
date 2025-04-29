@@ -286,6 +286,12 @@ class UserController extends Controller
             'keahlian' => 'required|exists:specializations,id',
         ]);
 
+         if($request->file('sertifikat')){
+            $file = $request->file('sertifikat');
+            $path = $file->store('dokumen', 'public');
+
+        }
+
         $skill = Specialization::find($request->keahlian);
 
         $user = $request->user();
@@ -295,7 +301,7 @@ class UserController extends Controller
         $keahlian->provider_id = $provider->id;
         $keahlian->specialization_id = $request->keahlian;
         $keahlian->skill_name  = $skill->name;
-        $keahlian->certificate_file = $request->sertifikat;
+        $keahlian->certificate_file = $path;
         $keahlian->issue_year = $request->tahun_terbit;
         $keahlian->issuer = $request->penerbit;
         $keahlian->is_verified = 0; // Set default value for is_verified

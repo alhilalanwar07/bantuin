@@ -395,20 +395,29 @@ class UserController extends Controller
             $fileName = uniqid() . '.jpeg';
             $filePath = 'user/' . $fileName;
 
+            // Ambil path lama sebelum diupdate
+            $oldPath = $request->user()->profile_photo;
+
+            //simpan ke storage ke path public
+            Storage::disk('public')->put($filePath, $image);
+
             $request->user()->update([
                 'profile_photo' => $filePath,
             ]);
 
-            //simpan ke storage ke path public
-            Storage::disk('public')->put($filePath, $image);
+            //cek apakah user sudah punya profile_photo
+            if ($oldPath) {
+                //hapus foto lama
+                Storage::disk('public')->delete($oldPath);
+            }
             
+            DB::commit();
             return response()->json([
                 'success' => true,
                 'data' => $filePath,
                 'message' => 'Profile photo berhasil diupload'
             ]);
         
-            DB::commit();
         } catch (\Throwable $th) {
             DB::rollback();
             return response()->json([

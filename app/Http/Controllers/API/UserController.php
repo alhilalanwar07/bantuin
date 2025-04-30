@@ -245,21 +245,136 @@ class UserController extends Controller
         ]);
     }
     // Memperbarui user
-    public function update(Request $request, User $user)
+    // public function update(Request $request, User $user)
+    // {
+    //     $validated = $request->validate([
+    //         'name'  => 'sometimes|string|max:255',
+    //         'email' => 'sometimes|string|email|max:255|unique:users,email,' . $user->id,
+    //         'password' => 'sometimes|string|min:6',
+    //     ]);
+
+    //     if(isset($validated['password'])){
+    //         $validated['password'] = Hash::make($validated['password']);
+    //     }
+
+    //     $user->update($validated);
+
+    //     return response()->json($user);
+    // }
+
+    public function updateProfile(Request $request)
     {
-        $validated = $request->validate([
-            'name'  => 'sometimes|string|max:255',
-            'email' => 'sometimes|string|email|max:255|unique:users,email,' . $user->id,
-            'password' => 'sometimes|string|min:6',
-        ]);
+        if($request->password){
+            try {
+                DB::beginTransaction();
+                //Ambil email lama sebelum ada update
+                $oldEmail = $request->user()->email;
+                //cek email apabila sudah digunakan oleh user lain kecuali user yang sedang login
+                $user = User::where('email', $request->email)->where('id','!=',$request->user()->id)->first();
+                if($user){
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Email sudah digunakan oleh user lain'
+                    ], 422);
+                }
+                
+                //update data user
+                $user = User::where('id', $request->user()->id)->first();
+                $user->email = $request->email;
+                $user->password = Hash::make($request->password);
+                $user->save();
 
-        if(isset($validated['password'])){
-            $validated['password'] = Hash::make($validated['password']);
+                //update data customer
+                $customer = Customer::where('user_id', $request->user()->id)->first();
+                $customer->name = $request->name;
+                $customer->phone = $request->phone;
+                $customer->address = $request->address;
+                $customer->gender = $request->gender;
+                $customer->save();
+
+                //Jika email diupdate, maka kirimkan email verifikasi ke email baru
+                if($oldEmail != $request->email){
+                    $request->user()->update([
+                        'email_verified_at' => null,
+                    ]);
+                    $request->user()->sendEmailVerificationNotification();
+
+                   //logout user
+                    $request->user()->tokens()->delete();
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Silakan verifikasi email Anda terlebih dahulu, cek kotak masuk email Anda',
+                    ], 422);
+                }
+
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Profil  berhasil diupdate',
+                ]);
+
+                DB::commit();
+            } catch (\Throwable $th) {
+                DB::rollback();
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Profil  gagal diupdate'
+                ], 422);
+            }
+        }else{
+            try {
+                DB::beginTransaction();
+                //Ambil email lama sebelum ada update
+                $oldEmail = $request->user()->email;
+                //cek email apabila sudah digunakan oleh user lain kecuali user yang sedang login
+                $user = User::where('email', $request->email)->where('id','!=',$request->user()->id)->first();
+                if($user){
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Email sudah digunakan oleh user lain'
+                    ], 422);
+                }
+                //update data user
+                $user = User::where('id', $request->user()->id)->first();
+                $user->email = $request->email;
+                $user->save();
+
+                //update data customer
+                $customer = Customer::where('user_id', $request->user()->id)->first();
+                $customer->name = $request->name;
+                $customer->phone = $request->phone;
+                $customer->address = $request->address;
+                $customer->gender = $request->gender;
+                $customer->save();
+
+                //Jika email diupdate, maka kirimkan email verifikasi ke email baru
+                if($oldEmail != $request->email){
+                    $request->user()->update([
+                        'email_verified_at' => null,
+                    ]);
+                    $request->user()->sendEmailVerificationNotification();
+
+                   //logout user
+                    $request->user()->tokens()->delete();
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Silakan verifikasi email Anda terlebih dahulu, cek kotak masuk email Anda',
+                    ], 422);
+                }
+                
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Profil berhasil diupdate',
+                ]);
+                DB::commit();
+            } catch (\Throwable $th) {
+                DB::rollback();
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Profil  gagal diupdate'
+                ], 422);
+            }
         }
-
-        $user->update($validated);
-
-        return response()->json($user);
+        
     }
 
     // Menghapus user
@@ -429,5 +544,15 @@ class UserController extends Controller
 
 
         
+    }
+
+    public function logout(Request $request)
+    {
+        $user = $request->user();
+        $user->tokens()->delete();
+
+        return response()->json([
+            'message' => 'Successfully logged out',
+        ], 200);
     }
 }

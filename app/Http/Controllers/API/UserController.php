@@ -265,29 +265,6 @@ class UserController extends Controller
     public function updateProfileVendor(Request $request)
     {
 
-        $request->validate([
-            'name'     => 'required|string|min:4',
-            [
-                'name.min' => 'Nama minimal harus 4 karakter.',
-            ],
-            'email'    => 'required|string|email',
-            'phone'    => 'required|min:10',
-            [
-                'phone.min' => 'Nomor telepon minimal harus 10 karakter.',
-            ],
-            'address'  => 'required|string',
-        ]);
-
-        //tampilan response errors apbilan  validasi gagal
-        if ($request->fails()) {
-            return response()->json([
-                'success' => false,
-                'message' => $request->errors()
-            ], 422);
-        }
-       
-
-
         if($request->password){
             try {
                 DB::beginTransaction();

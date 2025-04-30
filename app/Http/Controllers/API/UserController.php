@@ -278,7 +278,15 @@ class UserController extends Controller
             'address'  => 'required|string',
         ]);
 
+        //tampilan response errors apbilan  validasi gagal
+        if ($request->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => $request->errors()
+            ], 422);
+        }
        
+
 
         if($request->password){
             try {

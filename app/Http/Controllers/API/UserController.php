@@ -324,50 +324,51 @@ class UserController extends Controller
             }
         }else{
             try {
-                DB::beginTransaction();
-                //Ambil email lama sebelum ada update
-                $oldEmail = $request->user()->email;
-                //cek email apabila sudah digunakan oleh user lain kecuali user yang sedang login
-                $user = User::where('email', $request->email)->where('id','!=',$request->user()->id)->first();
-                if($user){
+                DB::transaction(function () use ($request) {
+                    //Ambil email lama sebelum ada update
+                    $oldEmail = $request->user()->email;
+                    //cek email apabila sudah digunakan oleh user lain kecuali user yang sedang login
+                    $user = User::where('email', $request->email)->where('id','!=',$request->user()->id)->first();
+                    if($user){
+                        return response()->json([
+                            'success' => false,
+                            'message' => 'Email sudah digunakan oleh user lain'
+                        ], 422);
+                    }
+                    //update data user
+                    $user = User::where('id', $request->user()->id)->first();
+                    $user->name = $request->name;
+                    $user->email = $request->email;
+                    $user->save();
+
+                    //update data customer
+                    $customer = ServiceProvider::where('user_id', $request->user()->id)->first();
+                    $customer->name = $request->name;
+                    $customer->phone = $request->phone;
+                    $customer->address = $request->address;
+                    $customer->gender = $request->gender;
+                    $customer->save();
+
+                    //Jika email diupdate, maka kirimkan email verifikasi ke email baru
+                    if($oldEmail != $request->email){
+                        $request->user()->update([
+                            'email_verified_at' => null,
+                        ]);
+                        $request->user()->sendEmailVerificationNotification();
+
+                    //logout user
+                        $request->user()->tokens()->delete();
+                        return response()->json([
+                            'success' => false,
+                            'message' => 'Silakan verifikasi email Anda terlebih dahulu, cek kotak masuk email Anda',
+                        ], 422);
+                    }
+                    
                     return response()->json([
-                        'success' => false,
-                        'message' => 'Email sudah digunakan oleh user lain'
-                    ], 422);
-                }
-                //update data user
-                $user = User::where('id', $request->user()->id)->first();
-                $user->name = $request->name;
-                $user->email = $request->email;
-                $user->save();
-
-                //update data customer
-                $customer = ServiceProvider::where('user_id', $request->user()->id)->first();
-                $customer->name = $request->name;
-                $customer->phone = $request->phone;
-                $customer->address = $request->address;
-                $customer->gender = $request->gender;
-                $customer->save();
-
-                //Jika email diupdate, maka kirimkan email verifikasi ke email baru
-                if($oldEmail != $request->email){
-                    $request->user()->update([
-                        'email_verified_at' => null,
+                        'success' => true,
+                        'message' => 'Profil berhasil diupdate',
                     ]);
-                    $request->user()->sendEmailVerificationNotification();
-
-                   //logout user
-                    $request->user()->tokens()->delete();
-                    return response()->json([
-                        'success' => false,
-                        'message' => 'Silakan verifikasi email Anda terlebih dahulu, cek kotak masuk email Anda',
-                    ], 422);
-                }
-                
-                return response()->json([
-                    'success' => true,
-                    'message' => 'Profil berhasil diupdate',
-                ]);
+                });
                 DB::commit();
             } catch (\Throwable $th) {
                 DB::rollback();

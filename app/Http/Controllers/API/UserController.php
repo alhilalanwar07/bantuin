@@ -264,6 +264,14 @@ class UserController extends Controller
 
     public function updateProfileVendor(Request $request)
     {
+
+        $request->validate([
+            'name'     => 'required|string|min:4',
+            'email'    => 'required|string|email',
+            'phone'    => 'required|string|min:10',
+            'address'  => 'required|string',
+        ]);
+
         if($request->password){
             try {
                 DB::beginTransaction();
@@ -318,7 +326,7 @@ class UserController extends Controller
                 DB::rollback();
                 return response()->json([
                     'success' => false,
-                    'message' => 'Profil  gagal diupdate'
+                    'message' => 'Profil  gagal diupdate '. $th->errors()
                 ], 422);
             }
         }else{
@@ -372,7 +380,7 @@ class UserController extends Controller
                 DB::rollback();
                 return response()->json([
                     'success' => false,
-                    'message' => 'Profil  gagal diupdate'
+                    'message' => 'Profil  gagal diupdate '. $th->errors()
                 ], 422);
             }
         }

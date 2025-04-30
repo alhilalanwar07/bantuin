@@ -306,6 +306,7 @@ class UserController extends Controller
                         return response()->json([
                             'success' => false,
                             'message' => 'Silakan verifikasi email Anda terlebih dahulu, cek kotak masuk email Anda',
+                            'email_is_update' => true,
                         ], 422);
                     }
                 });
@@ -361,6 +362,7 @@ class UserController extends Controller
                         return response()->json([
                             'success' => false,
                             'message' => 'Silakan verifikasi email Anda terlebih dahulu, cek kotak masuk email Anda',
+                            'email_is_update' => true,
                         ], 422);
                     }
                 });    

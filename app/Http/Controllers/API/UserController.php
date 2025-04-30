@@ -267,10 +267,18 @@ class UserController extends Controller
 
         $request->validate([
             'name'     => 'required|string|min:4',
+            [
+                'name.min' => 'Nama minimal harus 4 karakter.',
+            ],
             'email'    => 'required|string|email',
             'phone'    => 'required|string|min:10',
+            [
+                'phone.min' => 'Nomor telepon minimal harus 10 karakter.',
+            ],
             'address'  => 'required|string',
         ]);
+
+       
 
         if($request->password){
             try {

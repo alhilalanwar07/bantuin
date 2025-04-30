@@ -271,7 +271,7 @@ class UserController extends Controller
                 'name.min' => 'Nama minimal harus 4 karakter.',
             ],
             'email'    => 'required|string|email',
-            'phone'    => 'required|string|min:10',
+            'phone'    => 'required|min:10',
             [
                 'phone.min' => 'Nomor telepon minimal harus 10 karakter.',
             ],

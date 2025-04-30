@@ -294,26 +294,29 @@ class UserController extends Controller
                     $customer->gender = $request->gender;
                     $customer->save();
 
-                    //Jika email diupdate, maka kirimkan email verifikasi ke email baru
-                    if($oldEmail != $request->email){
-                        $request->user()->update([
-                            'email_verified_at' => null,
-                        ]);
-                        $request->user()->sendEmailVerificationNotification();
-
-                    //logout user
-                        $request->user()->tokens()->delete();
-                        return response()->json([
-                            'success' => false,
-                            'message' => 'Silakan verifikasi email Anda terlebih dahulu, cek kotak masuk email Anda',
-                            'email_is_update' => true,
-                        ], 422);
-                    }
                 });
-                return response()->json([
-                    'success' => true,
-                    'message' => 'Profil  berhasil diupdate',
-                ]);
+                
+                //Jika email diupdate, maka kirimkan email verifikasi ke email baru
+                if($oldEmail != $request->email){
+                    $request->user()->update([
+                        'email_verified_at' => null,
+                    ]);
+                    $request->user()->sendEmailVerificationNotification();
+
+                //logout user
+                    $request->user()->tokens()->delete();
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Silakan verifikasi email Anda terlebih dahulu, cek kotak masuk email Anda',
+                        'email_is_update' => true,
+                    ], 200);
+                }else{
+                    return response()->json([
+                        'success' => true,
+                        'message' => 'Profil  berhasil diupdate',
+                        'email_is_update' => false,
+                    ]);
+                }
 
                 DB::commit();
             } catch (\Throwable $th) {
@@ -350,26 +353,28 @@ class UserController extends Controller
                     $customer->gender = $request->gender;
                     $customer->save();
 
-                    //Jika email diupdate, maka kirimkan email verifikasi ke email baru
-                    if($oldEmail != $request->email){
-                        $request->user()->update([
-                            'email_verified_at' => null,
-                        ]);
-                        $request->user()->sendEmailVerificationNotification();
-
-                    //logout user
-                        $request->user()->tokens()->delete();
-                        return response()->json([
-                            'success' => false,
-                            'message' => 'Silakan verifikasi email Anda terlebih dahulu, cek kotak masuk email Anda',
-                            'email_is_update' => true,
-                        ], 422);
-                    }
                 });    
-                return response()->json([
-                    'success' => true,
-                    'message' => 'Profil berhasil diupdate',
-                ]);
+                //Jika email diupdate, maka kirimkan email verifikasi ke email baru
+                if($oldEmail != $request->email){
+                    $request->user()->update([
+                        'email_verified_at' => null,
+                    ]);
+                    $request->user()->sendEmailVerificationNotification();
+
+                //logout user
+                    $request->user()->tokens()->delete();
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Silakan verifikasi email Anda terlebih dahulu, cek kotak masuk email Anda',
+                        'email_is_update' => true,
+                    ], 200);
+                }else{
+                    return response()->json([
+                        'success' => true,
+                        'message' => 'Profil berhasil diupdate',
+                        'email_is_update' => false,
+                    ]);
+                }
                 
                 DB::commit();
             } catch (\Throwable $th) {

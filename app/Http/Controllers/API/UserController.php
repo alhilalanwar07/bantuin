@@ -234,7 +234,7 @@ class UserController extends Controller
         $vendor = Serviceprovider::join('users', 'users.id', '=', 'service_providers.user_id')
             // ->join('specializations', 'specializations.id', '=', 'service_providers.specialization_id')
             // ->select('service_providers.*', 'specializations.name as specialization_name','users.profile_photo')
-            ->select('service_providers.*', 'users.profile_photo')
+            ->select('service_providers.*', 'users.profile_photo','users.email')
             ->where('service_providers.user_id', $request->user()->id)
             ->first();
         
@@ -262,7 +262,7 @@ class UserController extends Controller
     //     return response()->json($user);
     // }
 
-    public function updateProfile(Request $request)
+    public function updateProfileVendor(Request $request)
     {
         if($request->password){
             try {
@@ -285,7 +285,7 @@ class UserController extends Controller
                 $user->save();
 
                 //update data customer
-                $customer = Customer::where('user_id', $request->user()->id)->first();
+                $customer = ServiceProvider::where('user_id', $request->user()->id)->first();
                 $customer->name = $request->name;
                 $customer->phone = $request->phone;
                 $customer->address = $request->address;
@@ -339,7 +339,7 @@ class UserController extends Controller
                 $user->save();
 
                 //update data customer
-                $customer = Customer::where('user_id', $request->user()->id)->first();
+                $customer = ServiceProvider::where('user_id', $request->user()->id)->first();
                 $customer->name = $request->name;
                 $customer->phone = $request->phone;
                 $customer->address = $request->address;

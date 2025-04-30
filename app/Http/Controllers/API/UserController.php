@@ -280,6 +280,7 @@ class UserController extends Controller
                 
                 //update data user
                 $user = User::where('id', $request->user()->id)->first();
+                $user->name = $request->name;
                 $user->email = $request->email;
                 $user->password = Hash::make($request->password);
                 $user->save();
@@ -335,6 +336,7 @@ class UserController extends Controller
                 }
                 //update data user
                 $user = User::where('id', $request->user()->id)->first();
+                $user->name = $request->name;
                 $user->email = $request->email;
                 $user->save();
 

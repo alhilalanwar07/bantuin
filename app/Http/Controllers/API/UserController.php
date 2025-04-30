@@ -299,7 +299,7 @@ class UserController extends Controller
             if ($oldEmail !== $request->email) {
                 $user->update(['email_verified_at' => null]);
                 $user->sendEmailVerificationNotification();
-                $user->tokens()->delete();
+                // $user->tokens()->delete();
 
                 return response()->json([
                     'success' => false,

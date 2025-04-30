@@ -363,19 +363,20 @@ class UserController extends Controller
                             'message' => 'Silakan verifikasi email Anda terlebih dahulu, cek kotak masuk email Anda',
                         ], 422);
                     }
-                    
-                    return response()->json([
-                        'success' => true,
-                        'message' => 'Profil berhasil diupdate',
-                    ]);
-                });
+                });    
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Profil berhasil diupdate',
+                ]);
+                
                 DB::commit();
             } catch (\Throwable $th) {
-                DB::rollback();
+                
                 return response()->json([
                     'success' => false,
                     'message' => 'Profil  gagal diupdate '. $th->errors()
                 ], 422);
+                DB::rollback();
             }
         }
         

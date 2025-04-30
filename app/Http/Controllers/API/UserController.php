@@ -264,128 +264,183 @@ class UserController extends Controller
 
     public function updateProfileVendor(Request $request)
     {
+        try {
+            $user = $request->user();
+            $oldEmail = $user->email;
 
-        if($request->password){
-            try {
-                DB::transaction(function () use ($request) {
-                    //Ambil email lama sebelum ada update
-                    $oldEmail = $request->user()->email;
-                    //cek email apabila sudah digunakan oleh user lain kecuali user yang sedang login
-                    $user = User::where('email', $request->email)->where('id','!=',$request->user()->id)->first();
-                    if($user){
-                        return response()->json([
-                            'success' => false,
-                            'message' => 'Email sudah digunakan oleh user lain'
-                        ], 422);
-                    }
-                    
-                    //update data user
-                    $user = User::where('id', $request->user()->id)->first();
-                    $user->name = $request->name;
-                    $user->email = $request->email;
+            DB::transaction(function () use ($request, $user) {
+                // Cek email jika sudah digunakan oleh user lain
+                $cekEmail = User::where('email', $request->email)
+                                ->where('id', '!=', $user->id)
+                                ->exists();
+
+                if ($cekEmail) {
+                    throw new \Exception('Email sudah digunakan oleh user lain');
+                }
+
+                // Update user
+                $user->name = $request->name;
+                $user->email = $request->email;
+                if ($request->password) {
                     $user->password = Hash::make($request->password);
-                    $user->save();
-
-                    //update data customer
-                    $customer = ServiceProvider::where('user_id', $request->user()->id)->first();
-                    $customer->name = $request->name;
-                    $customer->phone = $request->phone;
-                    $customer->address = $request->address;
-                    $customer->gender = $request->gender;
-                    $customer->save();
-
-                });
-                
-                //Jika email diupdate, maka kirimkan email verifikasi ke email baru
-                if($oldEmail != $request->email){
-                    $request->user()->update([
-                        'email_verified_at' => null,
-                    ]);
-                    $request->user()->sendEmailVerificationNotification();
-
-                //logout user
-                    $request->user()->tokens()->delete();
-                    return response()->json([
-                        'success' => false,
-                        'message' => 'Silakan verifikasi email Anda terlebih dahulu, cek kotak masuk email Anda',
-                        'email_is_update' => true,
-                    ], 200);
-                }else{
-                    return response()->json([
-                        'success' => true,
-                        'message' => 'Profil  berhasil diupdate',
-                        'email_is_update' => false,
-                    ]);
                 }
+                $user->save();
 
-                DB::commit();
-            } catch (\Throwable $th) {
+                // Update service provider
+                $provider = ServiceProvider::where('user_id', $user->id)->first();
+                $provider->name = $request->name;
+                $provider->phone = $request->phone;
+                $provider->address = $request->address;
+                $provider->gender = $request->gender;
+                $provider->save();
+            });
+
+            // Jika email berubah, reset verifikasi dan logout
+            if ($oldEmail !== $request->email) {
+                $user->update(['email_verified_at' => null]);
+                $user->sendEmailVerificationNotification();
+                $user->tokens()->delete();
+
                 return response()->json([
                     'success' => false,
-                    'message' => 'Profil  gagal diupdate '. $th->errors()
-                ], 422);
-                DB::rollback();
+                    'message' => 'Silakan verifikasi email Anda terlebih dahulu, cek kotak masuk email Anda',
+                    'email_is_update' => true,
+                ], 200);
             }
-        }else{
-            try {
-                DB::transaction(function () use ($request) {
-                    //Ambil email lama sebelum ada update
-                    $oldEmail = $request->user()->email;
-                    //cek email apabila sudah digunakan oleh user lain kecuali user yang sedang login
-                    $user = User::where('email', $request->email)->where('id','!=',$request->user()->id)->first();
-                    if($user){
-                        return response()->json([
-                            'success' => false,
-                            'message' => 'Email sudah digunakan oleh user lain'
-                        ], 422);
-                    }
-                    //update data user
-                    $user = User::where('id', $request->user()->id)->first();
-                    $user->name = $request->name;
-                    $user->email = $request->email;
-                    $user->save();
 
-                    //update data customer
-                    $customer = ServiceProvider::where('user_id', $request->user()->id)->first();
-                    $customer->name = $request->name;
-                    $customer->phone = $request->phone;
-                    $customer->address = $request->address;
-                    $customer->gender = $request->gender;
-                    $customer->save();
-
-                });    
-                //Jika email diupdate, maka kirimkan email verifikasi ke email baru
-                if($oldEmail != $request->email){
-                    $request->user()->update([
-                        'email_verified_at' => null,
-                    ]);
-                    $request->user()->sendEmailVerificationNotification();
-
-                //logout user
-                    $request->user()->tokens()->delete();
-                    return response()->json([
-                        'success' => false,
-                        'message' => 'Silakan verifikasi email Anda terlebih dahulu, cek kotak masuk email Anda',
-                        'email_is_update' => true,
-                    ], 200);
-                }else{
-                    return response()->json([
-                        'success' => true,
-                        'message' => 'Profil berhasil diupdate',
-                        'email_is_update' => false,
-                    ]);
-                }
-                
-                DB::commit();
-            } catch (\Throwable $th) {
-                
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Profil  gagal diupdate '. $th->errors()
-                ], 422);
-                DB::rollback();
-            }
+            return response()->json([
+                'success' => true,
+                'message' => 'Profil berhasil diupdate',
+                'email_is_update' => false,
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Profil gagal diupdate: ' . $e->getMessage(),
+            ], 422);
         }
+
+        // if($request->password){
+        //     try {
+        //         DB::transaction(function () use ($request) {
+        //             //Ambil email lama sebelum ada update
+        //             $oldEmail = $request->user()->email;
+        //             //cek email apabila sudah digunakan oleh user lain kecuali user yang sedang login
+        //             $user = User::where('email', $request->email)->where('id','!=',$request->user()->id)->first();
+        //             if($user){
+        //                 return response()->json([
+        //                     'success' => false,
+        //                     'message' => 'Email sudah digunakan oleh user lain'
+        //                 ], 422);
+        //             }
+                    
+        //             //update data user
+        //             $user = User::where('id', $request->user()->id)->first();
+        //             $user->name = $request->name;
+        //             $user->email = $request->email;
+        //             $user->password = Hash::make($request->password);
+        //             $user->save();
+
+        //             //update data customer
+        //             $customer = ServiceProvider::where('user_id', $request->user()->id)->first();
+        //             $customer->name = $request->name;
+        //             $customer->phone = $request->phone;
+        //             $customer->address = $request->address;
+        //             $customer->gender = $request->gender;
+        //             $customer->save();
+
+        //         });
+                
+        //         //Jika email diupdate, maka kirimkan email verifikasi ke email baru
+        //         if($oldEmail != $request->email){
+        //             $request->user()->update([
+        //                 'email_verified_at' => null,
+        //             ]);
+        //             $request->user()->sendEmailVerificationNotification();
+
+        //         //logout user
+        //             $request->user()->tokens()->delete();
+        //             return response()->json([
+        //                 'success' => false,
+        //                 'message' => 'Silakan verifikasi email Anda terlebih dahulu, cek kotak masuk email Anda',
+        //                 'email_is_update' => true,
+        //             ], 200);
+        //         }else{
+        //             return response()->json([
+        //                 'success' => true,
+        //                 'message' => 'Profil  berhasil diupdate',
+        //                 'email_is_update' => false,
+        //             ]);
+        //         }
+
+        //         DB::commit();
+        //     } catch (\Throwable $th) {
+        //         return response()->json([
+        //             'success' => false,
+        //             'message' => 'Profil  gagal diupdate '. $th->errors()
+        //         ], 422);
+        //         DB::rollback();
+        //     }
+        // }else{
+        //     try {
+        //         DB::transaction(function () use ($request) {
+        //             //Ambil email lama sebelum ada update
+        //             $oldEmail = $request->user()->email;
+        //             //cek email apabila sudah digunakan oleh user lain kecuali user yang sedang login
+        //             $user = User::where('email', $request->email)->where('id','!=',$request->user()->id)->first();
+        //             if($user){
+        //                 return response()->json([
+        //                     'success' => false,
+        //                     'message' => 'Email sudah digunakan oleh user lain'
+        //                 ], 422);
+        //             }
+        //             //update data user
+        //             $user = User::where('id', $request->user()->id)->first();
+        //             $user->name = $request->name;
+        //             $user->email = $request->email;
+        //             $user->save();
+
+        //             //update data customer
+        //             $customer = ServiceProvider::where('user_id', $request->user()->id)->first();
+        //             $customer->name = $request->name;
+        //             $customer->phone = $request->phone;
+        //             $customer->address = $request->address;
+        //             $customer->gender = $request->gender;
+        //             $customer->save();
+
+        //         });    
+        //         //Jika email diupdate, maka kirimkan email verifikasi ke email baru
+        //         if($oldEmail != $request->email){
+        //             $request->user()->update([
+        //                 'email_verified_at' => null,
+        //             ]);
+        //             $request->user()->sendEmailVerificationNotification();
+
+        //         //logout user
+        //             $request->user()->tokens()->delete();
+        //             return response()->json([
+        //                 'success' => false,
+        //                 'message' => 'Silakan verifikasi email Anda terlebih dahulu, cek kotak masuk email Anda',
+        //                 'email_is_update' => true,
+        //             ], 200);
+        //         }else{
+        //             return response()->json([
+        //                 'success' => true,
+        //                 'message' => 'Profil berhasil diupdate',
+        //                 'email_is_update' => false,
+        //             ]);
+        //         }
+                
+        //         DB::commit();
+        //     } catch (\Throwable $th) {
+                
+        //         return response()->json([
+        //             'success' => false,
+        //             'message' => 'Profil  gagal diupdate '. $th->errors()
+        //         ], 422);
+        //         DB::rollback();
+        //     }
+        // }
         
     }
 

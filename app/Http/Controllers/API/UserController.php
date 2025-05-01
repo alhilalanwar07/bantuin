@@ -260,7 +260,7 @@ class UserController extends Controller
         return response()->json([
             'success' => true,
             'data' => $vendor,
-            'message' => 'Profil Vendor',
+            'message' => 'Profil Costumer',
         ]);
     }
 
@@ -641,5 +641,56 @@ class UserController extends Controller
         return response()->json([
             'message' => 'Successfully logged out',
         ], 200);
+    }
+
+    public function broadcastRequestBantuan(Request $request)
+    {
+        
+        // Broadcast the request for help
+        try { 
+            //cek model ServiceRequest, ambil 4 angka terakhir dari reference_number
+            $lastRequest = ServiceRequest::orderBy('created_at', 'desc')->first();
+            if ($lastRequest) {
+                $lastReference = $lastRequest->reference_number;
+                $lastNumber = (int) substr($lastReference, -4);
+            } else {
+                $lastNumber = 0;
+            }
+            $lastNumber++;
+            $lastNumber = str_pad($lastNumber, 4, '0', STR_PAD_LEFT);
+            //ambil id customer dari user yang sedang login
+            $customer = Customer::where('user_id', $request->user()->id)->first();
+            //make random reference number with prefix REQ- and customer_id, date_request dan $lastNumber
+            $reference_number = 'REQ-' . $customer->id . '-' . date('Ymd') . '-' . $lastNumber;
+            //save to service_request table
+            $serviceRequest = new ServiceRequest();
+            $serviceRequest->reference_number = $reference_number;
+            $serviceRequest->customer_id = $customer->id;
+            $serviceRequest->specialization_id = $request->keahlian;
+            $serviceRequest->service_address = $request->alamat;
+            $serviceRequest->longitude = $request->lng;
+            $serviceRequest->latitude = $request->lat;
+            $serviceRequest->scheduled_at = $request->tanggal . ' ' . $request->jam;
+            $serviceRequest->budget_amount = $request->biaya;     
+            $serviceRequest->description = $request->deskripsi;
+            $serviceRequest->status_id = 1; // 1 = waiting for confirmation
+            $serviceRequest->payment_status = 'pending';
+            $serviceRequest->save();
+
+            return response()->json([
+                'status' => true,
+                'message' => 'Permintaan bantuan berhasil disiarkan',
+                'data' => $serviceRequest,
+            ], 200);
+    
+                   
+        } catch (\Throwable $th) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Permintaan bantuan gagal disiarkan',
+                'error' => $th->getMessage(),
+            ], 500);
+        }
+        
     }
 }

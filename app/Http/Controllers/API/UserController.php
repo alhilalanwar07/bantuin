@@ -6,6 +6,7 @@ use DB;
 use App\Models\User;
 use App\Models\Customer;
 use Illuminate\Http\Request;
+use App\Models\ServiceRequest;
 use App\Models\Specialization;
 use App\Models\ServiceProvider;
 use App\Http\Controllers\Controller;

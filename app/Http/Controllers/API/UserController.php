@@ -244,6 +244,26 @@ class UserController extends Controller
             'message' => 'Profil Vendor',
         ]);
     }
+
+    //vendor profile
+    public function profilCostumer(Request $request)
+    {
+        $user = User::where('id', $request->user()->id)->whereIn('role',['costumer'])->where('is_active',1)->first();
+        
+        $vendor = Costumer::join('users', 'users.id', '=', 'costumers.user_id')
+            // ->join('specializations', 'specializations.id', '=', 'costumers.specialization_id')
+            // ->select('costumers.*', 'specializations.name as specialization_name','users.profile_photo')
+            ->select('costumers.*', 'users.profile_photo','users.email')
+            ->where('costumers.user_id', $request->user()->id)
+            ->first();
+        
+        return response()->json([
+            'success' => true,
+            'data' => $vendor,
+            'message' => 'Profil Vendor',
+        ]);
+    }
+
     // Memperbarui user
     // public function update(Request $request, User $user)
     // {

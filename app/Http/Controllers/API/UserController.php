@@ -250,11 +250,11 @@ class UserController extends Controller
     {
         $user = User::where('id', $request->user()->id)->whereIn('role',['costumer'])->where('is_active',1)->first();
         
-        $vendor = Costumer::join('users', 'users.id', '=', 'costumers.user_id')
-            // ->join('specializations', 'specializations.id', '=', 'costumers.specialization_id')
-            // ->select('costumers.*', 'specializations.name as specialization_name','users.profile_photo')
-            ->select('costumers.*', 'users.profile_photo','users.email')
-            ->where('costumers.user_id', $request->user()->id)
+        $vendor = Customer::join('users', 'users.id', '=', 'customers.user_id')
+            // ->join('specializations', 'specializations.id', '=', 'customers.specialization_id')
+            // ->select('customers.*', 'specializations.name as specialization_name','users.profile_photo')
+            ->select('customers.*', 'users.profile_photo','users.email')
+            ->where('customers.user_id', $request->user()->id)
             ->first();
         
         return response()->json([

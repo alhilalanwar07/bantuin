@@ -35,6 +35,7 @@ Route::group(['middleware' => 'auth:sanctum'], function(){
     Route::post('/update-profile-vendor', [UserController::class, 'updateProfileVendor']);
     Route::post('/broadcast-request-bantuan', [UserController::class, 'broadcastRequestBantuan']);
     Route::get('/list-broadcast', [UserController::class, 'listBroadcast']);
+    Route::get('/detail-request/{id}', [UserController::class, 'detailRequest']);
 });
 
 // Service Provider Routes

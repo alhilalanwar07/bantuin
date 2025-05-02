@@ -717,4 +717,32 @@ class UserController extends Controller
             'data' => $serviceRequest,
         ], 200);
     }
+
+    public function detailRequest($id)
+    {
+        $serviceRequest = ServiceRequest::join('customers', 'customers.id', '=', 'service_requests.customer_id')
+            ->join('specializations', 'specializations.id', '=', 'service_requests.specialization_id')
+            ->select(
+                'service_requests.*',
+                'customers.name as customer_name',
+                'customers.phone as customer_phone',
+                'customers.address as customer_address',
+                'specializations.name as specialization_name'
+            )
+            ->where('service_requests.id', $id)
+            ->first();
+
+        if (!$serviceRequest) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Permintaan tidak ditemukan',
+            ], 404);
+        }
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Detail permintaan',
+            'data' => $serviceRequest,
+        ], 200);
+    }
 }

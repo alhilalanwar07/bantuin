@@ -699,9 +699,12 @@ class UserController extends Controller
     {
         // get specialization_id from login user
         $user = $request->user();
-        $vendor = ServiceProvider::where('user_id', $user->id)->get();
-        $specialization_id = $vendor->pluck('specialization_id')->toArray();
-
+        $vendor = ServiceProvider::where('user_id', $user->id)->first();
+        //ambil specialization_id dari tabel provider_certification sesuai dengan user_id
+        $specialization_id = ProviderCertification::where('provider_id', $vendor->id)
+            ->pluck('specialization_id')
+            ->toArray();
+        
         //tampilkan semua service request yang status_id = 1 dan specialization_id yang sama dengan specialization_id vendor
         $serviceRequest = ServiceRequest::where('status_id', 1)
             ->whereIn('specialization_id', $specialization_id)

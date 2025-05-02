@@ -694,4 +694,19 @@ class UserController extends Controller
         }
         
     }
+
+    public function listBroadcast(Request $request)
+    {
+        //fetch all service request with status_id = 1
+        $serviceRequest = ServiceRequest::with('customer', 'specialization', 'status')
+            ->where('status_id', 1)
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        return response()->json([
+            'status' => true,
+            'message' => 'List broadcast',
+            'data' => $serviceRequest,
+        ], 200);
+    }
 }

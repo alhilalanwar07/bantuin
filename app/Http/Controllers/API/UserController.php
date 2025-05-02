@@ -697,9 +697,14 @@ class UserController extends Controller
 
     public function listBroadcast(Request $request)
     {
-        //fetch all service request with status_id = 1
-        $serviceRequest = ServiceRequest::with('customer', 'specialization', 'status')
-            ->where('status_id', 1)
+        // get specialization_id from login user
+        $user = $request->user();
+        $vendor = ServiceProvider::where('user_id', $user->id)->get();
+        $specialization_id = $vendor->pluck('specialization_id')->toArray();
+
+        //tampilkan semua service request yang status_id = 1 dan specialization_id yang sama dengan specialization_id vendor
+        $serviceRequest = ServiceRequest::where('status_id', 1)
+            ->whereIn('specialization_id', $specialization_id)
             ->orderBy('created_at', 'desc')
             ->get();
 

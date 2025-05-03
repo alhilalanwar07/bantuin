@@ -647,6 +647,7 @@ class UserController extends Controller
     public function broadcastRequestBantuan(Request $request)
     {
         
+
         // Broadcast the request for help
         try { 
             //cek model ServiceRequest, ambil 4 angka terakhir dari reference_number
@@ -677,6 +678,54 @@ class UserController extends Controller
             $serviceRequest->status_id = 1; // 1 = waiting for confirmation
             $serviceRequest->payment_status = 'pending';
             $serviceRequest->save();
+
+            //decode base64 jadi binary
+            $image1 = base64_decode($request->image1);
+            $fileName1 = uniqid() . '.jpeg';
+            $filePath1 = 'foto_request/' . $fileName1;
+
+            if($request->image2){
+                $image2 = base64_decode($request->image2);
+                $fileName2 = uniqid() . '.jpeg';
+                $filePath2 = 'foto_request/' . $fileName2;
+            }else{
+                $filePath2 = null;
+            }
+            if($request->image3){
+                $image3 = base64_decode($request->image3);
+                $fileName3 = uniqid() . '.jpeg';
+                $filePath3 = 'foto_request/' . $fileName3;
+            }else{
+                $filePath3 = null;
+            }
+            if($request->image4){
+                $image4 = base64_decode($request->image4);
+                $fileName4 = uniqid() . '.jpeg';
+                $filePath4 = 'foto_request/' . $fileName4;
+            }else{
+                $filePath4 = null;
+            }
+
+            //simpan ke tabel service_photos
+            $servicePhoto = new ServicePhoto();
+            $servicePhoto->reference_number = $serviceRequest->reference_number;
+            $servicePhoto->image_1 = $filePath1;
+            $servicePhoto->image_2 = $filePath2;
+            $servicePhoto->image_3 = $filePath3;
+            $servicePhoto->image_4 = $filePath4;
+            $servicePhoto->save();
+
+            //simpan ke storage ke empat image
+            Storage::disk('public')->put($filePath1, $image1);
+            if($request->image2){
+                Storage::disk('public')->put($filePath2, $image2);
+            }
+            if($request->image3){
+                Storage::disk('public')->put($filePath3, $image3);
+            }
+            if($request->image4){
+                Storage::disk('public')->put($filePath4, $image4);
+            }
 
             return response()->json([
                 'status' => true,

@@ -748,4 +748,21 @@ class UserController extends Controller
             'data' => $serviceRequest,
         ], 200);
     }
+
+    public function checkInDaily(Request $request)
+    {
+        
+        $user = $request->user();
+        $vendor = ServiceProvider::where('user_id', $user->id)->first();
+
+        $vendor->latitude = $request->latitude;
+        $vendor->longitude = $request->longitude;
+        $vendor->save();
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Selamat lokasi kamu berhasil diperbarui, semoga harimu menyenangkan',
+            'data' => $vendor,
+        ], 200);
+    }
 }

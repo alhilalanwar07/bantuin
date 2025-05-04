@@ -828,4 +828,41 @@ class UserController extends Controller
             'data' => $vendor,
         ], 200);
     }
+
+    public function acceptJob(Request $request)
+    {
+        $user = $request->user();
+        $vendor = ServiceProvider::where('user_id', $user->id)->first();
+        
+
+        $serviceRequest = ServiceRequest::where('id', $request->idRequest)->first();
+        //cek apakah serviceRequest sudah diambil oleh vendor lain
+        if ($serviceRequest->status_id != 1) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Sorry Bre, kamu telat pekerjaan sudah diambil oleh vendor lain',
+            ], 422);
+        }
+        
+        //cek apakah vendor sudah mengisi lokasi
+        if (!$vendor->latitude || !$vendor->longitude) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Kamu harus checkin dulu yah, biar customer tahu kamu ada di mana',
+            ], 422);
+        }
+
+        //jika belum diambil vendor lain, maka update status_id menjadi 2
+        $serviceRequest = ServiceRequest::where('id', $request->idRequest)->first();
+        $serviceRequest->status_id = 2; // pick up
+        $serviceRequest->provider_id = $vendor->id;
+        $serviceRequest->save();
+
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Selemat pekerjaan berhasil diambil, mengajukan penawaran ke customer yah',
+            'data' => $serviceRequest,
+        ], 200);
+    }
 }

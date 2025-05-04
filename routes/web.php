@@ -16,6 +16,7 @@ Route::middleware('auth')->prefix('admin')->group(function () {
     Route::view('manajemen-user', 'manajemen-user')->name('admin.manajemen-user');
     Route::view('customer', 'admin/customer')->name('admin.customer');
     Route::view('advertisement', 'admin/advertisement')->name('admin.advertisement');
+    Route::view('specialization', 'admin/specialization')->name('admin.specialization');
 });
 
 

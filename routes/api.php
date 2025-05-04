@@ -38,6 +38,7 @@ Route::group(['middleware' => 'auth:sanctum'], function(){
     Route::get('/detail-request/{id}', [UserController::class, 'detailRequest']);
     Route::post('/checkin-daily', [UserController::class, 'checkInDaily']);
     Route::post('/accept-job', [UserController::class, 'acceptJob']);
+    Route::get('/list-transactions-vendor', [UserController::class, 'listTransactionsVendor']);
 });
 
 // Service Provider Routes

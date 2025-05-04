@@ -865,4 +865,34 @@ class UserController extends Controller
             'data' => $serviceRequest,
         ], 200);
     }
+
+    public function listTransactionsVendor(Request $request)
+    {
+        $user = $request->user();
+        $vendor = ServiceProvider::where('user_id', $user->id)->first();
+
+        //ambil semua service_request yang status_id 2 dan provider_id vendor
+        $serviceRequest = ServiceRequest::join('customers', 'customers.id', '=', 'service_requests.customer_id')
+            ->join('specializations', 'specializations.id', '=', 'service_requests.specialization_id')
+            ->join('users', 'users.id', '=', 'customers.user_id')
+            ->select(
+                'service_requests.*',
+                'customers.name as customer_name',
+                'customers.phone as customer_phone',
+                'customers.address as customer_address',
+                'specializations.name as specialization_name',
+                'users.profile_photo as customer_profile_photo',
+                'users.email as customer_email'
+            )
+            ->where('service_requests.provider_id', $vendor->id)
+            ->whereIn('service_requests.status_id',[2,3,4])
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        return response()->json([
+            'status' => true,
+            'message' => 'List transaksi vendor',
+            'data' => $serviceRequest,
+        ], 200);
+    }
 }

@@ -875,6 +875,7 @@ class UserController extends Controller
         $serviceRequest = ServiceRequest::join('customers', 'customers.id', '=', 'service_requests.customer_id')
             ->join('specializations', 'specializations.id', '=', 'service_requests.specialization_id')
             ->join('users', 'users.id', '=', 'customers.user_id')
+            ->join('service_statuses', 'service_statuses.id', '=', 'service_requests.status_id')
             ->select(
                 'service_requests.*',
                 'customers.name as customer_name',
@@ -882,7 +883,9 @@ class UserController extends Controller
                 'customers.address as customer_address',
                 'specializations.name as specialization_name',
                 'users.profile_photo as customer_profile_photo',
-                'users.email as customer_email'
+                'users.email as customer_email',
+                'service_statuses.name as status_name',
+                'service_statuses.color as status_color',
             )
             ->where('service_requests.provider_id', $vendor->id)
             ->whereIn('service_requests.status_id',[2,3,4])

@@ -773,6 +773,7 @@ class UserController extends Controller
         $serviceRequest = ServiceRequest::join('customers', 'customers.id', '=', 'service_requests.customer_id')
             ->join('specializations', 'specializations.id', '=', 'service_requests.specialization_id')
             ->join('users', 'users.id', '=', 'customers.user_id')
+            ->join('service_photos', 'service_photos.reference_number', '=', 'service_requests.reference_number')
             ->select(
                 'service_requests.*',
                 'customers.name as customer_name',
@@ -781,6 +782,10 @@ class UserController extends Controller
                 'specializations.name as specialization_name',
                 'users.profile_photo as customer_profile_photo',
                 'users.email as customer_email',
+                'service_photos.image_1 as image_1',
+                'service_photos.image_2 as image_2',
+                'service_photos.image_3 as image_3',
+                'service_photos.image_4 as image_4',
             )
             ->where('service_requests.id', $id)
             ->first();

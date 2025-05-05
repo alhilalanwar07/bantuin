@@ -56,6 +56,15 @@ new class extends Component {
                             <p>Manajemen User</p>
                         </a>
                     </li>
+                    <!-- specialization -->
+                    <li class="nav-item {{ Route::is('admin.specialization')? 'active text-info' : '' }}">
+                        <a class="nav-link" href="{{ route('admin.specialization') }}" wire:navigate>
+                            <i class="fas fa-certificate"></i>
+                            <p>
+                                Specialization
+                            </p>
+                        </a>
+                    </li>
                     <li class="nav-section">
                         <span class="sidebar-mini-icon">
                             <i class="fa fa-ellipsis-h"></i>

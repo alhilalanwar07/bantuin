@@ -39,10 +39,7 @@ Route::group(['middleware' => 'auth:sanctum'], function(){
     Route::post('/checkin-daily', [UserController::class, 'checkInDaily']);
     Route::post('/accept-job', [UserController::class, 'acceptJob']);
     Route::get('/list-transactions-vendor', [UserController::class, 'listTransactionsVendor']);
-    Route::get('/detail-image1/{image}', [UserController::class, 'lihatImage1']);
-    Route::get('/detail-image2/{image}', [UserController::class, 'lihatImage2']);
-    Route::get('/detail-image3/{image}', [UserController::class, 'lihatImage3']);
-    Route::get('/detail-image4/{image}', [UserController::class, 'lihatImage4']);
+    Route::get('/detail-image/{image}', [UserController::class, 'lihatImage']);
 });
 
 // Service Provider Routes

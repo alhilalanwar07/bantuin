@@ -805,7 +805,7 @@ class UserController extends Controller
         $serviceRequest = ServiceBid::join('service_requests', 'service_requests.reference_number', '=', 'service_bids.reference_number')
             ->join('customers', 'customers.id', '=', 'service_requests.customer_id')
             ->join('users', 'users.id', '=', 'customers.user_id')
-            ->where('status_id', 1)
+            ->where('service_bids.status_id', 1)
             ->select(
                 'service_requests.*','customers.name as customer_name','users.profile_photo as customer_profile_photo',
                 DB::raw("6371 * acos(cos(radians($vendorLat)) * cos(radians(latitude)) * cos(radians(longitude) - radians($vendorLng)) + sin(radians($vendorLat)) * sin(radians(latitude))) AS distance")

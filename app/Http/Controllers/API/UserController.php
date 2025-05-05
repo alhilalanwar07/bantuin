@@ -947,4 +947,78 @@ class UserController extends Controller
             'data' => $serviceRequest,
         ], 200);
     }
+
+    public function lihatImage1(Request $request, $image)
+    {
+        $serviceRequest = ServicePhoto::where('image_1', $image)
+            ->first();
+
+        if (!$serviceRequest) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Permintaan tidak ditemukan',
+            ], 404);
+        }
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Detail permintaan',
+            'data' => $serviceRequest,
+        ], 200);
+    }
+
+    public function lihatImage2(Request $request, $image)
+    {
+        $serviceRequest = ServicePhoto::where('image_2', $image)
+            ->first();
+
+        if (!$serviceRequest) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Permintaan tidak ditemukan',
+            ], 404);
+        }
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Detail permintaan',
+            'data' => $serviceRequest,
+        ], 200);
+    }
+    public function lihatImage3(Request $request, $image)
+    {
+        $serviceRequest = ServicePhoto::where('image_3', $image)
+            ->first();
+
+        if (!$serviceRequest) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Permintaan tidak ditemukan',
+            ], 404);
+        }
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Detail permintaan',
+            'data' => $serviceRequest,
+        ], 200);
+    }
+    public function lihatImage4(Request $request, $image)
+    {
+        $serviceRequest = ServicePhoto::where('image_4', $image)
+            ->first();
+
+        if (!$serviceRequest) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Permintaan tidak ditemukan',
+            ], 404);
+        }
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Detail permintaan',
+            'data' => $serviceRequest,
+        ], 200);
+    }
 }

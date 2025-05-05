@@ -844,7 +844,7 @@ class UserController extends Controller
                 'service_photos.image_3 as image_3',
                 'service_photos.image_4 as image_4',
             )
-            ->where('service_bids.reference_number', $reference_number->reference_number)
+            ->where('service_requests.id', $id)
             ->first();
 
         if (!$serviceRequest) {

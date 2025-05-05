@@ -646,7 +646,7 @@ class UserController extends Controller
         ], 200);
     }
 
-    public function broadcastRequestBantuanOld(Request $request)
+    public function broadcastRequestBantuan(Request $request)
     {
         
 

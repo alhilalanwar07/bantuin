@@ -781,7 +781,7 @@ class UserController extends Controller
         $serviceRequest = ServiceRequest::join('customers', 'customers.id', '=', 'service_requests.customer_id')
             ->join('specializations', 'specializations.id', '=', 'service_requests.specialization_id')
             ->join('users', 'users.id', '=', 'customers.user_id')
-            ->join('service_photos', 'service_photos.reference_number', '=', 'service_requests.reference_number')
+            ->leftJoin('service_photos', 'service_photos.reference_number', '=', 'service_requests.reference_number')
             ->select(
                 'service_requests.*',
                 'customers.name as customer_name',

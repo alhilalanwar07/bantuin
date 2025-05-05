@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use DB;
 use App\Models\User;
 use App\Models\Customer;
+use App\Models\ServiceBid;
 use App\Models\ServicePhoto;
 use Illuminate\Http\Request;
 use App\Models\ServiceRequest;
@@ -645,7 +646,7 @@ class UserController extends Controller
         ], 200);
     }
 
-    public function broadcastRequestBantuan(Request $request)
+    public function broadcastRequestBantuanOld(Request $request)
     {
         
 
@@ -679,6 +680,12 @@ class UserController extends Controller
             $serviceRequest->status_id = 1; // 1 = waiting for confirmation
             $serviceRequest->payment_status = 'pending';
             $serviceRequest->save();
+
+            //insert juga ke tabel service_bids untuk dilihat oleh semua vendor
+            $serviceBid = new ServiceBid();
+            $serviceBid->reference_number = $reference_number;
+            $serviceBid->status_id = 1; // 1 = waiting for confirmation
+            $serviceBid->save();
 
             //decode base64 jadi binary
             $image1 = base64_decode($request->image1);
@@ -745,6 +752,41 @@ class UserController extends Controller
         
     }
 
+   
+
+    // public function listBroadcast(Request $request)
+    // {
+    //     // get specialization_id from login user
+    //     $user = $request->user();
+    //     $vendor = ServiceProvider::where('user_id', $user->id)->first();
+    //     //ambil specialization_id dari tabel provider_certification sesuai dengan user_id
+    //     $specialization_id = ProviderCertification::where('provider_id', $vendor->id)
+    //         ->pluck('specialization_id')
+    //         ->toArray();
+        
+    //     //ambil latitude dan longitude dari tabel service_provider
+    //     $vendorLat = $vendor->latitude;
+    //     $vendorLng = $vendor->longitude;
+
+    //     //tampilkan semua service request yang status_id = 1 dan specialization_id yang sama dengan specialization_id vendor
+    //     $serviceRequest = ServiceRequest::join('customers', 'customers.id', '=', 'service_requests.customer_id')
+    //         ->join('users', 'users.id', '=', 'customers.user_id')
+    //         ->where('status_id', 1)
+    //         ->select(
+    //             'service_requests.*','customers.name as customer_name','users.profile_photo as customer_profile_photo',
+    //             DB::raw("6371 * acos(cos(radians($vendorLat)) * cos(radians(latitude)) * cos(radians(longitude) - radians($vendorLng)) + sin(radians($vendorLat)) * sin(radians(latitude))) AS distance")
+    //         )
+    //         ->whereIn('specialization_id', $specialization_id)
+    //         ->orderBy('created_at', 'desc')
+    //         ->get();
+
+    //     return response()->json([
+    //         'status' => true,
+    //         'message' => 'List broadcast',
+    //         'data' => $serviceRequest,
+    //     ], 200);
+    // }
+
     public function listBroadcast(Request $request)
     {
         // get specialization_id from login user
@@ -760,7 +802,8 @@ class UserController extends Controller
         $vendorLng = $vendor->longitude;
 
         //tampilkan semua service request yang status_id = 1 dan specialization_id yang sama dengan specialization_id vendor
-        $serviceRequest = ServiceRequest::join('customers', 'customers.id', '=', 'service_requests.customer_id')
+        $serviceRequest = ServiceBid::join('service_requests', 'service_requests.reference_number', '=', 'service_bids.reference_number')
+            ->join('customers', 'customers.id', '=', 'service_requests.customer_id')
             ->join('users', 'users.id', '=', 'customers.user_id')
             ->where('status_id', 1)
             ->select(

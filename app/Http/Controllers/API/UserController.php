@@ -760,9 +760,11 @@ class UserController extends Controller
         $vendorLng = $vendor->longitude;
 
         //tampilkan semua service request yang status_id = 1 dan specialization_id yang sama dengan specialization_id vendor
-        $serviceRequest = ServiceRequest::where('status_id', 1)
+        $serviceRequest = ServiceRequest::join('customers', 'customers.id', '=', 'service_requests.customer_id')
+            ->join('users', 'users.id', '=', 'customers.user_id')
+            ->where('status_id', 1)
             ->select(
-                'service_requests.*',
+                'service_requests.*','customers.name as customer_name','customers.profile_photo as customer_profile_photo',
                 DB::raw("6371 * acos(cos(radians($vendorLat)) * cos(radians(latitude)) * cos(radians(longitude) - radians($vendorLng)) + sin(radians($vendorLat)) * sin(radians(latitude))) AS distance")
             )
             ->whereIn('specialization_id', $specialization_id)

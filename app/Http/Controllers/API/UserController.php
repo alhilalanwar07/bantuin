@@ -823,7 +823,11 @@ class UserController extends Controller
 
     public function detailRequest($id)
     {
-        $serviceRequest = ServiceRequest::join('customers', 'customers.id', '=', 'service_requests.customer_id')
+        //ambil reference_number dari service_bids
+        $reference_number = ServiceBid::where('id', $id)->first();
+
+        $serviceRequest = ServiceBid::join('service_requests', 'service_requests.reference_number', '=', 'service_bids.reference_number')
+            ->join('customers', 'customers.id', '=', 'service_requests.customer_id')
             ->join('specializations', 'specializations.id', '=', 'service_requests.specialization_id')
             ->join('users', 'users.id', '=', 'customers.user_id')
             ->leftJoin('service_photos', 'service_photos.reference_number', '=', 'service_requests.reference_number')
@@ -840,7 +844,7 @@ class UserController extends Controller
                 'service_photos.image_3 as image_3',
                 'service_photos.image_4 as image_4',
             )
-            ->where('service_requests.id', $id)
+            ->where('service_bids.reference_number', $reference_number->reference_number)
             ->first();
 
         if (!$serviceRequest) {

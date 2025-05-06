@@ -907,6 +907,17 @@ class UserController extends Controller
             ], 422);
         }
 
+        //cek jika vendor sudah mengajukan penawaran
+        $serviceBid = ServiceBid::where('reference_number', $request->reference_number)
+            ->where('provider_id', $vendor->id)
+            ->first();
+        if ($serviceBid) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Kamu sudah mengajukan penawaran untuk pekerjaan ini, silahkan tunggu konfirmasi dari customer yah',
+            ], 422);
+        }
+
         //jika belum diambil vendor lain, maka update status_id menjadi 2
         // $serviceRequest = ServiceRequest::where('id', $request->idRequest)->first();
         // $serviceRequest->status_id = 2; // pick up

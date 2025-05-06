@@ -802,7 +802,15 @@ class UserController extends Controller
         if (!$vendor->latitude || !$vendor->longitude) {
 
             //tampilkan semua service request yang status_id = 1 dan specialization_id yang sama dengan specialization_id vendor
-            $serviceRequest = [];
+            $serviceRequest = ServiceRequest::join('customers', 'customers.id', '=', 'service_requests.customer_id')
+                ->join('users', 'users.id', '=', 'customers.user_id')
+                ->where('service_requests.status_id', 1)
+                ->select(
+                    'service_requests.*','customers.name as customer_name','users.profile_photo as customer_profile_photo'
+                )
+                ->whereIn('specialization_id', $specialization_id)
+                ->orderBy('created_at', 'desc')
+                ->get();
 
             return response()->json([
                 'status' => false,

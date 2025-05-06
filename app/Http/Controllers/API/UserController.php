@@ -807,6 +807,7 @@ class UserController extends Controller
             return response()->json([
                 'status' => false,
                 'message' => 'Kamu harus checkin dulu yah, biar customer tahu kamu ada di mana',
+                'data' => $serviceRequest,
             ], 422);
         }else{
             //ambil latitude dan longitude dari tabel service_provider

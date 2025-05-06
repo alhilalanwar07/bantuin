@@ -889,16 +889,6 @@ class UserController extends Controller
         $user = $request->user();
         $vendor = ServiceProvider::where('user_id', $user->id)->first();
         
-
-        // $serviceRequest = ServiceRequest::where('id', $request->idRequest)->first();
-        // //cek apakah serviceRequest sudah diambil oleh vendor lain
-        // if ($serviceRequest->status_id != 1) {
-        //     return response()->json([
-        //         'status' => false,
-        //         'message' => 'Sorry Bre, kamu telat pekerjaan sudah diambil oleh vendor lain',
-        //     ], 422);
-        // }
-        
         //cek apakah vendor sudah mengisi lokasi
         if (!$vendor->latitude || !$vendor->longitude) {
             return response()->json([
@@ -908,7 +898,7 @@ class UserController extends Controller
         }
 
         //cek jika vendor sudah mengajukan penawaran
-        $serviceBid = ServiceBid::where('reference_number', $request->reference_number)
+        $serviceBid = ServiceBid::where('reference_number', $reference_number->reference_number)
             ->where('provider_id', $vendor->id)
             ->first();
         if ($serviceBid) {
@@ -916,22 +906,24 @@ class UserController extends Controller
                 'status' => false,
                 'message' => 'Kamu sudah mengajukan penawaran untuk pekerjaan ini, silahkan tunggu konfirmasi dari customer yah',
             ], 422);
+        }else{
+            $reference_number = ServiceRequest::where('id', $request->idRequest)->first();
+    
+            //save to service_bid table
+            $serviceBid = new ServiceBid();
+            $serviceBid->reference_number = $reference_number->reference_number;
+            $serviceBid->provider_id = $vendor->id;
+            $serviceBid->bid_amount = $request->nilaipenawaran;
+            $serviceBid->status_id = 2; // 2 = pickup
+            $serviceBid->save();
+
+            return response()->json([
+                'status' => true,
+                'message' => 'Selemat pekerjaan berhasil diambil, mengajukan penawaran ke customer yah',
+                'data' => $serviceBid,
+            ], 200);
         }
 
-        //jika belum diambil vendor lain, maka update status_id menjadi 2
-        // $serviceRequest = ServiceRequest::where('id', $request->idRequest)->first();
-        // $serviceRequest->status_id = 2; // pick up
-        // $serviceRequest->provider_id = $vendor->id;
-        // $serviceRequest->save();
-        $reference_number = ServiceRequest::where('id', $request->idRequest)->first();
-
-        //save to service_bid table
-        $serviceBid = new ServiceBid();
-        $serviceBid->reference_number = $reference_number->reference_number;
-        $serviceBid->provider_id = $vendor->id;
-        $serviceBid->bid_amount = $request->nilaipenawaran;
-        $serviceBid->status_id = 2; // 2 = pickup
-        $serviceBid->save();
         
 
         if (!$serviceBid) {
@@ -943,11 +935,7 @@ class UserController extends Controller
         //update status_id menjadi 2
 
 
-        return response()->json([
-            'status' => true,
-            'message' => 'Selemat pekerjaan berhasil diambil, mengajukan penawaran ke customer yah',
-            'data' => $serviceBid,
-        ], 200);
+        
     }
 
     public function listTransactionsVendor(Request $request)

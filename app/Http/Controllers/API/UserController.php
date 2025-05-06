@@ -792,6 +792,14 @@ class UserController extends Controller
         // get specialization_id from login user
         $user = $request->user();
         $vendor = ServiceProvider::where('user_id', $user->id)->first();
+        //cek apakah vendor sudah mengisi lokasi
+        if (!$vendor->latitude || !$vendor->longitude) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Kamu harus checkin dulu yah, biar customer tahu kamu ada di mana',
+            ], 422);
+        }
+        
         //ambil specialization_id dari tabel provider_certification sesuai dengan user_id
         $specialization_id = ProviderCertification::where('provider_id', $vendor->id)
             ->pluck('specialization_id')

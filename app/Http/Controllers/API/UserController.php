@@ -792,6 +792,12 @@ class UserController extends Controller
         // get specialization_id from login user
         $user = $request->user();
         $vendor = ServiceProvider::where('user_id', $user->id)->first();
+
+        //ambil specialization_id dari tabel provider_certification sesuai dengan user_id
+        $specialization_id = ProviderCertification::where('provider_id', $vendor->id)
+            ->pluck('specialization_id')
+            ->toArray();
+
         //cek apakah vendor sudah mengisi lokasi
         if (!$vendor->latitude || !$vendor->longitude) {
 
@@ -802,35 +808,34 @@ class UserController extends Controller
                 'status' => false,
                 'message' => 'Kamu harus checkin dulu yah, biar customer tahu kamu ada di mana',
             ], 422);
+        }else{
+            //ambil latitude dan longitude dari tabel service_provider
+            $vendorLat = $vendor->latitude;
+            $vendorLng = $vendor->longitude;
+    
+            
+            //tampilkan semua service request yang status_id = 1 dan specialization_id yang sama dengan specialization_id vendor
+            $serviceRequest = ServiceRequest::join('customers', 'customers.id', '=', 'service_requests.customer_id')
+                ->join('users', 'users.id', '=', 'customers.user_id')
+                ->where('service_requests.status_id', 1)
+                ->select(
+                    'service_requests.*','customers.name as customer_name','users.profile_photo as customer_profile_photo',
+                    DB::raw("6371 * acos(cos(radians($vendorLat)) * cos(radians(latitude)) * cos(radians(longitude) - radians($vendorLng)) + sin(radians($vendorLat)) * sin(radians(latitude))) AS distance")
+                )
+                ->whereIn('specialization_id', $specialization_id)
+                ->orderBy('created_at', 'desc')
+                ->get();
+    
+            return response()->json([
+                'status' => true,
+                'message' => 'List broadcast',
+                'data' => $serviceRequest,
+            ], 200);
+
         }
 
-        //ambil specialization_id dari tabel provider_certification sesuai dengan user_id
-        $specialization_id = ProviderCertification::where('provider_id', $vendor->id)
-            ->pluck('specialization_id')
-            ->toArray();
         
-        //ambil latitude dan longitude dari tabel service_provider
-        $vendorLat = $vendor->latitude;
-        $vendorLng = $vendor->longitude;
-
         
-        //tampilkan semua service request yang status_id = 1 dan specialization_id yang sama dengan specialization_id vendor
-        $serviceRequest = ServiceRequest::join('customers', 'customers.id', '=', 'service_requests.customer_id')
-            ->join('users', 'users.id', '=', 'customers.user_id')
-            ->where('service_requests.status_id', 1)
-            ->select(
-                'service_requests.*','customers.name as customer_name','users.profile_photo as customer_profile_photo',
-                DB::raw("6371 * acos(cos(radians($vendorLat)) * cos(radians(latitude)) * cos(radians(longitude) - radians($vendorLng)) + sin(radians($vendorLat)) * sin(radians(latitude))) AS distance")
-            )
-            ->whereIn('specialization_id', $specialization_id)
-            ->orderBy('created_at', 'desc')
-            ->get();
-
-        return response()->json([
-            'status' => true,
-            'message' => 'List broadcast',
-            'data' => $serviceRequest,
-        ], 200);
     }
 
     public function detailRequest($id)

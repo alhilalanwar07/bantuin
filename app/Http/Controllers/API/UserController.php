@@ -798,42 +798,23 @@ class UserController extends Controller
             ->pluck('specialization_id')
             ->toArray();
 
-        //cek apakah vendor sudah mengisi lokasi
-        if (!$vendor->latitude || !$vendor->longitude) {
+        
+        //ambil latitude dan longitude dari tabel service_provider
+        $vendorLat = $vendor->latitude;
+        $vendorLng = $vendor->longitude;
 
-            //tampilkan semua service request yang status_id = 1 dan specialization_id yang sama dengan specialization_id vendor
-            $serviceRequest = ServiceRequest::join('customers', 'customers.id', '=', 'service_requests.customer_id')
-                ->join('users', 'users.id', '=', 'customers.user_id')
-                ->where('service_requests.status_id', 1)
-                ->select(
-                    'service_requests.*','customers.name as customer_name','users.profile_photo as customer_profile_photo'
-                )
-                ->whereIn('specialization_id', $specialization_id)
-                ->orderBy('created_at', 'desc')
-                ->get();
-
-            return response()->json([
-                'status' => false,
-                'message' => 'Kamu harus checkin dulu yah, biar customer tahu kamu ada di mana',
-                'data' => $serviceRequest,
-            ], 422);
-        }else{
-            //ambil latitude dan longitude dari tabel service_provider
-            $vendorLat = $vendor->latitude;
-            $vendorLng = $vendor->longitude;
-    
-            
-            //tampilkan semua service request yang status_id = 1 dan specialization_id yang sama dengan specialization_id vendor
-            $serviceRequest = ServiceRequest::join('customers', 'customers.id', '=', 'service_requests.customer_id')
-                ->join('users', 'users.id', '=', 'customers.user_id')
-                ->where('service_requests.status_id', 1)
-                ->select(
-                    'service_requests.*','customers.name as customer_name','users.profile_photo as customer_profile_photo',
-                    DB::raw("6371 * acos(cos(radians($vendorLat)) * cos(radians(latitude)) * cos(radians(longitude) - radians($vendorLng)) + sin(radians($vendorLat)) * sin(radians(latitude))) AS distance")
-                )
-                ->whereIn('specialization_id', $specialization_id)
-                ->orderBy('created_at', 'desc')
-                ->get();
+        
+        //tampilkan semua service request yang status_id = 1 dan specialization_id yang sama dengan specialization_id vendor
+        $serviceRequest = ServiceRequest::join('customers', 'customers.id', '=', 'service_requests.customer_id')
+            ->join('users', 'users.id', '=', 'customers.user_id')
+            ->where('service_requests.status_id', 1)
+            ->select(
+                'service_requests.*','customers.name as customer_name','users.profile_photo as customer_profile_photo',
+                DB::raw("6371 * acos(cos(radians($vendorLat)) * cos(radians(latitude)) * cos(radians(longitude) - radians($vendorLng)) + sin(radians($vendorLat)) * sin(radians(latitude))) AS distance")
+            )
+            ->whereIn('specialization_id', $specialization_id)
+            ->orderBy('created_at', 'desc')
+            ->get();
     
             return response()->json([
                 'status' => true,
@@ -841,7 +822,7 @@ class UserController extends Controller
                 'data' => $serviceRequest,
             ], 200);
 
-        }
+        
 
         
         

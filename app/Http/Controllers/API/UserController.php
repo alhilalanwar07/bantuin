@@ -888,7 +888,8 @@ class UserController extends Controller
     {
         $user = $request->user();
         $vendor = ServiceProvider::where('user_id', $user->id)->first();
-        
+        $reference_number = ServiceRequest::where('id', $request->idRequest)->first();
+
         //cek apakah vendor sudah mengisi lokasi
         if (!$vendor->latitude || !$vendor->longitude) {
             return response()->json([
@@ -907,8 +908,6 @@ class UserController extends Controller
                 'message' => 'Kamu sudah mengajukan penawaran untuk pekerjaan ini, silahkan tunggu konfirmasi dari customer yah',
             ], 422);
         }else{
-            $reference_number = ServiceRequest::where('id', $request->idRequest)->first();
-    
             //save to service_bid table
             $serviceBid = new ServiceBid();
             $serviceBid->reference_number = $reference_number->reference_number;

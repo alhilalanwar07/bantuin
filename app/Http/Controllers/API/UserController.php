@@ -682,10 +682,10 @@ class UserController extends Controller
             $serviceRequest->save();
 
             //insert juga ke tabel service_bids untuk dilihat oleh semua vendor
-            $serviceBid = new ServiceBid();
-            $serviceBid->reference_number = $reference_number;
-            $serviceBid->status_id = 1; // 1 = waiting for confirmation
-            $serviceBid->save();
+            // $serviceBid = new ServiceBid();
+            // $serviceBid->reference_number = $reference_number;
+            // $serviceBid->status_id = 1; // 1 = waiting for confirmation
+            // $serviceBid->save();
 
             //decode base64 jadi binary
             $image1 = base64_decode($request->image1);
@@ -802,10 +802,9 @@ class UserController extends Controller
         $vendorLng = $vendor->longitude;
 
         //tampilkan semua service request yang status_id = 1 dan specialization_id yang sama dengan specialization_id vendor
-        $serviceRequest = ServiceBid::join('service_requests', 'service_requests.reference_number', '=', 'service_bids.reference_number')
-            ->join('customers', 'customers.id', '=', 'service_requests.customer_id')
+        $serviceRequest = ServiceRequest::join('customers', 'customers.id', '=', 'service_requests.customer_id')
             ->join('users', 'users.id', '=', 'customers.user_id')
-            ->where('service_bids.status_id', 1)
+            ->where('service_requests.status_id', 1)
             ->select(
                 'service_requests.*','customers.name as customer_name','users.profile_photo as customer_profile_photo',
                 DB::raw("6371 * acos(cos(radians($vendorLat)) * cos(radians(latitude)) * cos(radians(longitude) - radians($vendorLng)) + sin(radians($vendorLat)) * sin(radians(latitude))) AS distance")
@@ -824,10 +823,9 @@ class UserController extends Controller
     public function detailRequest($id)
     {
         //ambil reference_number dari service_bids
-        $reference_number = ServiceBid::where('id', $id)->first();
+        // $reference_number = ServiceBid::where('id', $id)->first();
 
-        $serviceRequest = ServiceBid::join('service_requests', 'service_requests.reference_number', '=', 'service_bids.reference_number')
-            ->join('customers', 'customers.id', '=', 'service_requests.customer_id')
+        $serviceRequest = ServiceRequest::join('customers', 'customers.id', '=', 'service_requests.customer_id')
             ->join('specializations', 'specializations.id', '=', 'service_requests.specialization_id')
             ->join('users', 'users.id', '=', 'customers.user_id')
             ->leftJoin('service_photos', 'service_photos.reference_number', '=', 'service_requests.reference_number')
@@ -884,14 +882,14 @@ class UserController extends Controller
         $vendor = ServiceProvider::where('user_id', $user->id)->first();
         
 
-        $serviceRequest = ServiceRequest::where('id', $request->idRequest)->first();
-        //cek apakah serviceRequest sudah diambil oleh vendor lain
-        if ($serviceRequest->status_id != 1) {
-            return response()->json([
-                'status' => false,
-                'message' => 'Sorry Bre, kamu telat pekerjaan sudah diambil oleh vendor lain',
-            ], 422);
-        }
+        // $serviceRequest = ServiceRequest::where('id', $request->idRequest)->first();
+        // //cek apakah serviceRequest sudah diambil oleh vendor lain
+        // if ($serviceRequest->status_id != 1) {
+        //     return response()->json([
+        //         'status' => false,
+        //         'message' => 'Sorry Bre, kamu telat pekerjaan sudah diambil oleh vendor lain',
+        //     ], 422);
+        // }
         
         //cek apakah vendor sudah mengisi lokasi
         if (!$vendor->latitude || !$vendor->longitude) {
@@ -902,10 +900,28 @@ class UserController extends Controller
         }
 
         //jika belum diambil vendor lain, maka update status_id menjadi 2
-        $serviceRequest = ServiceRequest::where('id', $request->idRequest)->first();
-        $serviceRequest->status_id = 2; // pick up
-        $serviceRequest->provider_id = $vendor->id;
-        $serviceRequest->save();
+        // $serviceRequest = ServiceRequest::where('id', $request->idRequest)->first();
+        // $serviceRequest->status_id = 2; // pick up
+        // $serviceRequest->provider_id = $vendor->id;
+        // $serviceRequest->save();
+        $reference_number = ServiceRequest::where('id', $request->idRequest)->first();
+
+        //save to service_bid table
+        $serviceBid = new ServiceBid();
+        $serviceBid->reference_number = $reference_number->reference_number;
+        $serviceBid->provider_id = $vendor->id;
+        $serviceBid->bid_amount = $request->nilaipenawaran;
+        $serviceBid->status_id = 2; // 2 = pickup
+        $serviceBid->save();
+        
+
+        if (!$serviceBid) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Permintaan tidak ditemukan',
+            ], 404);
+        }
+        //update status_id menjadi 2
 
 
         return response()->json([

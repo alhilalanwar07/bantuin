@@ -927,7 +927,7 @@ class UserController extends Controller
         return response()->json([
             'status' => true,
             'message' => 'Selemat pekerjaan berhasil diambil, mengajukan penawaran ke customer yah',
-            'data' => $serviceRequest,
+            'data' => $serviceBid,
         ], 200);
     }
 

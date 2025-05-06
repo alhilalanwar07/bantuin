@@ -20,6 +20,9 @@ Route::middleware('auth')->prefix('admin')->group(function () {
 
     // report statistics
     Route::view('report-statistics', 'admin/report-statistics')->name('admin.report-statistics');
+
+    // providers
+    Route::view('providers', 'admin/providers')->name('admin.provider');
 });
 
 

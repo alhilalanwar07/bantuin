@@ -944,6 +944,7 @@ class UserController extends Controller
 
         //ambil semua service_request yang status_id 2 dan provider_id vendor
         $serviceRequest = ServiceRequest::join('customers', 'customers.id', '=', 'service_requests.customer_id')
+            ->join('service_bids', 'service_bids.reference_number', '=', 'service_requests.reference_number')
             ->join('specializations', 'specializations.id', '=', 'service_requests.specialization_id')
             ->join('users', 'users.id', '=', 'customers.user_id')
             ->join('service_statuses', 'service_statuses.id', '=', 'service_requests.status_id')
@@ -958,9 +959,10 @@ class UserController extends Controller
                 'service_statuses.name as status_name',
                 'service_statuses.color as status_color',
             )
-            ->where('service_requests.provider_id', $vendor->id)
+
+            ->where('service_bids.provider_id', $vendor->id)
             ->whereIn('service_requests.status_id',[2,3,4])
-            ->orderBy('created_at', 'desc')
+            ->orderBy('.service_requests.created_at', 'desc')
             ->get();
 
         return response()->json([

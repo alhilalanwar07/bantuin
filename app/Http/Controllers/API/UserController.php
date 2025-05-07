@@ -970,7 +970,7 @@ class UserController extends Controller
             )
 
             ->where('service_bids.provider_id', $vendor->id)
-            ->where('service_bids.status_id',2)
+            ->whereIn('service_bids.status_id',[2,3,4,5,6,7])
             ->orderBy('.service_requests.created_at', 'desc')
             ->get();
 

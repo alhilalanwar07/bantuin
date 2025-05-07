@@ -798,7 +798,7 @@ class UserController extends Controller
             ->pluck('specialization_id')
             ->toArray();
 
-        
+        $providerId = $vendor->id;
         //ambil latitude dan longitude dari tabel service_provider
         $vendorLat = $vendor->latitude;
         $vendorLng = $vendor->longitude;

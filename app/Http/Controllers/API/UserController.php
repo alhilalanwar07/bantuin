@@ -225,7 +225,7 @@ class UserController extends Controller
             'access_token' => $token,
             'token_type' => 'Bearer',
             'user' => $user,
-            'message' => 'Selamat datang kembali '.$vendor,
+            'message' => 'Selamat datang kembali '.$vendor.'semoga hari ini rejeki kamu berlimpah yah',
         ]);
     }
 
@@ -814,7 +814,15 @@ class UserController extends Controller
             )
             ->whereIn('specialization_id', $specialization_id)
             ->orderBy('created_at', 'desc')
-            ->get();
+            ->get()
+            ->map(function ($request) use ($providerId) {
+                $hasBid = ServiceBid::where('reference_number', $request->reference_number)
+                                    ->where('provider_id', $providerId)
+                                    ->exists();
+
+                $request->is_applied_by_me = $hasBid;
+                return $request;
+            });
     
             return response()->json([
                 'status' => true,

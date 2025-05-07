@@ -41,6 +41,7 @@ Route::group(['middleware' => 'auth:sanctum'], function(){
     Route::post('/checkin-daily', [UserController::class, 'checkInDaily']);
     Route::post('/accept-job', [UserController::class, 'acceptJob']);
     Route::get('/list-transactions-vendor', [UserController::class, 'listTransactionsVendor']);
+    Route::get('/list-transactions-customer', [UserController::class, 'listTransactionsCustomer']);
     Route::get('/detail-image/{image}', [UserController::class, 'lihatImage']);
     Route::post('/canceled-job', [UserController::class, 'canceledJob']);
 });

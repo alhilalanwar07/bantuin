@@ -1082,6 +1082,43 @@ class UserController extends Controller
         ], 200);
     }
 
+    public function listTransactionsCustomer(Request $request)
+    {
+        $user = $request->user();
+        $customer = Customer::where('user_id', $user->id)->first();
+
+        //ambil semua service_request yang disudah dibroadcast customer
+        $serviceRequest = ServiceRequest::leftJoin('service_bids', 'service_bids.reference_number', '=', 'service_requests.reference_number')
+            ->join('specializations', 'specializations.id', '=', 'service_requests.specialization_id')
+            ->join('service_providers', 'service_providers.id', '=', 'service_bids.provider_id')
+            ->join('users', 'users.id', '=', 'service_providers.user_id')
+            ->join('service_statuses', 'service_statuses.id', '=', 'service_bids.status_id')
+            ->select(
+                'service_requests.*',
+                'service_providers.name as provider_name',
+                'service_providers.phone as provider_phone',
+                'service_providers.address as provider_address',
+                'users.profile_photo as provider_profile_photo',
+                'users.email as provider_email',
+                'specializations.name as specialization_name',
+                'service_bids.bid_amount as bid_amount',
+                'service_bids.status_id as status_transaction',
+                'service_statuses.name as status_name',
+                'service_statuses.color as status_color',
+                'service_bids.id as service_bid_id',
+            )
+
+            ->where('service_requests.customer_id', $customer->id)
+            ->orderBy('.service_requests.created_at', 'desc')
+            ->get();
+
+        return response()->json([
+            'status' => true,
+            'message' => 'List transaksi customer',
+            'data' => $serviceRequest,
+        ], 200);
+    }
+
     public function lihatImage(Request $request, $image)
     {
         $serviceRequest = ServicePhoto::where('reference_number', $image)

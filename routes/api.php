@@ -25,14 +25,16 @@ Route::get('/list-specializations', [UserController::class, 'listSpecializations
 
 Route::group(['middleware' => 'auth:sanctum'], function(){
     Route::get('/profil-vendor', [UserController::class, 'profilVendor']);
-    Route::get('/profil-costumer', [UserController::class, 'profilCostumer']);
+    Route::get('/profil-customer', [UserController::class, 'profilCustomer']);
     Route::post('/fcm-token', [UserController::class, 'storeFcmToken']);
     Route::get('/logout', [UserController::class, 'logout']);
     Route::post('/upload-sertifikat', [UserController::class, 'simpanSertifikat']);
     Route::post('/tambah-keahlian', [UserController::class, 'tambahKeahlian']);
     Route::get('/list-keahlian-vendor', [UserController::class, 'listKeahlianVendor']);
     Route::post('/upload-foto', [UserController::class, 'uploadFoto']);
+    Route::post('/upload-foto-customer', [UserController::class, 'uploadFotoCustomer']);
     Route::post('/update-profile-vendor', [UserController::class, 'updateProfileVendor']);
+    Route::post('/update-profile-customer', [UserController::class, 'updateProfileCustomer']);
     Route::post('/broadcast-request-bantuan', [UserController::class, 'broadcastRequestBantuan']);
     Route::get('/list-broadcast', [UserController::class, 'listBroadcast']);
     Route::get('/detail-request/{id}', [UserController::class, 'detailRequest']);

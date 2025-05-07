@@ -249,9 +249,9 @@ class UserController extends Controller
     }
 
     //vendor profile
-    public function profilCostumer(Request $request)
+    public function profilCustomer(Request $request)
     {
-        $user = User::where('id', $request->user()->id)->whereIn('role',['costumer'])->where('is_active',1)->first();
+        $user = User::where('id', $request->user()->id)->whereIn('role',['customer'])->where('is_active',1)->first();
         
         $vendor = Customer::join('users', 'users.id', '=', 'customers.user_id')
             // ->join('specializations', 'specializations.id', '=', 'customers.specialization_id')
@@ -266,24 +266,6 @@ class UserController extends Controller
             'message' => 'Profil Costumer',
         ]);
     }
-
-    // Memperbarui user
-    // public function update(Request $request, User $user)
-    // {
-    //     $validated = $request->validate([
-    //         'name'  => 'sometimes|string|max:255',
-    //         'email' => 'sometimes|string|email|max:255|unique:users,email,' . $user->id,
-    //         'password' => 'sometimes|string|min:6',
-    //     ]);
-
-    //     if(isset($validated['password'])){
-    //         $validated['password'] = Hash::make($validated['password']);
-    //     }
-
-    //     $user->update($validated);
-
-    //     return response()->json($user);
-    // }
 
     public function updateProfileVendor(Request $request)
     {
@@ -467,6 +449,69 @@ class UserController extends Controller
         
     }
 
+    public function updateProfileCustomer(Request $request)
+    {
+        try {
+            $user = $request->user();
+            $oldEmail = $user->email;
+
+            DB::transaction(function () use ($request, $user) {
+                // Cek email jika sudah digunakan oleh user lain
+                $cekEmail = User::where('email', $request->email)
+                                ->where('id', '!=', $user->id)
+                                ->exists();
+
+                if ($cekEmail) {
+                    throw new \Exception('Email sudah digunakan oleh user lain');
+                }
+
+                // Update user
+                $user->name = $request->name;
+                $user->email = $request->email;
+                if ($request->password) {
+                    $user->password = Hash::make($request->password);
+                }
+                $user->save();
+
+                //update data customer
+                $customer = Customer::where('user_id', $user->id)->first();
+                $customer->name = $request->name;
+                $customer->phone = $request->phone;
+                $customer->address = $request->address;
+                $customer->gender = $request->gender;
+                $customer->save();
+
+            });
+
+            // Jika email berubah, reset verifikasi dan logout
+            if ($oldEmail !== $request->email) {
+                $user->update(['email_verified_at' => null]);
+                $user->sendEmailVerificationNotification();
+                // $user->tokens()->delete();
+
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Silakan verifikasi email Anda terlebih dahulu, cek kotak masuk email Anda',
+                    'email_is_update' => true,
+                ], 200);
+            }
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Profil berhasil diupdate',
+                'email_is_update' => false,
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Profil gagal diupdate: ' . $e->getMessage(),
+            ], 422);
+        }
+
+        
+        
+    }
+
     // Menghapus user
     public function destroy(User $user)
     {
@@ -590,6 +635,53 @@ class UserController extends Controller
     }
 
     public function uploadFoto(Request $request)
+    {
+
+        try {
+            DB::beginTransaction();
+            
+            //decode base64 jadi binary
+            $image = base64_decode($request->foto);
+            $fileName = uniqid() . '.jpeg';
+            $filePath = 'user/' . $fileName;
+
+            // Ambil path lama sebelum diupdate
+            $oldPath = $request->user()->profile_photo;
+
+            //simpan ke storage ke path public
+            Storage::disk('public')->put($filePath, $image);
+
+            $request->user()->update([
+                'profile_photo' => $filePath,
+            ]);
+
+            //cek apakah user sudah punya profile_photo
+            if ($oldPath) {
+                //hapus foto lama
+                Storage::disk('public')->delete($oldPath);
+            }
+            
+            DB::commit();
+            return response()->json([
+                'success' => true,
+                'data' => $filePath,
+                'message' => 'Profile photo berhasil diupload'
+            ]);
+        
+        } catch (\Throwable $th) {
+            DB::rollback();
+            return response()->json([
+                'success' => false,
+                'message' => 'Foto gagal diupload'
+            ]);
+
+        }
+
+
+        
+    }
+
+    public function uploadFotoCustomer(Request $request)
     {
 
         try {

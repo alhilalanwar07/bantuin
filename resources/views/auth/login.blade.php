@@ -98,7 +98,6 @@
                     <div class="form-group">
                         <div class="d-flex justify-content-between align-items-center mb-2">
                             <label for="password" class="form-label mb-0">Password</label>
-                            <a href="./forgot-password.html" class="btn-link">Forgot password?</a>
                         </div>
                         <div class="input-group">
                             <i class="fas fa-lock input-icon"></i>
@@ -132,24 +131,8 @@
                     </div>
                 </form>
                 
-                <div class="divider">or continue with</div>
-                
-                <div class="social-login">
-                    <a href="#" class="social-btn google">
-                        <i class="fab fa-google"></i>
-                    </a>
-                    <a href="#" class="social-btn facebook">
-                        <i class="fab fa-facebook-f"></i>
-                    </a>
-                    <a href="#" class="social-btn apple">
-                        <i class="fab fa-apple"></i>
-                    </a>
-                </div>
             </div>
             
-            <div class="card-footer">
-                <span>Don't have an account? <a href="#" class="btn-link">Create account</a></span>
-            </div>
         </div>
     </main>
 

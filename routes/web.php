@@ -17,6 +17,12 @@ Route::middleware('auth')->prefix('admin')->group(function () {
     Route::view('customer', 'admin/customer')->name('admin.customer');
     Route::view('advertisement', 'admin/advertisement')->name('admin.advertisement');
     Route::view('specialization', 'admin/specialization')->name('admin.specialization');
+
+    // report statistics
+    Route::view('report-statistics', 'admin/report-statistics')->name('admin.report-statistics');
+
+    // providers
+    Route::view('providers', 'admin/providers')->name('admin.provider');
 });
 
 

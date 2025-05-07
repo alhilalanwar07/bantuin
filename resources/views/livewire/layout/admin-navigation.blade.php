@@ -87,7 +87,32 @@ new class extends Component {
                         <span class="sidebar-mini-icon">
                             <i class="fa fa-ellipsis-h"></i>
                         </span>
-                        <h4 class="text-section">Proses</h4>
+                        <h4 class="text-section">Providers</h4>
+                    </li>
+                    <li class="nav-item {{ Route::is('admin.provider') ? 'active text-info' : '' }}">
+                        <a class="nav-link" href="{{ route('admin.provider') }}" wire:navigate>
+                            <i class="fas fa-user-tie"></i>
+                            <p>Providers</p>
+                        </a>
+                    </li>
+                    <li class="nav-section">
+                        <span class="sidebar-mini-icon">
+                            <i class="fa fa-ellipsis-h"></i>
+                        </span>
+                        <h4 class="text-section">Output</h4>
+                    </li>
+                    <li class="nav-item {{ Route::is('admin.report-statistics')? 'active text-info' : '' }}">
+                        <a class="nav-link" href="{{ route('admin.report-statistics') }}" wire:navigate>
+                            <i class="fas fa-chart-bar"></i>
+                            <p>Report & Statistics</p>
+                        </a>
+                    </li>
+
+                    <li class="nav-section">
+                        <span class="sidebar-mini-icon">
+                            <i class="fa fa-ellipsis-h"></i>
+                        </span>
+                        <h4 class="text-section">Settings</h4>
                     </li>
                     @if(auth()->user()->role == 'admin')
                     <li class="nav-item {{ Route::is('admin.manajemen-user') ? 'active text-info' : '' }}">

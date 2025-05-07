@@ -1,34 +1,143 @@
 <?php
 
 use App\Models\Advertiser;
+use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Rule;
 use Livewire\Volt\Component;
 use Livewire\WithPagination;
+use Illuminate\Support\Str;
 
 new class extends Component {
     use WithPagination;
 
-    #[Rule('required', message: 'Nama perusahaan wajib diisi')]
-    #[Rule('min:3', message: 'Nama perusahaan minimal 3 karakter')]
-    #[Rule('max:100', message: 'Nama perusahaan maksimal 100 karakter')]
+    #[Rule('required', message: 'Company name is required')]
+    #[Rule('min:3', message: 'Company name must be at least 3 characters')]
+    #[Rule('max:100', message: 'Company name may not be greater than 100 characters')]
+    #[Rule(
+        'required|unique:advertisers,company_name,' . '$this->advertiserId',
+        message: 'Company name already exists'
+    )]
     public $company_name = '';
 
-    #[Rule('required', message: 'Nomor telepon wajib diisi')]
-    #[Rule('regex:/^[\d\s\-+()]{10,20}$/', message: 'Format nomor telepon tidak valid')]
+    #[Rule('required', message: 'Phone number is required')]
+    #[Rule('regex:/^[\d\s\-+()]{10,20}$/', message: 'Invalid phone number format')]
+    #[Rule(
+        'required|unique:advertisers,contact_phone,' . '$this->advertiserId',
+        message: 'Phone number already registered'
+    )]
     public $contact_phone = '';
 
-    #[Rule('required', message: 'Email wajib diisi')]
-    #[Rule('email', message: 'Format email tidak valid')]
+    #[Rule('required', message: 'Email is required')]
+    #[Rule('email', message: 'Invalid email format')]
+    #[Rule(
+        'required|unique:advertisers,contact_email,' . '$this->advertiserId',
+        message: 'Email address already in use'
+    )]
     public $contact_email = '';
 
-    #[Rule('required', message: 'Alamat bisnis wajib diisi')]
-    #[Rule('min:10', message: 'Alamat bisnis terlalu pendek, minimal 10 karakter')]
+    #[Rule('required', message: 'Business address is required')]
+    #[Rule('min:10', message: 'Business address must be at least 10 characters')]
     public $business_address = '';
 
     public $editMode = false;
     public $advertiserId;
     public $search = '';
     public $perPage = 10;
+    public $sortField = 'company_name';
+    public $sortDirection = 'asc';
+
+    public $selectedCustomers = [];
+    public $bulkAction = '';
+    public $showBulkActions = false;
+
+    public $selectAll = false;
+
+    public function mount()
+    {
+        $this->resetForm();
+    }
+
+    public function openCustomerModal()
+    {
+        $this->resetForm();
+        $this->dispatch('openModal', 'addModal');
+    }
+
+    public function updatedSelectAll($value)
+    {
+        $this->selectedCustomers = $value
+            ? $this->advertisers->pluck('id')->toArray()
+            : [];
+    }
+
+    public function applyBulkAction()
+    {
+        try {
+            DB::beginTransaction();
+
+            switch ($this->bulkAction) {
+                case 'delete':
+                    $customers = Advertiser::whereIn('id', $this->selectedCustomers)->get();
+                    foreach ($customers as $customer) {
+                        activity()
+                            ->causedBy(auth()->user())
+                            ->performedOn($customer)
+                            ->log('bulk deleted customer');
+                    }
+                    Advertiser::whereIn('id', $this->selectedCustomers)->delete();
+                    $message = 'Customers deleted successfully!';
+                    break;
+                default:
+                    throw new \Exception('Invalid bulk action');
+            }
+
+            DB::commit();
+            $this->resetBulkSelection();
+            $this->dispatch('showAlert', [
+                'type' => 'success',
+                'message' => $message,
+                'reload' => true,
+                'timer' => 1000
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            $this->dispatch('showAlert', [
+                'type' => 'error',
+                'message' => 'Error: ' . $e->getMessage()
+            ]);
+        }
+    }
+
+    public function resetBulkSelection()
+    {
+        $this->selectedCustomers = [];
+        $this->bulkAction = '';
+        $this->showBulkActions = false;
+    }
+
+    public function updatedSelectedCustomers()
+    {
+        $this->showBulkActions = count($this->selectedCustomers) > 0;
+    }
+
+    public function sortBy($field)
+    {
+        if ($this->sortField === $field) {
+            $this->sortDirection = $this->sortDirection === 'asc' ? 'desc' : 'asc';
+        } else {
+            $this->sortField = $field;
+            $this->sortDirection = 'asc';
+        }
+    }
+
+    public function getAdvertisersProperty()
+    {
+        return Advertiser::query()
+            ->withCount('advertisements')
+            ->search($this->search)
+            ->orderBy($this->sortField, $this->sortDirection)
+            ->paginate($this->perPage);
+    }
 
     public function with()
     {
@@ -52,6 +161,7 @@ new class extends Component {
         $this->resetErrorBag();
         $this->resetValidation();
     }
+
     public function save()
     {
         $this->validate();
@@ -102,23 +212,26 @@ new class extends Component {
 
     public function delete($id)
     {
-        $advertiser = Advertiser::find($id);
-        if (!$advertiser->advertisements()->exists()) {
-            $advertiser->delete();
-        } else {
+        try {
+            DB::transaction(function () use ($id) {
+                $advertiser = Advertiser::findOrFail($id);
+                if ($advertiser->advertisements()->exists()) {
+                    throw new \Exception('Customer has active advertisements');
+                }
+                $advertiser->delete();
+            });
+
+            $this->dispatch('showAlert', [
+                'type' => 'success',
+                'message' => 'Customer permanently deleted',
+                'reload' => true
+            ]);
+        } catch (\Exception $e) {
             $this->dispatch('showAlert', [
                 'type' => 'error',
-                'message' => 'Cannot delete customer with existing advertisements',
-                'timer' => 3000
+                'message' => 'Deletion failed: ' . $e->getMessage()
             ]);
-            return;
         }
-        $this->dispatch('showAlert', [
-            'type' => 'success',
-            'message' => 'Customer deleted successfully',
-            'reload' => true,
-            'timer' => 1000
-        ]);
     }
 
     public function updatingSearch()
@@ -128,92 +241,116 @@ new class extends Component {
 }; ?>
 
 <div>
-    <div class="col-md-12">
-        <div class="card card-round">
-            <!-- Card Header -->
-            <div class="card-header">
-                <div class="card-head-row d-flex justify-content-between align-items-center">
-                    <h4 class="card-title mb-0">Customers</h4>
-                    <div class="card-tools d-flex align-items-center gap-2">
-                        <!-- Search and Per Page Selection -->
-                        <div class="input-group" style="width: 500px;">
-                            <input
-                                type="text"
-                                wire:model.live.debounce.300ms="search"
-                                class="form-control"
-                                placeholder="Search...">
-                            <select
-                                wire:model.live="perPage"
-                                class="form-select"
-                                style="width: auto;">
-                                <option value="10">10</option>
-                                <option value="25">25</option>
-                                <option value="50">50</option>
-                                <option value="100">100</option>
-                            </select>
-                        </div>
+    <div class="card border-0 shadow-lg">
+        <div class="card-header bg-white border-bottom-0 py-4">
+            <div class="d-flex justify-content-between align-items-center">
+                <h3 class="mb-0 fw-bold text-primary">
+                    Customer Management
+                </h3>
+                <button wire:click="openCustomerModal"
+                    class="btn btn-primary rounded-pill px-4">
+                    <i class="fas fa-plus-circle me-2"></i>Add Customer
+                </button>
+            </div>
+        </div>
 
-                        <!-- Add Customer Button -->
-                        <button
-                            wire:click="resetForm"
-                            class="btn btn-info btn-sm d-flex align-items-center gap-1"
-                            data-bs-toggle="modal"
-                            data-bs-target="#addModal">
-                            <i class="fa fa-plus"></i>
-                            <span>Add Customer</span>
-                        </button>
-                    </div>
+        <!-- Rest of the template code remains unchanged -->
+        <!-- Card Body -->
+        <div class="card-body p-4">
+            @if($showBulkActions)
+            <div class="alert alert-info mb-4">
+                <div class="d-flex justify-content-between align-items-center">
+                    <span>{{ count($selectedCustomers) }} customers selected</span>
+                    <select wire:model="bulkAction" class="form-select w-auto">
+                        <option value="">Select Action</option>
+                        <option value="delete">Delete Selected</option>
+                    </select>
+                    <button wire:click="applyBulkAction" class="btn btn-primary ms-2">Apply</button>
+                    <button wire:click="resetBulkSelection" class="btn btn-link text-danger">Cancel</button>
                 </div>
             </div>
-
-            <!-- Card Body -->
-            <div class="card-body">
-                <div class="table-responsive">
-                    <table class="table table-striped table-hover">
-                        <thead class="bg-light">
-                            <tr>
-                                <th class="py-3">#</th>
-                                <th class="py-3">Company Name</th>
-                                <th class="py-3">Contact Phone</th>
-                                <th class="py-3">Email</th>
-                                <th class="py-3">Address</th>
-                                <th class="py-3">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach($advertisers as $key => $advertiser)
-                            <tr>
-                                <td class="py-2">{{ $key + 1 }}</td>
-                                <td class="py-2">{{ $advertiser->company_name }}</td>
-                                <td class="py-2">{{ $advertiser->contact_phone }}</td>
-                                <td class="py-2">{{ $advertiser->contact_email }}</td>
-                                <td class="py-2">{{ $advertiser->business_address }}</td>
-                                <td class="py-2">
-                                    <div class="d-flex gap-1">
-                                        <button
-                                            wire:click="edit({{ $advertiser->id }})"
-                                            class="btn btn-primary btn-sm d-flex align-items-center"
-                                            data-bs-toggle="modal"
-                                            data-bs-target="#addModal">
-                                            <i class="fas fa-edit"></i>
-                                        </button>
-                                        <button
-                                            wire:click="delete({{ $advertiser->id }})"
-                                            class="btn btn-danger btn-sm d-flex align-items-center"
-                                            onclick="return confirm('Are you sure?')">
-                                            <i class="fas fa-trash"></i>
-                                        </button>
-                                    </div>
-                                </td>
-                            </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
-
-                    <!-- Pagination -->
-                    <div class="mt-3">
-                        {{ $advertisers->links() }}
+            @endif
+            <div class="row g-3 mb-4">
+                <div class="col-12 col-md-6 col-xl-3">
+                    <div class="input-group input-group-lg">
+                        <span class="input-group-text bg-transparent border-end-0">
+                            <i class="fas fa-search text-muted"></i>
+                        </span>
+                        <input wire:model.live.debounce.300ms="search" type="search"
+                            class="form-control border-start-0"
+                            placeholder="Cari customer...">
                     </div>
+                </div>
+
+            </div>
+            <div class="table-responsive rounded-3 border">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="bg-light">
+                        <tr>
+                            <th class="py-3 px-4 bg-light text-uppercase" style="width: 50px;">
+                                <input type="checkbox" wire:model.live="selectAll">
+                            </th>
+                            <th class="py-3 px-4 bg-light text-uppercase">No</th>
+                            <th class="py-3 px-4 bg-light text-uppercase" wire:click="sortBy('company_name')" style="cursor:pointer">
+                                Company Name
+                                @if($sortField === 'company_name')
+                                <i class="fas fa-sort-{{ $sortDirection === 'asc' ? 'up' : 'down' }}"></i>
+                                @endif
+                            </th>
+                            <th class="py-3 px-4 bg-light text-uppercase">Phone</th>
+                            <th class="py-3 px-4 bg-light text-uppercase">Email</th>
+                            <th class="py-3 px-4 bg-light text-uppercase">Address</th>
+                            <th class="py-3 px-4 bg-light text-uppercase text-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach($advertisers as $key => $advertiser)
+                        <tr class="border-top">
+                            <td class="py-3 px-4">
+                                <input type="checkbox" wire:model.live="selectedCustomers" value="{{ $advertiser->id }}">
+                            </td>
+                            <td class="py-3 px-4">{{ $loop->iteration }}</td>
+                            <td class="py-3 px-4">
+                                <div class="fw-bold">{{ $advertiser->company_name }}</div>
+                            </td>
+                            <td class="py-3 px-4">
+                                <div class="text-primary">{{ $advertiser->contact_phone }}</div>
+                            </td>
+                            <td class="py-3 px-4">{{ $advertiser->contact_email }}</td>
+                            <td class="py-3 px-4">
+                                <span class="badge bg-primary">
+                                    <i class="fas fa-map-marker-alt me-1"></i>
+                                    {{ Str::limit($advertiser->business_address, 25) }}
+                                </span>
+                            </td>
+                            <td class="py-3 px-4 text-end">
+                                <div class="d-flex gap-2 justify-content-end">
+                                    <button
+                                        wire:click="edit({{ $advertiser->id }})"
+                                        class="btn btn-icon btn-sm btn-outline-primary rounded-circle"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#addModal"
+                                        data-bs-tooltip="tooltip"
+                                        title="Edit">
+                                        <i class="fas fa-pencil-alt"></i>
+                                    </button>
+                                    <button
+                                        wire:click="confirmDelete({{ $advertiser->id }})"
+                                        class="btn btn-icon btn-sm btn-outline-danger rounded-circle"
+                                        data-bs-tooltip="tooltip"
+                                        title="Hapus">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+
+                <!-- Pagination -->
+                <div class="mt-3">
+                    {{ $advertisers->links() }}
                 </div>
             </div>
         </div>
@@ -221,45 +358,47 @@ new class extends Component {
 
     <!-- Customer Modal -->
     <div wire:ignore.self class="modal fade" id="addModal" tabindex="-1" role="dialog" aria-hidden="true">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">{{ $editMode ? 'Edit' : 'Add' }} Customer</h5>
-                    <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close" wire:click="resetForm()">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg">
+                <div class="modal-header bg-white border-bottom-0 py-4">
+                    <h5 class="modal-title fw-bold text-primary" id="addModalLabel">
+                        <i class="fas fa-building me-2"></i>{{ $editMode ? 'Edit' : 'Add' }} Customer
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" wire:click="resetForm()"></button>
                 </div>
-                <div class="modal-body">
+                <div class="modal-body p-4">
                     <form wire:submit.prevent="{{ $editMode ? 'update' : 'save' }}">
-                        <div class="form-group">
-                            <label>Company Name</label>
-                            <input type="text" wire:model="company_name" class="form-control">
-                            @error('company_name') <span class="text-danger">{{ $message }}</span> @enderror
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">Company Name</label>
+                            <input type="text" wire:model="company_name" class="form-control form-control-lg" placeholder="Enter company name">
+                            @error('company_name') <div class="text-danger small mt-1">{{ $message }}</div> @enderror
                         </div>
-                        <div class="form-group">
-                            <label>Contact Phone</label>
-                            <input type="text" wire:model="contact_phone" class="form-control">
-                            @error('contact_phone') <span class="text-danger">{{ $message }}</span> @enderror
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Contact Phone</label>
+                            <input type="text" wire:model="contact_phone" class="form-control" placeholder="Enter phone number">
+                            @error('contact_phone') <div class="text-danger small mt-1">{{ $message }}</div> @enderror
                         </div>
-                        <div class="form-group">
-                            <label>Email</label>
-                            <input type="email" wire:model="contact_email" class="form-control">
-                            @error('contact_email') <span class="text-danger">{{ $message }}</span> @enderror
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Email</label>
+                            <input type="email" wire:model="contact_email" class="form-control" placeholder="Enter email address">
+                            @error('contact_email') <div class="text-danger small mt-1">{{ $message }}</div> @enderror
                         </div>
-                        <div class="form-group">
-                            <label>Business Address</label>
-                            <textarea wire:model="business_address" class="form-control"></textarea>
-                            @error('business_address') <span class="text-danger">{{ $message }}</span> @enderror
+                        <div class="mb-4">
+                            <label class="form-label fw-semibold">Business Address</label>
+                            <textarea wire:model="business_address" class="form-control" rows="3" placeholder="Enter business address"></textarea>
+                            @error('business_address') <div class="text-danger small mt-1">{{ $message }}</div> @enderror
                         </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" wire:click="resetForm()">Close</button>
-                            <button type="submit" class="btn btn-primary">Save changes</button>
+                        <div class="modal-footer border-top-0">
+                            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" wire:click="resetForm()">Cancel</button>
+                            <button type="submit" class="btn btn-primary px-4">
+                                {{ $editMode ? 'Update' : 'Save' }} Customer
+                            </button>
                         </div>
                     </form>
                 </div>
             </div>
         </div>
-    </div>
 
+    </div>
     <livewire:_alert />
 </div>

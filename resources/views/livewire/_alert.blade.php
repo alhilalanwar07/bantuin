@@ -4,13 +4,19 @@
         document.addEventListener('livewire:init', function() {
             // Modal Control Functions
             Livewire.on('openModal', (modalId) => {
-                const modal = new bootstrap.Modal(document.getElementById(modalId));
-                modal.show();
+                const modalElement = document.getElementById(modalId);
+                if (modalElement) {
+                    const modal = new bootstrap.Modal(modalElement);
+                    modal.show();
+                }
             });
 
             Livewire.on('closeModal', (modalId) => {
-                const modal = bootstrap.Modal.getInstance(document.getElementById(modalId));
-                modal?.hide();
+                const modalElement = document.getElementById(modalId);
+                if (modalElement) {
+                    const modal = bootstrap.Modal.getInstance(modalElement);
+                    modal?.hide();
+                }
             });
 
             // Alert Toast Functions
@@ -35,8 +41,11 @@
                 swal(defaults);
 
                 if (options.closeModal) {
-                    const modal = bootstrap.Modal.getInstance(document.getElementById(options.modalId));
-                    modal?.hide();
+                    const modalElement = document.getElementById(options.modalId);
+                    if (modalElement) {
+                        const modal = bootstrap.Modal.getInstance(modalElement);
+                        modal?.hide();
+                    }
                 }
 
                 if (options.reload) {
@@ -44,8 +53,8 @@
                 }
             });
 
-            // Specific Event Handlers (for backward compatibility)
-            Livewire.on('addAlertToast', (event) => {
+            // Specific Event Handlers
+            Livewire.on('addAlertToast', () => {
                 Livewire.dispatch('showAlert', {
                     type: 'success',
                     message: 'Data has been successfully added',
@@ -54,7 +63,7 @@
                 });
             });
 
-            Livewire.on('updateAlertToast', (event) => {
+            Livewire.on('updateAlertToast', () => {
                 Livewire.dispatch('showAlert', {
                     type: 'success',
                     message: 'Data has been successfully updated',
@@ -63,7 +72,7 @@
                 });
             });
 
-            Livewire.on('deleteAlertToast', (event) => {
+            Livewire.on('deleteAlertToast', () => {
                 Livewire.dispatch('showAlert', {
                     type: 'success',
                     message: 'Data has been successfully deleted',
@@ -72,7 +81,7 @@
                 });
             });
 
-            Livewire.on('errorAlertToast', (event) => {
+            Livewire.on('errorAlertToast', () => {
                 Livewire.dispatch('showAlert', {
                     type: 'error',
                     message: 'An error occurred while processing your request'

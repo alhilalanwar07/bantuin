@@ -74,4 +74,22 @@ class ServiceRequest extends Model
     {
         return $this->hasOne(Rating::class, 'reference_number', 'reference_number');
     }
+
+    public function scopeCompleted($query)
+    {
+        return $query->where('status_id', 4);
+    }
+
+    public function scopePending($query)
+    {
+        return $query->whereIn('status_id', [1, 2, 3]);
+    }
+
+    public function scopeWhereDateBetween($query, $column, $start, $end, $period = 'day')
+    {
+        return $query->whereBetween($column, [
+            $start->startOf($period),
+            $end->endOf($period)
+        ]);
+    }
 }

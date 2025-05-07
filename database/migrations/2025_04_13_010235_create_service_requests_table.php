@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->uuid('reference_number')->unique();
             $table->foreignId('customer_id')->constrained()->onDelete('cascade');
-            $table->foreignId('provider_id')->constrained('service_providers')->onDelete('cascade');
+            $table->foreignId('provider_id')->constrained('service_providers')->onDelete('cascade')->nullable();
             $table->foreignId('specialization_id')->constrained()->onDelete('cascade');
             $table->text('service_address');
             $table->decimal('longitude', 10, 7);

@@ -1000,4 +1000,30 @@ class UserController extends Controller
             'data' => $serviceRequest,
         ], 200);
     }
+
+    public function canceledJob(Request $request)
+    {
+        $user = $request->user();
+        $vendor = ServiceProvider::where('user_id', $user->id)->first();
+
+        //hapus penawaran vendor di service_bid
+        $serviceBid = ServiceBid::where('id', $request->idRequest)
+            ->where('provider_id', $vendor->id)
+            ->first();
+        if (!$serviceBid) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Permintaan tidak ditemukan',
+            ], 404);
+        }else{
+            $serviceBid->delete();
+            
+            return response()->json([
+                'status' => true,
+                'message' => 'Permintaan berhasil dibatalkan',
+            ], 200);
+        }
+
+
+    }
 }

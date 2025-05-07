@@ -1106,6 +1106,7 @@ class UserController extends Controller
                 'service_statuses.name as status_name',
                 'service_statuses.color as status_color',
                 'service_bids.id as service_bid_id',
+                'service_bids.provider_id as provider_applied_id',
             )
 
             ->where('service_requests.customer_id', $customer->id)

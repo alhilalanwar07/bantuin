@@ -967,6 +967,7 @@ class UserController extends Controller
                 'service_bids.status_id as status_transaction',
                 'service_statuses.name as status_name',
                 'service_statuses.color as status_color',
+                'service_bids.id as service_bid_id',
             )
 
             ->where('service_bids.provider_id', $vendor->id)

@@ -908,12 +908,19 @@ class UserController extends Controller
                 'message' => 'Kamu sudah mengajukan penawaran untuk pekerjaan ini, silahkan tunggu konfirmasi dari customer yah',
             ], 422);
         }else{
+
+            //cek status _id dari service_request
+            $budgetAmount = ServiceRequest::where('id', $request->idRequest)->first()->budget_amount;
+
+            $statusBids = ($budgetAmount != $request->nilaipenawaran) ? 3 : 2; // 3 = negotiation, 2 = pickup
+            
+            
             //save to service_bid table
             $serviceBid = new ServiceBid();
             $serviceBid->reference_number = $reference_number->reference_number;
             $serviceBid->provider_id = $vendor->id;
             $serviceBid->bid_amount = $request->nilaipenawaran;
-            $serviceBid->status_id = 2; // 2 = pickup
+            $serviceBid->status_id = $statusBids; // 1 = waiting for confirmation, 2 = pickup, 3 = negotiation
             $serviceBid->save();
 
             return response()->json([

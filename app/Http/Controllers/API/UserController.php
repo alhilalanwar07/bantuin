@@ -947,7 +947,7 @@ class UserController extends Controller
             ->join('service_bids', 'service_bids.reference_number', '=', 'service_requests.reference_number')
             ->join('specializations', 'specializations.id', '=', 'service_requests.specialization_id')
             ->join('users', 'users.id', '=', 'customers.user_id')
-            ->join('service_statuses', 'service_statuses.id', '=', 'service_requests.status_id')
+            ->join('service_statuses', 'service_statuses.id', '=', 'service_bids.status_id')
             ->select(
                 'service_requests.*',
                 'customers.name as customer_name',
@@ -956,6 +956,8 @@ class UserController extends Controller
                 'specializations.name as specialization_name',
                 'users.profile_photo as customer_profile_photo',
                 'users.email as customer_email',
+                'service_bids.bid_amount as bid_amount',
+                'service_bids.status_id as status_transaction',
                 'service_statuses.name as status_name',
                 'service_statuses.color as status_color',
             )

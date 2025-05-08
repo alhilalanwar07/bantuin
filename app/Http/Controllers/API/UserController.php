@@ -1101,16 +1101,11 @@ class UserController extends Controller
         //     ->where('service_requests.customer_id', $customer->id)
         //     ->orderBy('service_requests.created_at', 'desc')
         //     ->get();
-        $serviceRequestsQuery = ServiceRequest::with([
-                'topBids.provider.user',
-            ])
+        $serviceRequestsQuery = ServiceRequest::with(['topBids.provider.user'])
             ->join('specializations', 'specializations.id', '=', 'service_requests.specialization_id')
             ->leftJoin('service_photos', 'service_photos.reference_number', '=', 'service_requests.reference_number')
-            ->leftJoin(DB::raw('(
-                SELECT reference_number, COUNT(*) as total_applicants
-                FROM service_bids
-                GROUP BY reference_number
-            ) as sb'), 'sb.reference_number', '=', 'service_requests.reference_number')
+            ->leftJoin(DB::raw('(SELECT reference_number, COUNT(*) as total_applicants FROM service_bids GROUP BY reference_number) as sb'),
+                'sb.reference_number', '=', 'service_requests.reference_number')
             ->select(
                 'service_requests.*',
                 'specializations.name as specialization_name',

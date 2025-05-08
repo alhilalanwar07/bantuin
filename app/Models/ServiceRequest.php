@@ -92,4 +92,12 @@ class ServiceRequest extends Model
             $end->endOf($period)
         ]);
     }
+
+    public function topBids()
+    {
+        return $this->hasMany(ServiceBid::class, 'reference_number', 'reference_number')
+            ->orderBy('created_at', 'asc') // atau order lain yang kamu mau
+            ->limit(5)
+            ->with(['provider.user']); // untuk ambil info provider dan user sekaligus
+    }
 }

@@ -37,4 +37,9 @@ class ServiceProvider extends Model
     {
         return $this->hasMany(ServiceRequest::class, 'provider_id');
     }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
 }

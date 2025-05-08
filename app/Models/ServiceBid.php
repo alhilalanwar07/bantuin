@@ -27,4 +27,6 @@ class ServiceBid extends Model
     {
         return $this->belongsTo(ServiceStatus::class);
     }
+
+    
 }

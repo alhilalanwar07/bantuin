@@ -1088,10 +1088,29 @@ class UserController extends Controller
         $customer = Customer::where('user_id', $user->id)->first();
 
         //ambil semua service_request yang disudah dibroadcast customer
-        $serviceRequest = ServiceRequest::join('specializations', 'specializations.id', '=', 'service_requests.specialization_id')
+        // $serviceRequest = ServiceRequest::join('specializations', 'specializations.id', '=', 'service_requests.specialization_id')
+        //     ->leftJoin('service_photos', 'service_photos.reference_number', '=', 'service_requests.reference_number')
+        //     ->leftJoin(DB::raw('(SELECT reference_number, COUNT(*) as total_applicants FROM service_bids GROUP BY reference_number) as sb'),
+        //         'sb.reference_number', '=', 'service_requests.reference_number')
+        //     ->select(
+        //         'service_requests.*',
+        //         'specializations.name as specialization_name',
+        //         'service_photos.image_1 as image_1',
+        //         DB::raw('COALESCE(sb.total_applicants, 0) as total_applicants')
+        //     )
+        //     ->where('service_requests.customer_id', $customer->id)
+        //     ->orderBy('service_requests.created_at', 'desc')
+        //     ->get();
+        $serviceRequestsQuery = ServiceRequest::with([
+                'topBids.provider.user',
+            ])
+            ->join('specializations', 'specializations.id', '=', 'service_requests.specialization_id')
             ->leftJoin('service_photos', 'service_photos.reference_number', '=', 'service_requests.reference_number')
-            ->leftJoin(DB::raw('(SELECT reference_number, COUNT(*) as total_applicants FROM service_bids GROUP BY reference_number) as sb'),
-                'sb.reference_number', '=', 'service_requests.reference_number')
+            ->leftJoin(DB::raw('(
+                SELECT reference_number, COUNT(*) as total_applicants
+                FROM service_bids
+                GROUP BY reference_number
+            ) as sb'), 'sb.reference_number', '=', 'service_requests.reference_number')
             ->select(
                 'service_requests.*',
                 'specializations.name as specialization_name',
@@ -1101,6 +1120,34 @@ class UserController extends Controller
             ->where('service_requests.customer_id', $customer->id)
             ->orderBy('service_requests.created_at', 'desc')
             ->get();
+
+        $serviceRequests = $serviceRequestsQuery->map(function ($request) {
+            return [
+                'id' => $request->id,
+                'reference_number' => $request->reference_number,
+                'description' => $request->description,
+                'created_at' => $request->created_at,
+                'specialization' => [
+                    'id' => $request->specialization_id,
+                    'name' => $request->specialization_name,
+                ],
+                'image' => $request->image_1,
+                'total_applicants' => $request->total_applicants,
+
+                'top_providers' => $request->topBids->map(function ($bid) {
+                    return [
+                        'bid_id' => $bid->id,
+                        'bid_amount' => $bid->bid_amount,
+                        'provider_id' => $bid->provider->id ?? null,
+                        'provider_name' => $bid->provider->name ?? null,
+                        'provider_phone' => $bid->provider->phone ?? null,
+                        'provider_address' => $bid->provider->address ?? null,
+                        'provider_email' => $bid->provider->user->email ?? null,
+                        'provider_profile_photo' => $bid->provider->user->profile_photo ?? null,
+                    ];
+                }),
+            ];
+        });
 
         return response()->json([
             'status' => true,

@@ -1089,11 +1089,13 @@ class UserController extends Controller
 
         //ambil semua service_request yang disudah dibroadcast customer
         $serviceRequest = ServiceRequest::join('specializations', 'specializations.id', '=', 'service_requests.specialization_id')
+            ->leftJoin('service_photos', 'service_photos.reference_number', '=', 'service_requests.reference_number')
             ->leftJoin(DB::raw('(SELECT reference_number, COUNT(*) as total_applicants FROM service_bids GROUP BY reference_number) as sb'),
                 'sb.reference_number', '=', 'service_requests.reference_number')
             ->select(
                 'service_requests.*',
                 'specializations.name as specialization_name',
+                'service_photos.image_1 as image_1',
                 DB::raw('COALESCE(sb.total_applicants, 0) as total_applicants')
             )
             ->where('service_requests.customer_id', $customer->id)

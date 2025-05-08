@@ -1116,7 +1116,7 @@ class UserController extends Controller
             ->orderBy('service_requests.created_at', 'desc')
             ->get();
 
-        $serviceRequests = $serviceRequestsQuery->map(function ($request) {
+        $serviceRequest = $serviceRequestsQuery->map(function ($request) {
             return [
                 'id' => $request->id,
                 'reference_number' => $request->reference_number,

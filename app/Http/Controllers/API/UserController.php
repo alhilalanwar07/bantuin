@@ -1190,6 +1190,7 @@ class UserController extends Controller
         //ambil reference_number dari service_bids
         $serviceBid = ServiceBid::join('service_requests', 'service_requests.reference_number', '=', 'service_bids.reference_number')
             ->join('service_providers', 'service_providers.id', '=', 'service_bids.provider_id')
+            ->join('provider_certifications', 'provider_certifications.provider_id', '=', 'service_providers.id')
             ->join('users', 'users.id', '=', 'service_providers.user_id')
             ->join('specializations', 'specializations.id', '=', 'service_requests.specialization_id')
             ->select(
@@ -1203,6 +1204,7 @@ class UserController extends Controller
                 'service_providers.address as provider_address', 
                 'users.profile_photo as provider_profile_photo', 
                 'specializations.name as specialization_name', 
+                'provider_certifications.is_verified as is_verified',
                 DB::raw("6371 * acos(cos(radians(service_providers.latitude)) * cos(radians(service_requests.latitude)) * cos(radians(service_requests.longitude) - radians(service_providers.longitude)) + sin(radians(service_providers.latitude)) * sin(radians(service_requests.latitude))) as jarak_vendor_ke_lokasi"))
             ->where('service_bids.reference_number', $referencenumber)
             ->get();

@@ -1190,7 +1190,10 @@ class UserController extends Controller
         //ambil reference_number dari service_bids
         $serviceBid = ServiceBid::join('service_requests', 'service_requests.reference_number', '=', 'service_bids.reference_number')
             ->join('service_providers', 'service_providers.id', '=', 'service_bids.provider_id')
-            ->join('provider_certifications', 'provider_certifications.provider_id', '=', 'service_providers.id')
+            ->join('provider_certifications', function ($join) {
+                $join->on('provider_certifications.provider_id', '=', 'service_providers.id')
+                    ->on('provider_certifications.specialization_id', '=', 'service_requests.specialization_id');
+            })
             ->join('users', 'users.id', '=', 'service_providers.user_id')
             ->join('specializations', 'specializations.id', '=', 'service_requests.specialization_id')
             ->select(

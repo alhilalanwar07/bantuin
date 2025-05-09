@@ -1203,7 +1203,7 @@ class UserController extends Controller
                 'service_providers.address as provider_address', 
                 'users.profile_photo as provider_profile_photo', 
                 'specializations.name as specialization_name', 
-                DB::raw("6371 *acos(cos(radians.service_providers.latitude)) * cos(radians(service_requests.latitude)) * cos(radians(service_requests.longitude) - radians(service_providers.longitude)) + sin(radians(service_providers.latitude)) * sin(radians(service_requests.latitude))) as jarak_vendor_ke_lokasi"))
+                DB::raw("6371 * acos(cos(radians(service_providers.latitude)) * cos(radians(service_requests.latitude)) * cos(radians(service_requests.longitude) - radians(service_providers.longitude)) + sin(radians(service_providers.latitude)) * sin(radians(service_requests.latitude))) as jarak_vendor_ke_lokasi"))
             ->where('service_bids.reference_number', $referencenumber)
             ->get();
         

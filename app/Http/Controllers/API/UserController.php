@@ -1203,7 +1203,7 @@ class UserController extends Controller
             ->join('service_providers', 'service_providers.id', '=', 'service_bids.provider_id')
             ->join('users', 'users.id', '=', 'service_providers.user_id')
             ->join('specializations', 'specializations.id', '=', 'service_requests.specialization_id')
-            ->where('reference_number', $reference_number)
+            ->where('reference_number', $referencenumber)
             ->get();
         
         return response()->json([

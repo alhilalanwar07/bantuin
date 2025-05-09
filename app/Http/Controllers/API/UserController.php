@@ -1203,6 +1203,7 @@ class UserController extends Controller
             ->join('service_providers', 'service_providers.id', '=', 'service_bids.provider_id')
             ->join('users', 'users.id', '=', 'service_providers.user_id')
             ->join('specializations', 'specializations.id', '=', 'service_requests.specialization_id')
+            ->select('service_bids.*', 'service_requests.description as request_description', 'service_requests.service_address as request_address', 'service_requests.scheduled_at as request_scheduled_at', 'service_requests.budget_amount as request_budget_amount', 'service_providers.name as provider_name', 'service_providers.phone as provider_phone', 'service_providers.address as provider_address', 'users.profile_photo as provider_profile_photo', 'specializations.name as specialization_name')
             ->where('service_bids.reference_number', $referencenumber)
             ->get();
         

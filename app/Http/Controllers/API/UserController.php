@@ -1195,4 +1195,29 @@ class UserController extends Controller
 
 
     }
+
+    public function detailPenawaran(Request $request, $referencenumber)
+    {
+        //ambil reference_number dari service_bids
+        $serviceBid = ServiceBid::join('service_requests', 'service_requests.reference_number', '=', 'service_bids.reference_number')
+            ->join('service_providers', 'service_providers.id', '=', 'service_bids.provider_id')
+            ->join('users', 'users.id', '=', 'service_providers.user_id')
+            ->join('specializations', 'specializations.id', '=', 'service_requests.specialization_id')
+            ->where('reference_number', $reference_number)
+            ->get();
+        
+        return response()->json([
+            'status' => true,
+            'message' => 'Detail penawaran',
+            'data' => $serviceBid,
+        ], 200);
+
+        if (!$serviceBid) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Permintaan tidak ditemukan',
+            ], 404);
+        }
+
+    }
 }

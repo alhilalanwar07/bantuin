@@ -1238,7 +1238,7 @@ class UserController extends Controller
             ->first();
 
         if ($provider) {
-            $specializations = ProviderCertification::join('service_procviders','service_providers.id','provider_certifications.provider_id')
+            $specializations = ProviderCertification::join('service_providers','service_providers.id','provider_certifications.provider_id')
                 ->join('specializations', 'specializations.id', '=', 'provider_certifications.specialization_id')
                 ->where('provider_certifications.provider_id', $provider->id)
                 ->pluck('specializations.name');

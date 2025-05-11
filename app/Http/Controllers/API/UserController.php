@@ -1250,7 +1250,7 @@ class UserController extends Controller
         
         return response()->json([
             'status' => true,
-            'message' => 'Detail penawaran',
+            'message' => 'Detail provider',
             'data' => $provider,
         ], 200);
 

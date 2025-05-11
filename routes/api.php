@@ -47,6 +47,7 @@ Route::group(['middleware' => 'auth:sanctum'], function(){
     Route::post('/broadcast-request-bantuan', [UserController::class, 'broadcastRequestBantuan']);
     Route::get('/list-transactions-customer', [UserController::class, 'listTransactionsCustomer']);
     Route::get('/detail-penawaran/{referencenumber}', [UserController::class, 'detailPenawaran']);
+    Route::get('/detail-provider/{id}', [UserController::class, 'detailProvider']);
 });
 
 // Service Provider Routes

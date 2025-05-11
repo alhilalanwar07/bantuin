@@ -1226,4 +1226,34 @@ class UserController extends Controller
         }
 
     }
+
+    public function detailProvider(Request $request, $id)
+    {
+        $provider = ServiceProvider::join('users', 'users.id', '=', 'service_providers.user_id')
+            ->select(
+                'service_providers.*',
+                'users.profile_photo as provider_profile_photo'
+            )
+            ->where('service_providers.id', $id)
+            ->first();
+
+        if ($provider) {
+            $specializations = ProviderCertification::join('service_procviders','service_providers.id','provider_certifications.provider_id')
+                ->join('specializations', 'specializations.id', '=', 'provider_certifications.specialization_id')
+                ->where('provider_certifications.provider_id', $provider->id)
+                ->pluck('specializations.name');
+
+            $provider = collect($provider)->merge([
+                'specializations' => $specializations,
+            ]);
+        }
+        
+        return response()->json([
+            'status' => true,
+            'message' => 'Detail penawaran',
+            'data' => $provider,
+        ], 200);
+
+
+    }
 }

@@ -229,8 +229,8 @@ new class extends Component {
     <div class="row mb-4">
         @foreach($statuses as $status)
             <div class="col-sm-6 col-md-3">
-                <div class="card card-stats card-{{ $status->color ?? 'primary' }} card-round">
-                    <div class="card-body">
+                <div class="card card-stats card-round text-white" style="background-color: {{ $status->color ?? '#000000FF' }}; color: white; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
+                    <div class="card-body p-3">
                         <div class="row">
                             <div class="col-5">
                                 <div class="icon-big text-center">
@@ -238,9 +238,9 @@ new class extends Component {
                                 </div>
                             </div>
                             <div class="col-7 col-stats">
-                                <div class="numbers">
-                                    <p class="card-category">{{ $status->name }}</p>
-                                    <h4 class="card-title">{{ $this->statusCounts[$status->id]->total ?? 0 }}</h4>
+                                <div class="numbers text-white">
+                                    <p class="card-category text-white">{{ $status->name }}</p>
+                                    <h4 class="card-title text-white">{{ $this->statusCounts[$status->id]->total ?? 0 }}</h4>
                                 </div>
                             </div>
                         </div>
@@ -301,7 +301,7 @@ new class extends Component {
                                         <td>{{ $request->scheduled_at ? $request->scheduled_at->format('d M Y H:i') : 'Not scheduled yet' }}</td>
                                         <td>Rp {{ number_format($request->budget_amount, 0, ',', '.') }}</td>
                                         <td>
-                                            <span class="badge bg-{{ $request->status->color ?? 'secondary' }}">{{ $request->status->name }}</span>
+                                            <span class="badge text-white" style="background-color: {{ $request->status->color ?? '#000000FF' }}; padding: 5px 8px; font-size: 0.85rem;">{{ $request->status->name }}</span>
                                         </td>
                                         <td>{{ $request->created_at->format('d M Y') }}</td>
                                         <td>
@@ -349,7 +349,7 @@ new class extends Component {
                                         <tr>
                                             <th>Status</th>
                                             <td>
-                                                <span class="badge bg-{{ $selectedRequest->status->color ?? 'secondary' }}">{{ $selectedRequest->status->name }}</span>
+                                                <span class="badge" style="background-color: {{ $selectedRequest->status->color ?? '#6c757d' }}; padding: 5px 8px; font-size: 0.85rem;">{{ $selectedRequest->status->name }}</span>
                                             </td>
                                         </tr>
                                         <tr>
@@ -449,7 +449,7 @@ new class extends Component {
                                             <td>{{ $bid->provider->name }}</td>
                                             <td>Rp {{ number_format($bid->bid_amount, 0, ',', '.') }}</td>
                                             <td>
-                                                <span class="badge bg-{{ $bid->status->color ?? 'secondary' }}">{{ $bid->status->name }}</span>
+                                                <span class="badge" style="background-color: {{ $bid->status->color ?? '#6c757d' }}; padding: 5px 8px; font-size: 0.85rem;">{{ $bid->status->name }}</span>
                                             </td>
                                             <td>{{ $bid->created_at->format('d M Y H:i') }}</td>
                                         </tr>

@@ -60,7 +60,7 @@ new class extends Component {
     public function openCustomerModal()
     {
         $this->resetForm();
-        $this->dispatch('openModal', 'addModal');
+        $this->dispatch('openModal', 'customerModal');
     }
 
     public function updatedSelectAll($value)
@@ -68,6 +68,7 @@ new class extends Component {
         $this->selectedCustomers = $value
             ? $this->advertisers->pluck('id')->toArray()
             : [];
+        $this->showBulkActions = count($this->selectedCustomers) > 0;
     }
 
     public function applyBulkAction()
@@ -113,6 +114,7 @@ new class extends Component {
         $this->selectedCustomers = [];
         $this->bulkAction = '';
         $this->showBulkActions = false;
+        $this->selectAll = false;
     }
 
     public function updatedSelectedCustomers()
@@ -131,33 +133,24 @@ new class extends Component {
     }
 
     public function getAdvertisersProperty()
-    {
-        return Advertiser::query()
-            ->withCount('advertisements')
-            ->search($this->search)
-            ->orderBy($this->sortField, $this->sortDirection)
-            ->paginate($this->perPage);
-    }
-
-    public function with()
-    {
-        return [
-            'advertisers' => Advertiser::when($this->search, function ($query) {
-                $query->where(function ($q) {
-                    $q->where('company_name', 'like', '%' . $this->search . '%')
-                        ->orWhere('contact_phone', 'like', '%' . $this->search . '%')
-                        ->orWhere('contact_email', 'like', '%' . $this->search . '%')
-                        ->orWhere('business_address', 'like', '%' . $this->search . '%');
-                });
-            })
-                ->latest()
-                ->paginate($this->perPage)
-        ];
-    }
+{
+    return Advertiser::query()
+        ->withCount('advertisements')
+        ->when($this->search, function ($query) {
+            $query->where(function ($q) {
+                $q->where('company_name', 'like', '%' . $this->search . '%')
+                    ->orWhere('contact_phone', 'like', '%' . $this->search . '%')
+                    ->orWhere('contact_email', 'like', '%' . $this->search . '%')
+                    ->orWhere('business_address', 'like', '%' . $this->search . '%');
+            });
+        })
+        ->orderBy($this->sortField, $this->sortDirection)
+        ->paginate($this->perPage);
+}
 
     public function resetForm()
     {
-        $this->reset();
+        $this->reset(['company_name', 'contact_phone', 'contact_email', 'business_address', 'editMode', 'advertiserId']);
         $this->resetErrorBag();
         $this->resetValidation();
     }
@@ -210,6 +203,18 @@ new class extends Component {
         ]);
     }
 
+    public function confirmDelete($id)
+    {
+        $this->dispatch('showConfirmation', [
+            'title' => 'Are you sure?',
+            'text' => 'You are about to delete this customer. This action cannot be undone.',
+            'confirmButtonText' => 'Yes, delete it!',
+            'cancelButtonText' => 'Cancel',
+            'onConfirmed' => 'deleteCustomer',
+            'data' => ['id' => $id]
+        ]);
+    }
+
     public function delete($id)
     {
         try {
@@ -218,13 +223,20 @@ new class extends Component {
                 if ($advertiser->advertisements()->exists()) {
                     throw new \Exception('Customer has active advertisements');
                 }
+                
+                activity()
+                    ->causedBy(auth()->user())
+                    ->performedOn($advertiser)
+                    ->log('deleted customer');
+                    
                 $advertiser->delete();
             });
 
             $this->dispatch('showAlert', [
                 'type' => 'success',
                 'message' => 'Customer permanently deleted',
-                'reload' => true
+                'reload' => true,
+                'timer' => 1000
             ]);
         } catch (\Exception $e) {
             $this->dispatch('showAlert', [
@@ -245,7 +257,7 @@ new class extends Component {
         <div class="card-header bg-white border-bottom-0 py-4">
             <div class="d-flex justify-content-between align-items-center">
                 <h3 class="mb-0 fw-bold text-primary">
-                    Customer Management
+                    <i class="fas fa-building me-2"></i>Customer Management
                 </h3>
                 <button wire:click="openCustomerModal"
                     class="btn btn-primary rounded-pill px-4">
@@ -254,8 +266,6 @@ new class extends Component {
             </div>
         </div>
 
-        <!-- Rest of the template code remains unchanged -->
-        <!-- Card Body -->
         <div class="card-body p-4">
             @if($showBulkActions)
             <div class="alert alert-info mb-4">
@@ -281,7 +291,14 @@ new class extends Component {
                             placeholder="Cari customer...">
                     </div>
                 </div>
-
+                <div class="col-12 col-md-6 col-xl-2">
+                    <select wire:model.live="perPage" class="form-select form-select-lg">
+                        <option value="10">10 per halaman</option>
+                        <option value="25">25 per halaman</option>
+                        <option value="50">50 per halaman</option>
+                        <option value="100">100 per halaman</option>
+                    </select>
+                </div>
             </div>
             <div class="table-responsive rounded-3 border">
                 <table class="table table-hover align-middle mb-0">
@@ -297,14 +314,24 @@ new class extends Component {
                                 <i class="fas fa-sort-{{ $sortDirection === 'asc' ? 'up' : 'down' }}"></i>
                                 @endif
                             </th>
-                            <th class="py-3 px-4 bg-light text-uppercase">Phone</th>
-                            <th class="py-3 px-4 bg-light text-uppercase">Email</th>
+                            <th class="py-3 px-4 bg-light text-uppercase" wire:click="sortBy('contact_phone')" style="cursor:pointer">
+                                Phone
+                                @if($sortField === 'contact_phone')
+                                <i class="fas fa-sort-{{ $sortDirection === 'asc' ? 'up' : 'down' }}"></i>
+                                @endif
+                            </th>
+                            <th class="py-3 px-4 bg-light text-uppercase" wire:click="sortBy('contact_email')" style="cursor:pointer">
+                                Email
+                                @if($sortField === 'contact_email')
+                                <i class="fas fa-sort-{{ $sortDirection === 'asc' ? 'up' : 'down' }}"></i>
+                                @endif
+                            </th>
                             <th class="py-3 px-4 bg-light text-uppercase">Address</th>
                             <th class="py-3 px-4 bg-light text-uppercase text-end">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach($advertisers as $key => $advertiser)
+                        @forelse($this->advertisers as $key => $advertiser)
                         <tr class="border-top">
                             <td class="py-3 px-4">
                                 <input type="checkbox" wire:model.live="selectedCustomers" value="{{ $advertiser->id }}">
@@ -312,6 +339,7 @@ new class extends Component {
                             <td class="py-3 px-4">{{ $loop->iteration }}</td>
                             <td class="py-3 px-4">
                                 <div class="fw-bold">{{ $advertiser->company_name }}</div>
+                                <small class="text-muted">{{ $advertiser->advertisements_count }} iklan</small>
                             </td>
                             <td class="py-3 px-4">
                                 <div class="text-primary">{{ $advertiser->contact_phone }}</div>
@@ -328,8 +356,6 @@ new class extends Component {
                                     <button
                                         wire:click="edit({{ $advertiser->id }})"
                                         class="btn btn-icon btn-sm btn-outline-primary rounded-circle"
-                                        data-bs-toggle="modal"
-                                        data-bs-target="#addModal"
                                         data-bs-tooltip="tooltip"
                                         title="Edit">
                                         <i class="fas fa-pencil-alt"></i>
@@ -344,24 +370,30 @@ new class extends Component {
                                 </div>
                             </td>
                         </tr>
-                        @endforeach
+                        @empty
+                        <tr>
+                            <td colspan="7" class="py-4 text-center text-muted">
+                                <i class="fas fa-database me-2"></i>No customers found
+                            </td>
+                        </tr>
+                        @endforelse
                     </tbody>
                 </table>
 
                 <!-- Pagination -->
                 <div class="mt-3">
-                    {{ $advertisers->links() }}
+                    {{ $this->advertisers->links() }}
                 </div>
             </div>
         </div>
     </div>
 
     <!-- Customer Modal -->
-    <div wire:ignore.self class="modal fade" id="addModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div wire:ignore.self class="modal fade" id="customerModal" tabindex="-1" role="dialog" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content border-0 shadow-lg">
                 <div class="modal-header bg-white border-bottom-0 py-4">
-                    <h5 class="modal-title fw-bold text-primary" id="addModalLabel">
+                    <h5 class="modal-title fw-bold text-primary" id="customerModalLabel">
                         <i class="fas fa-building me-2"></i>{{ $editMode ? 'Edit' : 'Add' }} Customer
                     </h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" wire:click="resetForm()"></button>
@@ -398,7 +430,6 @@ new class extends Component {
                 </div>
             </div>
         </div>
-
     </div>
     <livewire:_alert />
 </div>

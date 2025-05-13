@@ -24,26 +24,30 @@ Route::post('/login-vendor', [UserController::class, 'loginVendor']);
 Route::get('/list-specializations', [UserController::class, 'listSpecializations']);
 
 Route::group(['middleware' => 'auth:sanctum'], function(){
-    Route::get('/profil-vendor', [UserController::class, 'profilVendor']);
-    Route::get('/profil-customer', [UserController::class, 'profilCustomer']);
     Route::post('/fcm-token', [UserController::class, 'storeFcmToken']);
     Route::get('/logout', [UserController::class, 'logout']);
+    // API for service provider
+    Route::get('/profil-vendor', [UserController::class, 'profilVendor']);
     Route::post('/upload-sertifikat', [UserController::class, 'simpanSertifikat']);
     Route::post('/tambah-keahlian', [UserController::class, 'tambahKeahlian']);
     Route::get('/list-keahlian-vendor', [UserController::class, 'listKeahlianVendor']);
     Route::post('/upload-foto', [UserController::class, 'uploadFoto']);
-    Route::post('/upload-foto-customer', [UserController::class, 'uploadFotoCustomer']);
     Route::post('/update-profile-vendor', [UserController::class, 'updateProfileVendor']);
-    Route::post('/update-profile-customer', [UserController::class, 'updateProfileCustomer']);
-    Route::post('/broadcast-request-bantuan', [UserController::class, 'broadcastRequestBantuan']);
     Route::get('/list-broadcast', [UserController::class, 'listBroadcast']);
     Route::get('/detail-request/{id}', [UserController::class, 'detailRequest']);
     Route::post('/checkin-daily', [UserController::class, 'checkInDaily']);
     Route::post('/accept-job', [UserController::class, 'acceptJob']);
     Route::get('/list-transactions-vendor', [UserController::class, 'listTransactionsVendor']);
-    Route::get('/list-transactions-customer', [UserController::class, 'listTransactionsCustomer']);
     Route::get('/detail-image/{image}', [UserController::class, 'lihatImage']);
     Route::post('/canceled-job', [UserController::class, 'canceledJob']);
+    // API for customer
+    Route::get('/profil-customer', [UserController::class, 'profilCustomer']);
+    Route::post('/upload-foto-customer', [UserController::class, 'uploadFotoCustomer']);
+    Route::post('/update-profile-customer', [UserController::class, 'updateProfileCustomer']);
+    Route::post('/broadcast-request-bantuan', [UserController::class, 'broadcastRequestBantuan']);
+    Route::get('/list-transactions-customer', [UserController::class, 'listTransactionsCustomer']);
+    Route::get('/detail-penawaran/{referencenumber}', [UserController::class, 'detailPenawaran']);
+    Route::get('/detail-provider/{id}', [UserController::class, 'detailProvider']);
 });
 
 // Service Provider Routes

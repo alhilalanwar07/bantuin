@@ -1087,20 +1087,7 @@ class UserController extends Controller
         $user = $request->user();
         $customer = Customer::where('user_id', $user->id)->first();
 
-        //ambil semua service_request yang disudah dibroadcast customer
-        // $serviceRequest = ServiceRequest::join('specializations', 'specializations.id', '=', 'service_requests.specialization_id')
-        //     ->leftJoin('service_photos', 'service_photos.reference_number', '=', 'service_requests.reference_number')
-        //     ->leftJoin(DB::raw('(SELECT reference_number, COUNT(*) as total_applicants FROM service_bids GROUP BY reference_number) as sb'),
-        //         'sb.reference_number', '=', 'service_requests.reference_number')
-        //     ->select(
-        //         'service_requests.*',
-        //         'specializations.name as specialization_name',
-        //         'service_photos.image_1 as image_1',
-        //         DB::raw('COALESCE(sb.total_applicants, 0) as total_applicants')
-        //     )
-        //     ->where('service_requests.customer_id', $customer->id)
-        //     ->orderBy('service_requests.created_at', 'desc')
-        //     ->get();
+        
         $serviceRequestsQuery = ServiceRequest::with(['topBids.provider.user'])
             ->join('specializations', 'specializations.id', '=', 'service_requests.specialization_id')
             ->leftJoin('service_photos', 'service_photos.reference_number', '=', 'service_requests.reference_number')
@@ -1192,6 +1179,80 @@ class UserController extends Controller
                 'message' => 'Permintaan berhasil dibatalkan',
             ], 200);
         }
+
+
+    }
+
+    public function detailPenawaran(Request $request, $referencenumber)
+    {
+        // DB::raw("6371 * acos(cos(radians($vendorLat)) * cos(radians(latitude)) * cos(radians(longitude) - radians($vendorLng)) + sin(radians($vendorLat)) * sin(radians(latitude))) AS distance"
+
+        //ambil reference_number dari service_bids
+        $serviceBid = ServiceBid::join('service_requests', 'service_requests.reference_number', '=', 'service_bids.reference_number')
+            ->join('service_providers', 'service_providers.id', '=', 'service_bids.provider_id')
+            ->join('provider_certifications', function ($join) {
+                $join->on('provider_certifications.provider_id', '=', 'service_providers.id')
+                    ->on('provider_certifications.specialization_id', '=', 'service_requests.specialization_id');
+            })
+            ->join('users', 'users.id', '=', 'service_providers.user_id')
+            ->join('specializations', 'specializations.id', '=', 'service_requests.specialization_id')
+            ->select(
+                'service_bids.*', 
+                'service_requests.description as request_description', 
+                'service_requests.service_address as request_address', 
+                'service_requests.scheduled_at as request_scheduled_at', 
+                'service_requests.budget_amount as request_budget_amount', 
+                'service_providers.name as provider_name', 
+                'service_providers.phone as provider_phone', 
+                'service_providers.address as provider_address', 
+                'users.profile_photo as provider_profile_photo', 
+                'specializations.name as specialization_name', 
+                'provider_certifications.is_verified as is_verified',
+                DB::raw("6371 * acos(cos(radians(service_providers.latitude)) * cos(radians(service_requests.latitude)) * cos(radians(service_requests.longitude) - radians(service_providers.longitude)) + sin(radians(service_providers.latitude)) * sin(radians(service_requests.latitude))) as jarak_vendor_ke_lokasi"))
+            ->where('service_bids.reference_number', $referencenumber)
+            ->get();
+        
+        return response()->json([
+            'status' => true,
+            'message' => 'Detail penawaran',
+            'data' => $serviceBid,
+        ], 200);
+
+        if (!$serviceBid) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Permintaan tidak ditemukan',
+            ], 404);
+        }
+
+    }
+
+    public function detailProvider(Request $request, $id)
+    {
+        $provider = ServiceProvider::join('users', 'users.id', '=', 'service_providers.user_id')
+            ->select(
+                'service_providers.*',
+                'users.profile_photo as provider_profile_photo'
+            )
+            ->where('service_providers.id', $id)
+            ->first();
+
+        if ($provider) {
+            $specializations = ProviderCertification::join('service_providers','service_providers.id','provider_certifications.provider_id')
+                ->join('specializations', 'specializations.id', '=', 'provider_certifications.specialization_id')
+                ->where('provider_certifications.provider_id', $provider->id)
+                ->pluck('specializations.name');
+
+            $provider = collect($provider)->merge([
+                'specializations' => $specializations,
+            ]);
+        }
+        
+        return response()->json([
+            'status' => true,
+            'message' => 'Detail provider',
+            'data' => $provider,
+        ], 200);
 
 
     }

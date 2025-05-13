@@ -523,7 +523,7 @@ new class extends Component {
                             <h6 class="fw-bold">Rating & Review</h6>
                             <div class="d-flex align-items-center mb-2">
                                 <div class="me-2">
-                                    <span class="badge bg-warning text-dark">{{ $selectedRequest->rating->score }}/5</span>
+                                    <span class="badge" style="background-color: #FFC107; color: #212529; padding: 5px 8px; font-size: 0.85rem;">{{ $selectedRequest->rating->score }}/5</span>
                                 </div>
                                 <div>
                                     @for($i = 1; $i <= 5; $i++)

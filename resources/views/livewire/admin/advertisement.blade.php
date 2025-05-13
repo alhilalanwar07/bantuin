@@ -7,6 +7,7 @@ use Livewire\Volt\Component;
 use Livewire\WithPagination;
 use Livewire\WithFileUploads;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\DB;
 
 new class extends Component {
     use WithPagination, WithFileUploads;
@@ -46,6 +47,13 @@ new class extends Component {
     public $categories = ['banner', 'sidebar', 'popup'];
     public $statuses = ['active', 'inactive', 'pending'];
     public $payment_statuses = ['paid', 'unpaid', 'partial'];
+    public $selectedAdvertisements = [];
+    public $bulkAction = '';
+    public $showBulkActions = false;
+    public $selectAll = false;
+    public $sortField = 'created_at';
+    public $sortDirection = 'desc';
+    public $advertisers = []; // Tambahkan ini
 
     public function mount()
     {
@@ -57,26 +65,113 @@ new class extends Component {
             'kategori2',
             'kategori3',
         ];
+        $this->getAdvertisers();
     }
 
-    public function with()
+    public function getAdvertisers()
     {
-        return [
-            'advertisements' => Advertisement::with('advertiser')
-                ->when($this->search, function($query) {
-                    $query->where(function($q) {
-                        $q->where('category', 'like', '%'.$this->search.'%')
-                          ->orWhere('status', 'like', '%'.$this->search.'%')
-                          ->orWhere('payment_status', 'like', '%'.$this->search.'%')
-                          ->orWhereHas('advertiser', function($adv) {
-                              $adv->where('company_name', 'like', '%'.$this->search.'%');
-                          });
-                    });
-                })
-                ->latest()
-                ->paginate($this->perPage),
-            'advertisers' => Advertiser::orderBy('company_name')->get()
-        ];
+        $this->advertisers = Advertiser::orderBy('company_name')->get();
+    }
+
+    public function getAdvertisementsProperty()
+    {
+        return Advertisement::with('advertiser')
+            ->when($this->search, function($query) {
+                $query->where(function($q) {
+                    $q->where('category', 'like', '%'.$this->search.'%')
+                      ->orWhere('status', 'like', '%'.$this->search.'%')
+                      ->orWhere('payment_status', 'like', '%'.$this->search.'%')
+                      ->orWhereHas('advertiser', function($adv) {
+                          $adv->where('company_name', 'like', '%'.$this->search.'%');
+                      });
+                });
+            })
+            ->orderBy($this->sortField, $this->sortDirection)
+            ->paginate($this->perPage);
+    }
+
+    public function sortBy($field)
+    {
+        if ($this->sortField === $field) {
+            $this->sortDirection = $this->sortDirection === 'asc' ? 'desc' : 'asc';
+        } else {
+            $this->sortField = $field;
+            $this->sortDirection = 'asc';
+        }
+    }
+
+    public function updatedSelectAll($value)
+    {
+        $this->selectedAdvertisements = $value
+            ? $this->advertisements->pluck('id')->toArray()
+            : [];
+    }
+
+    public function updatedSelectedAdvertisements()
+    {
+        $this->showBulkActions = count($this->selectedAdvertisements) > 0;
+    }
+
+    public function resetBulkSelection()
+    {
+        $this->selectedAdvertisements = [];
+        $this->bulkAction = '';
+        $this->showBulkActions = false;
+        $this->selectAll = false;
+    }
+
+    public function applyBulkAction()
+    {
+        try {
+            DB::beginTransaction();
+            
+            switch($this->bulkAction) {
+                case 'activate':
+                    Advertisement::whereIn('id', $this->selectedAdvertisements)
+                        ->update(['status' => 'active']);
+                    $message = 'Iklan berhasil diaktifkan!';
+                    break;
+                case 'deactivate':
+                    Advertisement::whereIn('id', $this->selectedAdvertisements)
+                        ->update(['status' => 'inactive']);
+                    $message = 'Iklan berhasil dinonaktifkan!';
+                    break;
+                case 'delete':
+                    $ads = Advertisement::whereIn('id', $this->selectedAdvertisements)->get();
+                    
+                    foreach($ads as $ad) {
+                        if ($ad->banner_image && Storage::disk('public')->exists($ad->banner_image)) {
+                            Storage::disk('public')->delete($ad->banner_image);
+                        }
+                        
+                        activity()
+                            ->causedBy(auth()->user())
+                            ->performedOn($ad)
+                            ->log('bulk deleted advertisement');
+                    }
+                    
+                    Advertisement::whereIn('id', $this->selectedAdvertisements)->delete();
+                    $message = 'Iklan berhasil dihapus!';
+                    break;
+                default:
+                    throw new \Exception('Aksi tidak valid');
+            }
+            
+            DB::commit();
+            $this->resetBulkSelection();
+            $this->dispatch('showAlert', [
+                'type' => 'success',
+                'message' => $message,
+                'reload' => true,
+                'timer' => 1000
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            $this->dispatch('showAlert', [
+                'type' => 'error',
+                'message' => 'Error: ' . $e->getMessage()
+            ]);
+        }
     }
 
     public function resetForm()
@@ -226,155 +321,221 @@ new class extends Component {
 }; ?>
 
 <div>
-    <div class="col-md-12">
-        <div class="card card-round">
-            <!-- Card Header -->
-            <div class="card-header">
-                <div class="card-head-row d-flex justify-content-between align-items-center">
-                    <h4 class="card-title mb-0">Daftar Iklan</h4>
-                    <div class="card-tools d-flex align-items-center gap-2">
-                        <!-- Search and Per Page Selection -->
-                        <div class="input-group" style="width: 500px;">
-                            <input
-                                type="text"
-                                wire:model.live.debounce.300ms="search"
-                                class="form-control"
-                                placeholder="Cari...">
-                            <select
-                                wire:model.live="perPage"
-                                class="form-select"
-                                style="width: auto;">
-                                <option value="10">10</option>
-                                <option value="25">25</option>
-                                <option value="50">50</option>
-                                <option value="100">100</option>
-                            </select>
-                        </div>
-                        
-                        <!-- Add Advertisement Button -->
-                        <button
-                            wire:click="resetForm"
-                            class="btn btn-info btn-sm d-flex align-items-center gap-1"
-                            data-bs-toggle="modal"
-                            data-bs-target="#addModal">
-                            <i class="fa fa-plus"></i>
-                            <span>Tambah Iklan</span>
-                        </button>
+    <div class="card border-0 shadow-lg">
+        <div class="card-header bg-white border-bottom-0 py-4">
+            <div class="d-flex justify-content-between align-items-center">
+                <h3 class="mb-0 fw-bold text-primary">
+                    <i class="fas fa-ad me-2"></i>Manajemen Iklan
+                </h3>
+                <button wire:click="resetForm"
+                    class="btn btn-primary rounded-pill px-4"
+                    data-bs-toggle="modal"
+                    data-bs-target="#addModal">
+                    <i class="fas fa-plus-circle me-2"></i>Tambah Iklan
+                </button>
+            </div>
+        </div>
+
+        <div class="card-body p-4">
+            @if($showBulkActions)
+            <div class="alert alert-info mb-4">
+                <div class="d-flex justify-content-between align-items-center">
+                    <span>{{ count($selectedAdvertisements) }} iklan dipilih</span>
+                    <select wire:model="bulkAction" class="form-select w-auto">
+                        <option value="">Pilih Aksi</option>
+                        <option value="activate">Aktifkan</option>
+                        <option value="deactivate">Nonaktifkan</option>
+                        <option value="delete">Hapus</option>
+                    </select>
+                    <button wire:click="applyBulkAction" class="btn btn-primary ms-2">Terapkan</button>
+                    <button wire:click="resetBulkSelection" class="btn btn-link text-danger">Batal</button>
+                </div>
+            </div>
+            @endif
+            
+            <div class="row g-3 mb-4">
+                <div class="col-12 col-md-6 col-xl-3">
+                    <div class="input-group input-group-lg">
+                        <span class="input-group-text bg-transparent border-end-0">
+                            <i class="fas fa-search text-muted"></i>
+                        </span>
+                        <input wire:model.live.debounce.300ms="search" type="search"
+                            class="form-control border-start-0"
+                            placeholder="Cari iklan...">
                     </div>
+                </div>
+
+                <div class="col-12 col-md-6 col-xl-2">
+                    <select wire:model.live="perPage"
+                        class="form-select form-select-lg">
+                        <option value="10">10 per halaman</option>
+                        <option value="25">25 per halaman</option>
+                        <option value="50">50 per halaman</option>
+                        <option value="100">100 per halaman</option>
+                    </select>
                 </div>
             </div>
 
-            <!-- Card Body -->
-            <div class="card-body">
-                <div class="table-responsive">
-                    <table class="table table-striped table-hover">
-                        <thead class="bg-light">
-                            <tr>
-                                <th class="py-3">#</th>
-                                <th class="py-3">Customer</th>
-                                <th class="py-3">Banner</th>
-                                <th class="py-3">Kategori</th>
-                                <th class="py-3">Durasi</th>
-                                <th class="py-3">Tanggal</th>
-                                <th class="py-3">Status</th>
-                                <th class="py-3">Pembayaran</th>
-                                <th class="py-3">Aksi</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach($advertisements as $key => $advertisement)
-                            <tr>
-                                <td class="py-2">{{ $key + 1 }}</td>
-                                <td class="py-2">{{ $advertisement->advertiser->company_name }}</td>
-                                <td class="py-2">
-                                    <img src="{{ asset('storage/' . $advertisement->banner_image) }}" 
-                                         alt="Banner" 
-                                         class="img-thumbnail" 
-                                         style="max-width: 100px; max-height: 60px;">
-                                </td>
-                                <td class="py-2">{{ ucfirst($advertisement->category) }}</td>
-                                <td class="py-2">{{ $advertisement->duration_days }} hari</td>
-                                <td class="py-2">
-                                    {{ $advertisement->start_date->format('d/m/Y') }} - 
-                                    {{ $advertisement->end_date->format('d/m/Y') }}
-                                </td>
-                                <td class="py-2">
-                                    <span class="badge bg-{{ $advertisement->status == 'active' ? 'success' : ($advertisement->status == 'pending' ? 'warning' : 'danger') }}">
-                                        {{ ucfirst($advertisement->status) }}
-                                    </span>
-                                </td>
-                                <td class="py-2">
-                                    <span class="badge bg-{{ $advertisement->payment_status == 'paid' ? 'success' : ($advertisement->payment_status == 'partial' ? 'warning' : 'danger') }}">
-                                        {{ ucfirst($advertisement->payment_status) }}
-                                    </span>
-                                </td>
-                                <td class="py-2">
-                                    <div class="d-flex gap-1">
-                                        <button
-                                            wire:click="edit({{ $advertisement->id }})"
-                                            class="btn btn-primary btn-sm d-flex align-items-center"
-                                            title="Edit">
-                                            <i class="fas fa-edit"></i>
-                                        </button>
-                                        <button
-                                            wire:click="delete({{ $advertisement->id }})"
-                                            class="btn btn-danger btn-sm d-flex align-items-center"
-                                            onclick="return confirm('Apakah Anda yakin ingin menghapus iklan ini?')"
-                                            title="Hapus">
-                                            <i class="fas fa-trash"></i>
-                                        </button>
-                                    </div>
-                                </td>
-                            </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
-
-                    <!-- Pagination -->
-                    <div class="mt-3">
-                        {{ $advertisements->links() }}
-                    </div>
-                </div>
+            <div class="table-responsive rounded-3 border">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="bg-light">
+                        <tr>
+                            <th class="py-3 px-4 bg-light text-uppercase" style="width: 50px;">
+                                <input type="checkbox" wire:model.live="selectAll">
+                            </th>
+                            <th wire:click="sortBy('advertiser_id')" 
+                                class="py-3 px-4 bg-light text-uppercase" style="cursor:pointer">
+                                Customer
+                                @if($sortField === 'advertiser_id')
+                                <i class="fas fa-sort-{{ $sortDirection === 'asc' ? 'up' : 'down' }}"></i>
+                                @endif
+                            </th>
+                            <th class="py-3 px-4 bg-light text-uppercase">Banner</th>
+                            <th wire:click="sortBy('category')" 
+                                class="py-3 px-4 bg-light text-uppercase" style="cursor:pointer">
+                                Kategori
+                                @if($sortField === 'category')
+                                <i class="fas fa-sort-{{ $sortDirection === 'asc' ? 'up' : 'down' }}"></i>
+                                @endif
+                            </th>
+                            <th wire:click="sortBy('duration_days')" 
+                                class="py-3 px-4 bg-light text-uppercase" style="cursor:pointer">
+                                Durasi
+                                @if($sortField === 'duration_days')
+                                <i class="fas fa-sort-{{ $sortDirection === 'asc' ? 'up' : 'down' }}"></i>
+                                @endif
+                            </th>
+                            <th wire:click="sortBy('start_date')" 
+                                class="py-3 px-4 bg-light text-uppercase" style="cursor:pointer">
+                                Tanggal
+                                @if($sortField === 'start_date')
+                                <i class="fas fa-sort-{{ $sortDirection === 'asc' ? 'up' : 'down' }}"></i>
+                                @endif
+                            </th>
+                            <th wire:click="sortBy('status')" 
+                                class="py-3 px-4 bg-light text-uppercase" style="cursor:pointer">
+                                Status
+                                @if($sortField === 'status')
+                                <i class="fas fa-sort-{{ $sortDirection === 'asc' ? 'up' : 'down' }}"></i>
+                                @endif
+                            </th>
+                            <th wire:click="sortBy('payment_status')" 
+                                class="py-3 px-4 bg-light text-uppercase" style="cursor:pointer">
+                                Pembayaran
+                                @if($sortField === 'payment_status')
+                                <i class="fas fa-sort-{{ $sortDirection === 'asc' ? 'up' : 'down' }}"></i>
+                                @endif
+                            </th>
+                            <th class="py-3 px-4 bg-light text-uppercase text-end">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse($this->advertisements as $key => $advertisement)
+                        <tr class="border-top">
+                            <td class="py-3 px-4">
+                                <input type="checkbox" wire:model.live="selectedAdvertisements" value="{{ $advertisement->id }}">
+                            </td>
+                            <td class="py-3 px-4">
+                                <div class="fw-bold">{{ $advertisement->advertiser->company_name }}</div>
+                            </td>
+                            <td class="py-3 px-4">
+                                <img src="{{ asset('storage/' . $advertisement->banner_image) }}" 
+                                     alt="Banner" 
+                                     class="rounded" 
+                                     style="max-width: 100px; max-height: 60px; object-fit: cover;">
+                            </td>
+                            <td class="py-3 px-4">{{ ucfirst($advertisement->category) }}</td>
+                            <td class="py-3 px-4">{{ $advertisement->duration_days }} hari</td>
+                            <td class="py-3 px-4">
+                                <div>{{ $advertisement->start_date->format('d/m/Y') }}</div>
+                                <small class="text-muted">s/d {{ $advertisement->end_date->format('d/m/Y') }}</small>
+                            </td>
+                            <td class="py-3 px-4">
+                                <span class="badge bg-{{ $advertisement->status == 'active' ? 'success' : ($advertisement->status == 'pending' ? 'warning' : 'danger') }}">
+                                    <i class="fas fa-circle me-1 small"></i>
+                                    {{ ucfirst($advertisement->status) }}
+                                </span>
+                            </td>
+                            <td class="py-3 px-4">
+                                <span class="badge bg-{{ $advertisement->payment_status == 'paid' ? 'success' : ($advertisement->payment_status == 'partial' ? 'warning' : 'danger') }}">
+                                    <i class="fas fa-circle me-1 small"></i>
+                                    {{ ucfirst($advertisement->payment_status) }}
+                                </span>
+                            </td>
+                            <td class="py-3 px-4 text-end">
+                                <div class="d-flex gap-2 justify-content-end">
+                                    <button
+                                        wire:click="edit({{ $advertisement->id }})"
+                                        class="btn btn-icon btn-sm btn-outline-primary rounded-circle"
+                                        title="Edit">
+                                        <i class="fas fa-pencil-alt"></i>
+                                    </button>
+                                    <button
+                                        wire:click="delete({{ $advertisement->id }})"
+                                        class="btn btn-icon btn-sm btn-outline-danger rounded-circle"
+                                        onclick="return confirm('Apakah Anda yakin ingin menghapus iklan ini?')"
+                                        title="Hapus">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        @empty
+                        <tr>
+                            <td colspan="9" class="py-4 text-center text-muted">
+                                <i class="fas fa-database me-2"></i>Belum ada data iklan.
+                            </td>
+                        </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- Pagination -->
+            <div class="mt-3">
+                {{ $this->advertisements->links() }}
             </div>
         </div>
     </div>
 
     <!-- Advertisement Modal -->
     <div wire:ignore.self class="modal fade" id="addModal" tabindex="-1" role="dialog" aria-hidden="true">
-        <div class="modal-dialog modal-lg" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">{{ $editMode ? 'Edit' : 'Tambah' }} Iklan</h5>
-                    <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close" wire:click="resetForm">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content border-0 shadow-lg">
+                <div class="modal-header bg-white border-bottom-0 py-4">
+                    <h5 class="modal-title fw-bold text-primary" id="advertisementModalLabel">
+                        <i class="fas fa-ad me-2"></i>{{ $editMode ? 'Edit' : 'Tambah' }} Iklan
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" wire:click="resetForm"></button>
                 </div>
-                <div class="modal-body">
+                <div class="modal-body p-4">
                     <form wire:submit.prevent="{{ $editMode ? 'update' : 'save' }}">
                         <div class="row">
                             <div class="col-md-6">
-                                <div class="form-group mb-3">
-                                    <label>Customer</label>
-                                    <select wire:model="advertiser_id" class="form-select">
+                                <div class="mb-4">
+                                    <label class="form-label fw-bold">Customer</label>
+                                    <select wire:model="advertiser_id" class="form-select form-select-lg">
                                         <option value="">-- Pilih Customer --</option>
                                         @foreach($advertisers as $advertiser)
                                             <option value="{{ $advertiser->id }}">{{ $advertiser->company_name }}</option>
                                         @endforeach
                                     </select>
-                                    @error('advertiser_id') <span class="text-danger">{{ $message }}</span> @enderror
+                                    @error('advertiser_id') <div class="text-danger small mt-1">{{ $message }}</div> @enderror
                                 </div>
                                 
-                                <div class="form-group mb-3">
-                                    <label>Banner Iklan</label>
+                                <div class="mb-3">
+                                    <label class="form-label fw-semibold">Banner Iklan</label>
                                     <input type="file" wire:model="banner_image" class="form-control">
-                                    <div wire:loading wire:target="banner_image">Uploading...</div>
-                                    @error('banner_image') <span class="text-danger">{{ $message }}</span> @enderror
+                                    <div wire:loading wire:target="banner_image" class="text-info mt-1">
+                                        <i class="fas fa-spinner fa-spin me-1"></i>Uploading...
+                                    </div>
+                                    @error('banner_image') <div class="text-danger small mt-1">{{ $message }}</div> @enderror
                                     
                                     @if($editMode && $temp_image && !$banner_image)
                                         <div class="mt-2">
                                             <img src="{{ asset('storage/' . $temp_image) }}" 
                                                  alt="Current Banner" 
-                                                 class="img-thumbnail" 
+                                                 class="rounded" 
                                                  style="max-width: 200px; max-height: 120px;">
                                         </div>
                                     @endif
@@ -383,78 +544,79 @@ new class extends Component {
                                         <div class="mt-2">
                                             <img src="{{ $banner_image->temporaryUrl() }}" 
                                                  alt="Preview" 
-                                                 class="img-thumbnail" 
+                                                 class="rounded" 
                                                  style="max-width: 200px; max-height: 120px;">
                                         </div>
                                     @endif
                                 </div>
                                 
-                                <div class="form-group mb-3">
-                                    <label>Kategori</label>
+                                <div class="mb-3">
+                                    <label class="form-label fw-semibold">Kategori</label>
                                     <select wire:model="category" class="form-select">
                                         <option value="">-- Pilih Kategori --</option>
                                         @foreach($categories as $cat)
                                             <option value="{{ $cat }}">{{ ucfirst($cat) }}</option>
                                         @endforeach
                                     </select>
-                                    @error('category') <span class="text-danger">{{ $message }}</span> @enderror
+                                    @error('category') <div class="text-danger small mt-1">{{ $message }}</div> @enderror
                                 </div>
                             </div>
                             
                             <div class="col-md-6">
-                                <div class="form-group mb-3">
-                                    <label>Durasi (hari)</label>
+                                <div class="mb-3">
+                                    <label class="form-label fw-semibold">Durasi (hari)</label>
                                     <input type="number" wire:model.live="duration_days" class="form-control" min="1">
-                                    @error('duration_days') <span class="text-danger">{{ $message }}</span> @enderror
+                                    @error('duration_days') <div class="text-danger small mt-1">{{ $message }}</div> @enderror
                                 </div>
                                 
-                                <div class="form-group mb-3">
-                                    <label>Tanggal Mulai</label>
+                                <div class="mb-3">
+                                    <label class="form-label fw-semibold">Tanggal Mulai</label>
                                     <input type="date" wire:model.live="start_date" class="form-control">
-                                    @error('start_date') <span class="text-danger">{{ $message }}</span> @enderror
+                                    @error('start_date') <div class="text-danger small mt-1">{{ $message }}</div> @enderror
                                 </div>
                                 
-                                <div class="form-group mb-3">
-                                    <label>Tanggal Berakhir</label>
+                                <div class="mb-3">
+                                    <label class="form-label fw-semibold">Tanggal Berakhir</label>
                                     <input type="date" wire:model.live="end_date" class="form-control" readonly>
                                 </div>
                                 
                                 <div class="row">
                                     <div class="col-md-6">
-                                        <div class="form-group mb-3">
-                                            <label>Status</label>
+                                        <div class="mb-3">
+                                            <label class="form-label fw-semibold">Status</label>
                                             <select wire:model="status" class="form-select">
                                                 @foreach($statuses as $stat)
                                                     <option value="{{ $stat }}">{{ ucfirst($stat) }}</option>
                                                 @endforeach
                                             </select>
-                                            @error('status') <span class="text-danger">{{ $message }}</span> @enderror
+                                            @error('status') <div class="text-danger small mt-1">{{ $message }}</div> @enderror
                                         </div>
                                     </div>
                                     <div class="col-md-6">
-                                        <div class="form-group mb-3">
-                                            <label>Status Pembayaran</label>
+                                        <div class="mb-3">
+                                            <label class="form-label fw-semibold">Status Pembayaran</label>
                                             <select wire:model="payment_status" class="form-select">
                                                 @foreach($payment_statuses as $pstat)
                                                     <option value="{{ $pstat }}">{{ ucfirst($pstat) }}</option>
                                                 @endforeach
                                             </select>
-                                            @error('payment_status') <span class="text-danger">{{ $message }}</span> @enderror
+                                            @error('payment_status') <div class="text-danger small mt-1">{{ $message }}</div> @enderror
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
                         
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" wire:click="resetForm">Tutup</button>
-                            <button type="submit" class="btn btn-primary">{{ $editMode ? 'Update' : 'Simpan' }}</button>
+                        <div class="modal-footer border-top-0 px-0 pb-0">
+                            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" wire:click="resetForm">Batal</button>
+                            <button type="submit" class="btn btn-primary px-4">
+                                {{ $editMode ? 'Update' : 'Simpan' }} Iklan
+                            </button>
                         </div>
                     </form>
                 </div>
             </div>
         </div>
     </div>
-
     <livewire:_alert />
 </div>

@@ -375,7 +375,7 @@ new class extends Component {
                             </td>
                             <td class="py-3 px-4">
                                 @foreach($provider->certifications as $cert)
-                                <span class="badge rounded-pill bg-opacity-10 bg-success text-success me-1 mb-1">
+                                <span class="badge rounded-pill bg-opacity-10 bg-success text-white me-1 mb-1">
                                     {{ $cert->specialization->name }}
                                 </span>
                                 @endforeach

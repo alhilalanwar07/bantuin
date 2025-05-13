@@ -50,12 +50,6 @@ new class extends Component {
                         </span>
                         <h4 class="text-section">Masters</h4>
                     </li>
-                    <li class="nav-item {{ Route::is('admin.manajemen-user') ? 'active text-info' : '' }}">
-                        <a class="nav-link" href="{{ route('admin.manajemen-user') }}" wire:navigate>
-                            <i class="fas fa-users"></i>
-                            <p>Manajemen User</p>
-                        </a>
-                    </li>
                     <!-- specialization -->
                     <li class="nav-item {{ Route::is('admin.specialization')? 'active text-info' : '' }}">
                         <a class="nav-link" href="{{ route('admin.specialization') }}" wire:navigate>
@@ -87,12 +81,24 @@ new class extends Component {
                         <span class="sidebar-mini-icon">
                             <i class="fa fa-ellipsis-h"></i>
                         </span>
-                        <h4 class="text-section">Providers</h4>
+                        <h4 class="text-section">Services</h4>
                     </li>
                     <li class="nav-item {{ Route::is('admin.provider') ? 'active text-info' : '' }}">
                         <a class="nav-link" href="{{ route('admin.provider') }}" wire:navigate>
                             <i class="fas fa-user-tie"></i>
                             <p>Providers</p>
+                        </a>
+                    </li>
+                    <li class="nav-item {{ Route::is('admin.rating') ? 'active text-info' : '' }}">
+                        <a class="nav-link" href="{{ route('admin.rating') }}" wire:navigate>
+                            <i class="fas fa-star"></i>
+                            <p>Rating</p>
+                        </a>
+                    </li>
+                    <li class="nav-item {{ Route::is('admin.service-request')? 'active text-info' : '' }}">
+                        <a class="nav-link" href="{{ route('admin.service-request') }}" wire:navigate>
+                            <i class="fas fa-envelope"></i>
+                            <p>Service Request</p>
                         </a>
                     </li>
                     <li class="nav-section">

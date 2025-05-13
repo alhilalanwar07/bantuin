@@ -14,7 +14,8 @@ class Rating extends Model
         'reference_number',
         'score',
         'review',
-        'reviewer_id'
+        'reviewer_id',
+        'status'
     ];
 
     protected $casts = [
@@ -30,4 +31,10 @@ class Rating extends Model
     {
         return $this->belongsTo(User::class, 'reviewer_id');
     }
+
+    public function provider(): BelongsTo
+    {
+        return $this->belongsTo(ServiceProvider::class, 'provider_id');
+    }
+
 }

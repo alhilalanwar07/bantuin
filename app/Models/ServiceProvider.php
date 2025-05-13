@@ -42,4 +42,9 @@ class ServiceProvider extends Model
     {
         return $this->belongsTo(User::class, 'user_id');
     }
+
+    public function ratings(): HasMany
+    {
+        return $this->hasMany(Rating::class, 'provider_id');
+    }
 }

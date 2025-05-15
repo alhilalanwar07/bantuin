@@ -1212,7 +1212,9 @@ class UserController extends Controller
             ->where('service_bids.reference_number', $referencenumber)
             ->get();
 
-        $detailRequest = ServiceRequest::where('reference_number', $referencenumber)->first();
+        $detailRequest = ServiceRequest::join('specializations', 'specializations.id', '=', 'service_requests.specialization_id')
+            ->select('service_requests.*', 'specializations.name as specialization_name')
+            ->where('reference_number', $referencenumber)->first();
         
         return response()->json([
             'status' => true,

@@ -1213,7 +1213,8 @@ class UserController extends Controller
             ->get();
 
         $detailRequest = ServiceRequest::join('specializations', 'specializations.id', '=', 'service_requests.specialization_id')
-            ->select('service_requests.*', 'specializations.name as specialization_name')
+            ->leftJoin('service_photos', 'service_photos.reference_number', '=', 'service_requests.reference_number')
+            ->select('service_requests.*', 'specializations.name as specialization_name','service_photos.image_1 as image_1')
             ->where('reference_number', $referencenumber)->first();
         
         return response()->json([

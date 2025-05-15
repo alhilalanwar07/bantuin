@@ -1211,11 +1211,14 @@ class UserController extends Controller
                 DB::raw("6371 * acos(cos(radians(service_providers.latitude)) * cos(radians(service_requests.latitude)) * cos(radians(service_requests.longitude) - radians(service_providers.longitude)) + sin(radians(service_providers.latitude)) * sin(radians(service_requests.latitude))) as jarak_vendor_ke_lokasi"))
             ->where('service_bids.reference_number', $referencenumber)
             ->get();
+
+        $detailRequest = ServiceRequest::where('reference_number', $referencenumber)->first();
         
         return response()->json([
             'status' => true,
             'message' => 'Detail penawaran',
             'data' => $serviceBid,
+            'detail_request' => $detailRequest,
         ], 200);
 
         if (!$serviceBid) {

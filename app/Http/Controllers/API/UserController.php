@@ -1210,6 +1210,7 @@ class UserController extends Controller
                 'provider_certifications.is_verified as is_verified',
                 DB::raw("6371 * acos(cos(radians(service_providers.latitude)) * cos(radians(service_requests.latitude)) * cos(radians(service_requests.longitude) - radians(service_providers.longitude)) + sin(radians(service_providers.latitude)) * sin(radians(service_requests.latitude))) as jarak_vendor_ke_lokasi"))
             ->where('service_bids.reference_number', $referencenumber)
+            ->orderBy('service_bids.bid_amount', 'asc') // Urutkan berdasarkan bid_amount
             ->get();
 
         $detailRequest = ServiceRequest::join('specializations', 'specializations.id', '=', 'service_requests.specialization_id')

@@ -1152,6 +1152,7 @@ class UserController extends Controller
                 'specializations.name as specialization_name',
                 'service_photos.image_1 as image_1',
                 'users.profile_photo as provider_profile_photo',
+                'service_providers.name as provider_name',
             )
             ->where('service_requests.customer_id', $customer->id)
             ->whereIn('service_requests.status_id', [4,5,6])

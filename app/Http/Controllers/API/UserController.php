@@ -1115,6 +1115,7 @@ class UserController extends Controller
                     'name' => $request->specialization_name,
                 ],
                 'image' => $request->image_1,
+                'status' => $request->status_id,
                 'total_applicants' => $request->total_applicants,
 
                 'top_providers' => $request->topBids->map(function ($bid) {

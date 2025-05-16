@@ -41,13 +41,14 @@ Route::group(['middleware' => 'auth:sanctum'], function(){
     Route::get('/detail-image/{image}', [UserController::class, 'lihatImage']);
     Route::post('/canceled-job', [UserController::class, 'canceledJob']);
     // API for customer
-    Route::get('/profil-customer', [UserController::class, 'profilCustomer']);
-    Route::post('/upload-foto-customer', [UserController::class, 'uploadFotoCustomer']);
-    Route::post('/update-profile-customer', [UserController::class, 'updateProfileCustomer']);
-    Route::post('/broadcast-request-bantuan', [UserController::class, 'broadcastRequestBantuan']);
+    Route::get('/customer-profile', [UserController::class, 'profilCustomer']);
+    Route::post('/upload-customer-photo', [UserController::class, 'uploadFotoCustomer']);
+    Route::post('/update-customer-profile', [UserController::class, 'updateProfileCustomer']);
+    Route::post('/broadcast-job-request', [UserController::class, 'broadcastRequestBantuan']);
     Route::get('/list-transactions-customer', [UserController::class, 'listTransactionsCustomer']);
-    Route::get('/detail-penawaran/{referencenumber}', [UserController::class, 'detailPenawaran']);
+    Route::get('/detail-bid/{referencenumber}', [UserController::class, 'detailPenawaran']);
     Route::get('/detail-provider/{id}', [UserController::class, 'detailProvider']);
+    Route::post('/approve_bid', [UserController::class, 'approveBid']);
 });
 
 // Service Provider Routes

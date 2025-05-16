@@ -1271,4 +1271,68 @@ class UserController extends Controller
 
 
     }
+
+    public function approveBid(Request $request)
+    {
+        $referenceNumber = $request->reference_number;
+        $providerId = $request->provider_id;
+        $bidAmount = $request->bid_amount;
+
+        DB::beginTransaction();
+        try {
+            $serviceRequest = ServiceRequest::where('reference_number', $referenceNumber)->first();
+            if (!$serviceRequest) {
+                DB::rollBack();
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Penawaran tidak ditemukan',
+                ], 404);
+            }
+
+            $serviceBid = ServiceBid::where('reference_number', $referenceNumber)
+                ->where('provider_id', $providerId)
+                ->first();
+
+            if (!$serviceBid) {
+                DB::rollBack();
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Penawaran tidak ditemukan',
+                ], 404);
+            }
+
+            // Update ServiceRequest
+            $serviceRequest->provider_id = $providerId; // set provider_id to the selected provider
+            $serviceRequest->agreed_amount = $bidAmount; // set agreed amount to the bid amount
+            $serviceRequest->status_id = 4; // 4 = processing
+            $serviceRequest->save();
+
+            // Update status bid yang dipilih
+            $serviceBid->status_id = 4; // 4 = approved
+            $serviceBid->save();
+
+            // Update status bid lainnya jadi rejected
+            ServiceBid::where('reference_number', $referenceNumber)
+                ->where('provider_id', '!=', $providerId)
+                ->update(['status_id' => 7]); // rejected
+
+            DB::commit();
+
+            return response()->json([
+                'status' => true,
+                'message' => 'Penawaran berhasil disetujui',
+                'data' => $serviceBid,
+            ], 200);
+
+            
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'status' => false,
+                'message' => 'Terjadi kesalahan saat menyetujui penawaran.',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+       
+    }
 }

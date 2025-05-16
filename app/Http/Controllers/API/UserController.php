@@ -1100,6 +1100,7 @@ class UserController extends Controller
                 DB::raw('COALESCE(sb.total_applicants, 0) as total_applicants')
             )
             ->where('service_requests.customer_id', $customer->id)
+            ->where('service_requests.status_id', 1) // Exclude status_id 1 (waiting for confirmation)
             ->orderBy('service_requests.created_at', 'desc')
             ->get();
 

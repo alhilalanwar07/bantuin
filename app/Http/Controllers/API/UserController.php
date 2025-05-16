@@ -1145,12 +1145,16 @@ class UserController extends Controller
  
         $JobOnProgressQuery = ServiceRequest::join('specializations', 'specializations.id', '=', 'service_requests.specialization_id')
             ->leftJoin('service_photos', 'service_photos.reference_number', '=', 'service_requests.reference_number')
+            ->join('providers', 'providers.id', '=', 'service_requests.provider_id')
+            ->join('users', 'users.id', '=', 'providers.user_id')
             ->select(
                 'service_requests.*',
                 'specializations.name as specialization_name',
-                'service_photos.image_1 as image_1')
+                'service_photos.image_1 as image_1',
+                'users.profile_photo as provider_profile_photo',
+            )
             ->where('service_requests.customer_id', $customer->id)
-            ->whereIn('service_requests.status_id', [4,5,6]) 
+            ->whereIn('service_requests.status_id', [4,5,6])
             ->orderBy('service_requests.created_at', 'desc')
             ->get();
 

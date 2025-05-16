@@ -1082,12 +1082,11 @@ class UserController extends Controller
         ], 200);
     }
 
-    public function listTransactionsCustomer(Request $request)
+    public function listJobOpen(Request $request)
     {
         $user = $request->user();
         $customer = Customer::where('user_id', $user->id)->first();
-
-        
+ 
         $serviceRequestsQuery = ServiceRequest::with(['topBids.provider.user'])
             ->join('specializations', 'specializations.id', '=', 'service_requests.specialization_id')
             ->leftJoin('service_photos', 'service_photos.reference_number', '=', 'service_requests.reference_number')
@@ -1135,9 +1134,31 @@ class UserController extends Controller
 
         return response()->json([
             'status' => true,
-            'message' => 'List transaksi customer',
+            'message' => 'List job customer yang open',
             'data' => $serviceRequest,
         ], 200);
+    }
+
+    public function listJobOnProgress(Request $request){
+        $user = $request->user();
+        $customer = Customer::where('user_id', $user->id)->first();
+ 
+        $JobOnProgressQuery = ServiceRequest::join('specializations', 'specializations.id', '=', 'service_requests.specialization_id')
+            ->leftJoin('service_photos', 'service_photos.reference_number', '=', 'service_requests.reference_number')
+            ->select(
+                'service_requests.*',
+                'specializations.name as specialization_name',
+                'service_photos.image_1 as image_1')
+            ->where('service_requests.customer_id', $customer->id)
+            ->whereIn('service_requests.status_id', [4,5,6]) 
+            ->orderBy('service_requests.created_at', 'desc')
+            ->get();
+
+        return response()->json([
+            'status' => true,
+            'message' => 'List job on progress',
+            'data'  => $JobOnProgressQuery,
+        ],200);
     }
 
     public function lihatImage(Request $request, $image)

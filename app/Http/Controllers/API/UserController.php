@@ -1238,7 +1238,8 @@ class UserController extends Controller
         $provider = ServiceProvider::join('users', 'users.id', '=', 'service_providers.user_id')
             ->select(
                 'service_providers.*',
-                'users.profile_photo as provider_profile_photo'
+                'users.profile_photo as provider_profile_photo',
+                'users.email as provider_email',
             )
             ->where('service_providers.id', $id)
             ->first();
@@ -1247,7 +1248,7 @@ class UserController extends Controller
             $specializations = ProviderCertification::join('service_providers','service_providers.id','provider_certifications.provider_id')
                 ->join('specializations', 'specializations.id', '=', 'provider_certifications.specialization_id')
                 ->where('provider_certifications.provider_id', $provider->id)
-                ->pluck('specializations.name');
+                ->pluck('specializations.name','specializations.icon','provider_certifications.is_verified','provider_certifications.certificate_file','provider_certifications.issue_year','provider_certifications.issuer');
 
             $provider = collect($provider)->merge([
                 'specializations' => $specializations,

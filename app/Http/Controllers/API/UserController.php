@@ -1143,7 +1143,7 @@ class UserController extends Controller
         $user = $request->user();
         $customer = Customer::where('user_id', $user->id)->first();
  
-        $JobOnProgressQuery = ServiceRequest::join('specializations', 'specializations.id', '=', 'service_requests.specialization_id')
+        $JobsQuery = ServiceRequest::join('specializations', 'specializations.id', '=', 'service_requests.specialization_id')
             ->leftJoin('service_photos', 'service_photos.reference_number', '=', 'service_requests.reference_number')
             ->join('service_providers', 'service_providers.id', '=', 'service_requests.provider_id')
             ->join('users', 'users.id', '=', 'service_providers.user_id')
@@ -1155,14 +1155,14 @@ class UserController extends Controller
                 'service_providers.name as provider_name',
             )
             ->where('service_requests.customer_id', $customer->id)
-            ->whereIn('service_requests.status_id', [4,5,6])
+            ->whereIn('service_requests.status_id', [4,5,6,7])
             ->orderBy('service_requests.created_at', 'desc')
             ->get();
 
         return response()->json([
             'status' => true,
             'message' => 'List job on progress',
-            'data'  => $JobOnProgressQuery,
+            'data'  => $JobsQuery,
         ],200);
     }
 

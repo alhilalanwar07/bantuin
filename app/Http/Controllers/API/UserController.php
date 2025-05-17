@@ -1266,6 +1266,11 @@ class UserController extends Controller
         $job = ServiceRequest::join('service_providers', 'service_providers.id', '=', 'service_requests.provider_id')
             ->join('users', 'users.id', '=', 'service_providers.user_id')
             ->join('specializations', 'specializations.id', '=', 'service_requests.specialization_id')
+            ->leftJoin('service_photos', 'service_photos.reference_number', '=', 'service_requests.reference_number')
+            ->join('provider_certifications', function ($join) {
+                $join->on('provider_certifications.provider_id', '=', 'service_providers.id')
+                    ->on('provider_certifications.specialization_id', '=', 'service_requests.specialization_id');
+            })
             ->select(
                 'service_requests.*',
                 'service_providers.name as provider_name',
@@ -1273,6 +1278,8 @@ class UserController extends Controller
                 'service_providers.address as provider_address',
                 'users.profile_photo as provider_profile_photo',
                 'specializations.name as specialization_name',
+                'service_photos.image_1 as image_1',
+                'provider_certifications.is_verified as is_verified',
                 DB::raw("6371 * acos(cos(radians(service_providers.latitude)) * cos(radians(service_requests.latitude)) * cos(radians(service_requests.longitude) - radians(service_providers.longitude)) + sin(radians(service_providers.latitude)) * sin(radians(service_requests.latitude))) as jarak_provider_ke_lokasi"))
             ->where('service_requests.reference_number', $referencenumber)
             ->first();

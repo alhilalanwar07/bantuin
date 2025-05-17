@@ -26,6 +26,8 @@ Route::get('/list-specializations', [UserController::class, 'listSpecializations
 Route::group(['middleware' => 'auth:sanctum'], function(){
     Route::post('/fcm-token', [UserController::class, 'storeFcmToken']);
     Route::get('/logout', [UserController::class, 'logout']);
+    Route::get('/advertise', [UserController::class, 'advertise']);
+
     // API for service provider
     Route::get('/profil-vendor', [UserController::class, 'profilVendor']);
     Route::post('/upload-sertifikat', [UserController::class, 'simpanSertifikat']);

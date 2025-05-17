@@ -8,6 +8,7 @@ use App\Models\Customer;
 use App\Models\ServiceBid;
 use App\Models\ServicePhoto;
 use Illuminate\Http\Request;
+use App\Models\Advertisement;
 use App\Models\ServiceRequest;
 use App\Models\Specialization;
 use App\Models\ServiceProvider;
@@ -519,6 +520,17 @@ class UserController extends Controller
         return response()->json(null, 204);
     }
 
+    public function advertise(Request $request){
+        $advertisements = Advertisement::where('status', 'active')
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        return response()->json([
+            'status' => true,
+            'data' => $advertisements,
+            'message' => 'List of advertisements',
+        ], 200);
+    }
     public function listSpecializations(Request $request)
     {
         $data = Specialization::orderBy('name')->get();
@@ -594,28 +606,6 @@ class UserController extends Controller
 
        
     }
-
-    // public function simpanSertifikat(Request $request)
-    // {
-    //     // $request->validate([
-    //     //     'dokumen' => 'required|file|mimes:pdf|max:2048',
-    //     // ]);
-
-    //     if($request->file('dokumen')){
-    //         $file = $request->file('dokumen');
-    //         $path = $file->store('dokumen', 'public');
-
-    //     }
-
-
-    //     return response()->json([
-    //         'status' => true,
-    //         'message' => 'Sertifikat berhasil diunggah',
-    //         'data' => [
-    //         'sertifikat' => $file,
-    //         ],
-    //     ], 200);
-    // }
 
     public function listKeahlianVendor(Request $request)
     {
@@ -844,41 +834,6 @@ class UserController extends Controller
         
     }
 
-   
-
-    // public function listBroadcast(Request $request)
-    // {
-    //     // get specialization_id from login user
-    //     $user = $request->user();
-    //     $vendor = ServiceProvider::where('user_id', $user->id)->first();
-    //     //ambil specialization_id dari tabel provider_certification sesuai dengan user_id
-    //     $specialization_id = ProviderCertification::where('provider_id', $vendor->id)
-    //         ->pluck('specialization_id')
-    //         ->toArray();
-        
-    //     //ambil latitude dan longitude dari tabel service_provider
-    //     $vendorLat = $vendor->latitude;
-    //     $vendorLng = $vendor->longitude;
-
-    //     //tampilkan semua service request yang status_id = 1 dan specialization_id yang sama dengan specialization_id vendor
-    //     $serviceRequest = ServiceRequest::join('customers', 'customers.id', '=', 'service_requests.customer_id')
-    //         ->join('users', 'users.id', '=', 'customers.user_id')
-    //         ->where('status_id', 1)
-    //         ->select(
-    //             'service_requests.*','customers.name as customer_name','users.profile_photo as customer_profile_photo',
-    //             DB::raw("6371 * acos(cos(radians($vendorLat)) * cos(radians(latitude)) * cos(radians(longitude) - radians($vendorLng)) + sin(radians($vendorLat)) * sin(radians(latitude))) AS distance")
-    //         )
-    //         ->whereIn('specialization_id', $specialization_id)
-    //         ->orderBy('created_at', 'desc')
-    //         ->get();
-
-    //     return response()->json([
-    //         'status' => true,
-    //         'message' => 'List broadcast',
-    //         'data' => $serviceRequest,
-    //     ], 200);
-    // }
-
     public function listBroadcast(Request $request)
     {
         // get specialization_id from login user
@@ -920,12 +875,7 @@ class UserController extends Controller
                 'status' => true,
                 'message' => 'List broadcast',
                 'data' => $serviceRequest,
-            ], 200);
-
-        
-
-        
-        
+            ], 200);        
     }
 
     public function detailRequest($id)

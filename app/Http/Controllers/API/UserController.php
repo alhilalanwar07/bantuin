@@ -1276,6 +1276,8 @@ class UserController extends Controller
                 'service_providers.name as provider_name',
                 'service_providers.phone as provider_phone',
                 'service_providers.address as provider_address',
+                'service_providers.latitude as provider_latitude',
+                'service_providers.longitude as provider_longitude',
                 'users.profile_photo as provider_profile_photo',
                 'specializations.name as specialization_name',
                 'service_photos.image_1 as image_1',

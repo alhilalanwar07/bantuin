@@ -1139,7 +1139,7 @@ class UserController extends Controller
         ], 200);
     }
 
-    public function listJobOnProgress(Request $request){
+    public function listJob(Request $request){
         $user = $request->user();
         $customer = Customer::where('user_id', $user->id)->first();
  

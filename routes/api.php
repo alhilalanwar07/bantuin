@@ -48,6 +48,7 @@ Route::group(['middleware' => 'auth:sanctum'], function(){
     Route::get('/list-transactions-customer', [UserController::class, 'listJobOpen']);
     Route::get('/list-job-on-progress', [UserController::class, 'listJobOnProgress']);
     Route::get('/detail-bid/{referencenumber}', [UserController::class, 'detailPenawaran']);
+    Route::get('/job-progress/{referencenumber}', [UserController::class, 'jobProgress']);
     Route::get('/detail-provider/{id}', [UserController::class, 'detailProvider']);
     Route::post('/approve_bid', [UserController::class, 'approveBid']);
 });

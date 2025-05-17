@@ -1262,6 +1262,22 @@ class UserController extends Controller
 
     }
 
+    public function jobProgress(Request $request, $referencenumber){
+        $job = ServiceRequest::join('service_providers', 'service_providers.id', '=', 'service_requests.provider_id')
+            ->join('users', 'users.id', '=', 'service_providers.user_id')
+            ->join('specializations', 'specializations.id', '=', 'service_requests.specialization_id')
+            ->select(
+                'service_requests.*',
+                'service_providers.name as provider_name',
+                'service_providers.phone as provider_phone',
+                'service_providers.address as provider_address',
+                'users.profile_photo as provider_profile_photo',
+                'specializations.name as specialization_name',
+                DB::raw("6371 * acos(cos(radians(service_providers.latitude)) * cos(radians(service_requests.latitude)) * cos(radians(service_requests.longitude) - radians(service_providers.longitude)) + sin(radians(service_providers.latitude)) * sin(radians(service_requests.latitude))) as jarak_provider_ke_lokasi"))
+            ->where('service_requests.reference_number', $referencenumber)
+            ->first();
+    }
+
     public function detailProvider(Request $request, $id)
     {
         $provider = ServiceProvider::join('users', 'users.id', '=', 'service_providers.user_id')

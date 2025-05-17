@@ -1276,6 +1276,12 @@ class UserController extends Controller
                 DB::raw("6371 * acos(cos(radians(service_providers.latitude)) * cos(radians(service_requests.latitude)) * cos(radians(service_requests.longitude) - radians(service_providers.longitude)) + sin(radians(service_providers.latitude)) * sin(radians(service_requests.latitude))) as jarak_provider_ke_lokasi"))
             ->where('service_requests.reference_number', $referencenumber)
             ->first();
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Detail job progress',
+            'data' => $job,
+        ], 200);
     }
 
     public function detailProvider(Request $request, $id)

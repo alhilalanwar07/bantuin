@@ -1022,7 +1022,7 @@ class UserController extends Controller
 
             ->where('service_bids.provider_id', $vendor->id)
             ->whereIn('service_bids.status_id',[2,3,4,5,6,7])
-            ->orderBy('.service_requests.scheduled_at', 'desc')
+            ->orderBy('.service_requests.scheduled_at', 'asc')
             ->get();
 
         return response()->json([

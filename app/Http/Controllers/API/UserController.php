@@ -1135,29 +1135,75 @@ class UserController extends Controller
         ], 200);
     }
 
-    public function canceledJob(Request $request)
+    public function cancelBid(Request $request)
     {
         $user = $request->user();
         $vendor = ServiceProvider::where('user_id', $user->id)->first();
 
-        //hapus penawaran vendor di service_bid
-        $serviceBid = ServiceBid::where('id', $request->idRequest)
-            ->where('provider_id', $vendor->id)
-            ->first();
-        if (!$serviceBid) {
+        try {
+            DB::beginTransaction();
+            //cancel job jika status_id = 2 (pickup) atau 3 (negotiation)
+            $serviceBid = ServiceBid::where('id', $request->idRequest)
+                ->where('provider_id', $vendor->id)
+                ->first();
+            if (!$serviceBid) {
+                DB::rollback();
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Permintaan tidak ditemukan',
+                ], 404);
+            }else{
+                $serviceBid->delete();
+                DB::commit();
+                return response()->json([
+                    'status' => true,
+                    'message' => 'Permintaan berhasil dibatalkan',
+                ], 200);
+            }   
+        } catch (\Throwable $th) {
+            DB::rollback();
             return response()->json([
                 'status' => false,
-                'message' => 'Permintaan tidak ditemukan',
-            ], 404);
-        }else{
-            $serviceBid->delete();
-            
-            return response()->json([
-                'status' => true,
-                'message' => 'Permintaan berhasil dibatalkan',
-            ], 200);
+                'message' => 'Terjadi kesalahan',
+            ], 500);
         }
 
+    }
+
+    public function cancelJob(Request $request)
+    {
+        $user = $request->user();
+        $vendor = ServiceProvider::where('user_id', $user->id)->first();
+
+        try {
+            DB::beginTransaction();
+            //cancel job jika status_id = 2 (pickup) atau 3 (negotiation)
+            $job = ServiceRequest::where('id', $request->idRequest)
+                ->where('provider_id', $vendor->id)
+                ->first();
+            if (!$job) {
+                DB::rollback();
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Permintaan tidak ditemukan',
+                ], 404);
+            }else{
+                $job->status_id = 7; // 7 = canceled
+                $job->save();
+
+                DB::commit();
+                return response()->json([
+                    'status' => true,
+                    'message' => 'Permintaan berhasil dibatalkan',
+                ], 200);
+            }   
+        } catch (\Throwable $th) {
+            DB::rollback();
+            return response()->json([
+                'status' => false,
+                'message' => 'Terjadi kesalahan',
+            ], 500);
+        }
 
     }
 

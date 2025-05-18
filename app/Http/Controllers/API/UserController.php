@@ -1191,6 +1191,15 @@ class UserController extends Controller
                 $job->status_id = 7; // 7 = canceled
                 $job->save();
 
+                $bid = ServiceBid::where('reference_number', $job->reference_number)
+                    ->where('provider_id', $vendor->id)
+                    ->first();
+                if ($bid) {
+                    $bid->status_id = 7; // 7 = canceled
+                    $bid->save();
+                }
+
+    
                 DB::commit();
                 return response()->json([
                     'status' => true,

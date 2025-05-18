@@ -43,6 +43,7 @@ Route::group(['middleware' => 'auth:sanctum'], function(){
     Route::get('/detail-image/{image}', [UserController::class, 'lihatImage']);
     Route::post('/cancel-bid', [UserController::class, 'cancelBid']);
     Route::post('/cancel-job', [UserController::class, 'cancelJob']);
+    Route::post('/start-work', [UserController::class, 'startWork']);
     // API for customer
     Route::get('/customer-profile', [UserController::class, 'profilCustomer']);
     Route::post('/upload-customer-photo', [UserController::class, 'uploadFotoCustomer']);

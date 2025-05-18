@@ -1399,4 +1399,50 @@ class UserController extends Controller
         }
        
     }
+
+    public function startWork(Request $request)
+    {
+        $user = $request->user();
+        $vendor = ServiceProvider::where('user_id', $user->id)->first();
+
+        try {
+            DB::beginTransaction();
+            //cancel job jika status_id = 2 (pickup) atau 3 (negotiation)
+            $job = ServiceRequest::where('id', $request->idRequest)
+                ->where('provider_id', $vendor->id)
+                ->first();
+            if (!$job) {
+                DB::rollback();
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Permintaan tidak ditemukan',
+                ], 404);
+            }else{
+                $job->status_id = 5; // 5 = in_progress
+                $job->save();
+
+                $bid = ServiceBid::where('reference_number', $job->reference_number)
+                    ->where('provider_id', $vendor->id)
+                    ->first();
+                if ($bid) {
+                    $bid->status_id = 5; // 5 = in_progress
+                    $bid->save();
+                }
+
+    
+                DB::commit();
+                return response()->json([
+                    'status' => true,
+                    'message' => 'Mulai pekerjaan',
+                ], 200);
+            }   
+        } catch (\Throwable $th) {
+            DB::rollback();
+            return response()->json([
+                'status' => false,
+                'message' => 'Terjadi kesalahan',
+            ], 500);
+        }
+
+    }
 }

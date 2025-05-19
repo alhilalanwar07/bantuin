@@ -152,10 +152,8 @@ class UserController extends Controller
             'password' => 'required'
         ]);
 
-        $user = User::where('email', $request->email)->whereIn('role',['customer'])->first();
+        $user = User::where('email', $request->email)->whereIn('role',['customer'])->where('is_active', 1)->first();
 
-        
-        
         if ($user && !$user->hasVerifiedEmail()) {
 
             $user->sendEmailVerificationNotification();
@@ -195,10 +193,8 @@ class UserController extends Controller
             'password' => 'required'
         ]);
 
-        $user = User::where('email', $request->email)->whereIn('role',['vendor'])->first();
+        $user = User::where('email', $request->email)->whereIn('role',['vendor'])->where('is_active', 1)->first();
 
-        
-        
         if ($user && !$user->hasVerifiedEmail()) {
 
             $user->sendEmailVerificationNotification();
@@ -226,7 +222,7 @@ class UserController extends Controller
             'access_token' => $token,
             'token_type' => 'Bearer',
             'user' => $user,
-            'message' => 'Selamat datang kembali '.$vendor.'semoga hari ini rejeki kamu berlimpah yah',
+            'message' => 'Selamat datang kembali '.$vendor.' semoga hari ini rejeki kamu berlimpah yah',
         ]);
     }
 

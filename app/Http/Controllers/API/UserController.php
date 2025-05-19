@@ -994,6 +994,7 @@ class UserController extends Controller
             ->join('specializations', 'specializations.id', '=', 'service_requests.specialization_id')
             ->join('users', 'users.id', '=', 'customers.user_id')
             ->join('service_statuses', 'service_statuses.id', '=', 'service_bids.status_id')
+            ->leftJoin('service_progress_photos', 'service_progress_photos.reference_number', '=', 'service_requests.reference_number')
             ->select(
                 'service_requests.*',
                 'customers.name as customer_name',
@@ -1007,6 +1008,10 @@ class UserController extends Controller
                 'service_statuses.name as status_name',
                 'service_statuses.color as status_color',
                 'service_bids.id as service_bid_id',
+                'service_progress_photos.after_photo1 as progress_image_1',
+                'service_progress_photos.after_photo2 as progress_image_2',
+                'service_progress_photos.after_photo3 as progress_image_3',
+                'service_progress_photos.after_photo4 as progress_image_4',
             )
 
             ->where('service_bids.provider_id', $vendor->id)

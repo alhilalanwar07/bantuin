@@ -1529,4 +1529,49 @@ class UserController extends Controller
             ], 500);
         }
     }
+
+    public function approveJobResult(Request $request)
+    {
+        $referenceNumber = $request->reference_number;
+        $providerId = $request->provider_id;
+
+        DB::beginTransaction();
+        try {
+            $serviceRequest = ServiceRequest::where('reference_number', $referenceNumber)->where('provider_id', $providerId)->first();
+            if (!$serviceRequest) {
+                DB::rollBack();
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Permintaan tidak ditemukan',
+                ], 404);
+            }
+
+            // Update ServiceRequest
+            $serviceRequest->status_id = 6; // 6 = completed
+            $serviceRequest->save();
+
+            // Update status bid yang dipilih
+            $serviceBid = ServiceBid::where('reference_number', $referenceNumber)->where('provider_id', $providerId)->first();
+            if ($serviceBid) {
+                $serviceBid->status_id = 6; // 6 = completed
+                $serviceBid->save();
+            }
+
+            DB::commit();
+
+            return response()->json([
+                'status' => true,
+                'message' => 'Hasil pekerjaan berhasil disetujui',
+            ], 200);
+
+            
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'status' => false,
+                'message' => 'Terjadi kesalahan saat menyetujui hasil pekerjaan.',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
 }

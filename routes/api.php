@@ -48,13 +48,14 @@ Route::group(['middleware' => 'auth:sanctum'], function(){
     Route::get('/customer-profile', [UserController::class, 'profilCustomer']);
     Route::post('/upload-customer-photo', [UserController::class, 'uploadFotoCustomer']);
     Route::post('/update-customer-profile', [UserController::class, 'updateProfileCustomer']);
-    Route::post('/broadcast-job-request', [UserController::class, 'broadcastRequestBantuan']);
+    Route::post('/broadcast-job-request', [UserController::class, 'broadcastJobRequest']);
     Route::get('/list-transactions-customer', [UserController::class, 'listJobOpen']);
     Route::get('/list-job', [UserController::class, 'listJob']);
     Route::get('/detail-bid/{referencenumber}', [UserController::class, 'detailPenawaran']);
     Route::get('/job-progress/{referencenumber}', [UserController::class, 'jobProgress']);
     Route::get('/detail-provider/{id}', [UserController::class, 'detailProvider']);
     Route::post('/approve_bid', [UserController::class, 'approveBid']);
+    Route::post('/upload-photo-result', [UserController::class, 'uploadPhotoResult']);
 });
 
 // Service Provider Routes

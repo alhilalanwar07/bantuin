@@ -13,6 +13,7 @@ use App\Models\ServiceRequest;
 use App\Models\Specialization;
 use App\Models\ServiceProvider;
 use App\Http\Controllers\Controller;
+use App\Models\ServiceProgressPhoto;
 use Illuminate\Support\Facades\Hash;
 use App\Models\ProviderCertification;
 use Illuminate\Auth\Events\Registered;
@@ -724,10 +725,8 @@ class UserController extends Controller
         ], 200);
     }
 
-    public function broadcastRequestBantuan(Request $request)
+    public function broadcastJobRequest(Request $request)
     {
-        
-
         // Broadcast the request for help
         try { 
             //cek model ServiceRequest, ambil 4 angka terakhir dari reference_number
@@ -758,12 +757,6 @@ class UserController extends Controller
             $serviceRequest->status_id = 1; // 1 = waiting for confirmation
             $serviceRequest->payment_status = 'pending';
             $serviceRequest->save();
-
-            //insert juga ke tabel service_bids untuk dilihat oleh semua vendor
-            // $serviceBid = new ServiceBid();
-            // $serviceBid->reference_number = $reference_number;
-            // $serviceBid->status_id = 1; // 1 = waiting for confirmation
-            // $serviceBid->save();
 
             //decode base64 jadi binary
             $image1 = base64_decode($request->image1);
@@ -1440,5 +1433,71 @@ class UserController extends Controller
             ], 500);
         }
 
+    }
+
+    public function uploadPhotoResult(Request $request)
+    {
+        try {
+            DB::beginTransaction();
+            $image1 = base64_decode($request->image1);
+            $fileName1 = uniqid() . '.jpeg';
+            $filePath1 = 'foto_result/' . $fileName1;
+
+            if($request->image2){
+                $image2 = base64_decode($request->image2);
+                $fileName2 = uniqid() . '.jpeg';
+                $filePath2 = 'foto_result/' . $fileName2;
+            }else{
+                $filePath2 = null;
+            }
+            if($request->image3){
+                $image3 = base64_decode($request->image3);
+                $fileName3 = uniqid() . '.jpeg';
+                $filePath3 = 'foto_result/' . $fileName3;
+            }else{
+                $filePath3 = null;
+            }
+            if($request->image4){
+                $image4 = base64_decode($request->image4);
+                $fileName4 = uniqid() . '.jpeg';
+                $filePath4 = 'foto_result/' . $fileName4;
+            }else{
+                $filePath4 = null;
+            }
+
+            $photoResult = new ServiceProgressPhoto();
+            $photoResult->reference_number = $request->reference_number;
+            $photoResult->after_photo1 = $filePath1;
+            $photoResult->after_photo2 = $filePath2;
+            $photoResult->after_photo3 = $filePath3;
+            $photoResult->after_photo4 = $filePath4;
+            $photoResult->save();
+
+            //simpan ke storage ke empat image
+            Storage::disk('public')->put($filePath1, $image1);
+            if($request->image2){
+                Storage::disk('public')->put($filePath2, $image2);
+            }
+            if($request->image3){
+                Storage::disk('public')->put($filePath3, $image3);
+            }
+            if($request->image4){
+                Storage::disk('public')->put($filePath4, $image4);
+            }
+
+            DB::commit();
+            return response()->json([
+                'status' => true,
+                'message' => 'Foto hasil pekerjaan berhasil diunggah',
+            ], 200);
+            
+        } catch (\Throwable $th) {
+            DB::rollback();
+            return response()->json([
+                'status' => false,
+                'message' => 'Terjadi kesalahan saat mengunggah foto hasil pekerjaan',
+                'error' => $th->getMessage()
+            ], 500);
+        }
     }
 }

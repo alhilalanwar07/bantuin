@@ -1266,6 +1266,7 @@ class UserController extends Controller
             ->join('users', 'users.id', '=', 'service_providers.user_id')
             ->join('specializations', 'specializations.id', '=', 'service_requests.specialization_id')
             ->leftJoin('service_photos', 'service_photos.reference_number', '=', 'service_requests.reference_number')
+            ->leftJoin('service_progress_photos', 'service_progress_photos.reference_number', '=', 'service_requests.reference_number')
             ->join('provider_certifications', function ($join) {
                 $join->on('provider_certifications.provider_id', '=', 'service_providers.id')
                     ->on('provider_certifications.specialization_id', '=', 'service_requests.specialization_id');
@@ -1280,6 +1281,10 @@ class UserController extends Controller
                 'users.profile_photo as provider_profile_photo',
                 'specializations.name as specialization_name',
                 'service_photos.image_1 as image_1',
+                'service_progress_photos.after_photo1 as progress_image_1',
+                'service_progress_photos.after_photo2 as progress_image_2',
+                'service_progress_photos.after_photo3 as progress_image_3',
+                'service_progress_photos.after_photo4 as progress_image_4',
                 'provider_certifications.is_verified as is_verified',
                 DB::raw("6371 * acos(cos(radians(service_providers.latitude)) * cos(radians(service_requests.latitude)) * cos(radians(service_requests.longitude) - radians(service_providers.longitude)) + sin(radians(service_providers.latitude)) * sin(radians(service_requests.latitude))) as jarak_provider_ke_lokasi"))
             ->where('service_requests.reference_number', $referencenumber)

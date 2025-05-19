@@ -40,10 +40,12 @@ Route::group(['middleware' => 'auth:sanctum'], function(){
     Route::post('/checkin-daily', [UserController::class, 'checkInDaily']);
     Route::post('/accept-job', [UserController::class, 'acceptJob']);
     Route::get('/list-transactions-vendor', [UserController::class, 'listTransactionsVendor']);
-    Route::get('/detail-image/{image}', [UserController::class, 'lihatImage']);
+    Route::get('/detail-image/{referencenumber}', [UserController::class, 'lihatImage']);
+    Route::get('/detail-image-result/{referencenumber}', [UserController::class, 'lihatImageResult']);
     Route::post('/cancel-bid', [UserController::class, 'cancelBid']);
     Route::post('/cancel-job', [UserController::class, 'cancelJob']);
     Route::post('/start-work', [UserController::class, 'startWork']);
+    Route::post('/upload-photo-result', [UserController::class, 'uploadPhotoResult']);
     // API for customer
     Route::get('/customer-profile', [UserController::class, 'profilCustomer']);
     Route::post('/upload-customer-photo', [UserController::class, 'uploadFotoCustomer']);
@@ -55,7 +57,6 @@ Route::group(['middleware' => 'auth:sanctum'], function(){
     Route::get('/job-progress/{referencenumber}', [UserController::class, 'jobProgress']);
     Route::get('/detail-provider/{id}', [UserController::class, 'detailProvider']);
     Route::post('/approve_bid', [UserController::class, 'approveBid']);
-    Route::post('/upload-photo-result', [UserController::class, 'uploadPhotoResult']);
 });
 
 // Service Provider Routes

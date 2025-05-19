@@ -1110,22 +1110,41 @@ class UserController extends Controller
         ],200);
     }
 
-    public function lihatImage(Request $request, $image)
+    public function lihatImage(Request $request, $referencenumber)
     {
-        $serviceRequest = ServicePhoto::where('reference_number', $image)
+        $serviceRequest = ServicePhoto::where('reference_number', $referencenumber)
             ->first();
 
         if (!$serviceRequest) {
             return response()->json([
                 'status' => false,
-                'message' => 'Permintaan tidak ditemukan',
+                'message' => 'Photo tidak ditemukan',
             ], 404);
         }
 
         return response()->json([
             'status' => true,
-            'message' => 'Detail permintaan',
+            'message' => 'Photo Awal Pekerjaan',
             'data' => $serviceRequest,
+        ], 200);
+    }
+
+    public function lihatImageResult(Request $request, $referencenumber)
+    {
+        $photo = ServiceProgressPhoto::where('reference_number', $referencenumber)
+            ->first();
+
+        if (!$photo) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Photo tidak ditemukan',
+            ], 404);
+        }
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Photo Awal Pekerjaan',
+            'data' => $photo,
         ], 200);
     }
 

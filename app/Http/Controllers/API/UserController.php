@@ -1022,7 +1022,8 @@ class UserController extends Controller
                 })
                 ->orWhere('service_requests.provider_id', $vendor->id);
             })
-            ->orderBy('.service_requests.scheduled_at', 'asc')
+            ->orderBy('service_requests.scheduled_at', 'asc')
+            ->distinct('service_requests.reference_number')
             ->get();
 
         return response()->json([

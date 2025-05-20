@@ -1005,23 +1005,13 @@ class UserController extends Controller
                 'users.profile_photo as customer_profile_photo',
                 'users.email as customer_email',
                 'service_requests.description',
-                // 'service_bids.bid_amount as bid_amount',
-                // 'service_bids.status_id as status_transaction',
                 'service_statuses.name as status_name',
                 'service_statuses.color as status_color',
-                // 'service_bids.id as service_bid_id',
                 'service_progress_photos.after_photo1 as progress_image_1',
                 'service_progress_photos.after_photo2 as progress_image_2',
                 'service_progress_photos.after_photo3 as progress_image_3',
                 'service_progress_photos.after_photo4 as progress_image_4',
             )
-
-            // ->where(function ($query) use ($vendor) {
-            //     $query->where(function ($q) use ($vendor) {
-            //         $q->whereIn('service_bids.status_id', [2, 3, 4, 5, 6, 7])
-            //           ->where('service_bids.provider_id', $vendor->id);
-            //     })
-            // })
             ->where('service_bids.provider_id', $vendor->id)
             ->whereIn('service_bids.status_id', [2,3])
             ->orderBy('service_requests.scheduled_at', 'asc')
@@ -1054,26 +1044,15 @@ class UserController extends Controller
                 'specializations.name as specialization_name',
                 'users.profile_photo as customer_profile_photo',
                 'users.email as customer_email',
-                // 'service_bids.bid_amount as bid_amount',
-                // 'service_bids.status_id as status_transaction',
                 'service_statuses.name as status_name',
                 'service_statuses.color as status_color',
-                // 'service_bids.id as service_bid_id',
                 'service_progress_photos.after_photo1 as progress_image_1',
                 'service_progress_photos.after_photo2 as progress_image_2',
                 'service_progress_photos.after_photo3 as progress_image_3',
                 'service_progress_photos.after_photo4 as progress_image_4',
             )
-
-            // ->where(function ($query) use ($vendor) {
-            //     $query->where(function ($q) use ($vendor) {
-            //         $q->whereIn('service_bids.status_id', [2, 3, 4, 5, 6, 7])
-            //           ->where('service_bids.provider_id', $vendor->id);
-            //     })
-            // })
             ->where('service_requests.provider_id', $vendor->id)
             ->orderBy('service_requests.scheduled_at', 'asc')
-            // ->distinct('service_requests.reference_number')
             ->get();
 
         return response()->json([
@@ -1454,6 +1433,12 @@ class UserController extends Controller
             ServiceBid::where('reference_number', $referenceNumber)
                 ->where('provider_id', '!=', $providerId)
                 ->update(['status_id' => 7]); // rejected
+
+            
+            //kurangi saldo yang dimiliki provider
+            $provider = ServiceProvider::find($providerId);
+            $provider->account_balance -=  2000;
+            $provider->save();
 
             DB::commit();
 

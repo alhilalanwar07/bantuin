@@ -1015,9 +1015,13 @@ class UserController extends Controller
                 'service_progress_photos.after_photo4 as progress_image_4',
             )
 
-            ->where('service_bids.provider_id', $vendor->id)
-            ->where('service_requests.provider_id', $vendor->id)
-            ->whereIn('service_bids.status_id',[2,3,4,5,6,7])
+            ->where(function ($query) use ($vendor) {
+                $query->where(function ($q) use ($vendor) {
+                    $q->whereIn('service_bids.status_id', [2, 3, 4, 5, 6, 7])
+                      ->where('service_bids.provider_id', $vendor->id);
+                })
+                ->orWhere('service_requests.provider_id', $vendor->id);
+            })
             ->orderBy('.service_requests.scheduled_at', 'asc')
             ->get();
 

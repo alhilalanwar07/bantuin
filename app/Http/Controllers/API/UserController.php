@@ -1029,7 +1029,7 @@ class UserController extends Controller
 
         return response()->json([
             'status' => true,
-            'message' => 'List transaksi vendor',
+            'message' => 'List bid provider',
             'data' => $serviceBid,
         ], 200);
     }
@@ -1077,7 +1077,7 @@ class UserController extends Controller
 
         return response()->json([
             'status' => true,
-            'message' => 'List transaksi vendor',
+            'message' => 'List order provider',
             'data' => $serviceRequest,
         ], 200);
     }

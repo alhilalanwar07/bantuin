@@ -1574,4 +1574,75 @@ class UserController extends Controller
             ], 500);
         }
     }
+
+    public function jobCompletedThisMonth(Request $request)
+    {
+        $user = $request->user();
+        $provider = ServiceProvider::where('user_id', $user->id)->first();
+
+        $completedJobs = ServiceRequest::where('provider_id', $provider->id)
+            ->where('status_id', 6) // 6 = completed
+            ->whereMonth('updated_at', Carbon::now()->month)
+            ->count();
+
+        return response()->json([
+            'status' => true,
+            'data' => $completedJobs,
+            'message' => 'Jumlah pekerjaan yang selesai bulan ini',
+        ]);
+    }
+
+    public function incomeThisMonth(Request $request)
+    {
+        $provider = ServiceProvider::where('user_id', $request->user()->id)->first();
+
+        if (!$provider) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Provider tidak ditemukan.',
+            ], 404);
+        }
+
+        $totalIncome = ServiceRequest::where('provider_id', $provider->id)
+            ->where('status_id', 6) // 6 = completed
+            ->whereMonth('updated_at', now()->month)
+            ->sum('agreed_amount');
+
+        return response()->json([
+            'status' => true,
+            'data' => $totalIncome,
+            'message' => 'Total pendapatan bulan ini',
+        ]);
+    }
+
+    public function historyJob(Request $request)
+    {
+        $provider = ServiceProvider::where('user_id', $request->user()->id)->first();
+
+        if (!$provider) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Provider tidak ditemukan.',
+            ], 404);
+        }
+
+        $history = ServiceRequest::where('provider_id', $provider->id)
+            ->where('status_id', 6)
+            ->whereMonth('updated_at', now()->month)
+            ->limit(10)
+            ->orderBy('updated_at', 'desc')
+            ->get([
+                'reference_number',
+                'description',
+                'updated_at',
+                'agreed_amount',
+                'status_id',
+            ]);
+
+        return response()->json([
+            'status' => true,
+            'data' => $history,
+            'message' => 'history job bulan ini',
+        ]);
+    }
 }

@@ -984,17 +984,65 @@ class UserController extends Controller
         
     }
 
-    public function listTransactionsVendor(Request $request)
+    public function listBidsProvider(Request $request)
+    {
+        $user = $request->user();
+        $vendor = ServiceProvider::where('user_id', $user->id)->first();
+
+        //ambil semua service_request yang status_id 2 dan provider_id vendor
+        $serviceBid = ServiceBid::join('customers', 'customers.id', '=', 'service_bids.customer_id')
+            ->join('service_requests', 'service_requests.reference_number', '=', 'service_bids.reference_number')
+            ->join('specializations', 'specializations.id', '=', 'service_requests.specialization_id')
+            ->join('users', 'users.id', '=', 'customers.user_id')
+            ->join('service_statuses', 'service_statuses.id', '=', 'service_bids.status_id')
+            ->leftJoin('service_progress_photos', 'service_progress_photos.reference_number', '=', 'service_bids.reference_number')
+            ->select(
+                'service_bids.*',
+                'customers.name as customer_name',
+                'customers.phone as customer_phone',
+                'customers.address as customer_address',
+                'specializations.name as specialization_name',
+                'users.profile_photo as customer_profile_photo',
+                'users.email as customer_email',
+                // 'service_bids.bid_amount as bid_amount',
+                // 'service_bids.status_id as status_transaction',
+                'service_statuses.name as status_name',
+                'service_statuses.color as status_color',
+                // 'service_bids.id as service_bid_id',
+                'service_progress_photos.after_photo1 as progress_image_1',
+                'service_progress_photos.after_photo2 as progress_image_2',
+                'service_progress_photos.after_photo3 as progress_image_3',
+                'service_progress_photos.after_photo4 as progress_image_4',
+            )
+
+            // ->where(function ($query) use ($vendor) {
+            //     $query->where(function ($q) use ($vendor) {
+            //         $q->whereIn('service_bids.status_id', [2, 3, 4, 5, 6, 7])
+            //           ->where('service_bids.provider_id', $vendor->id);
+            //     })
+            // })
+            ->where('service_bids.provider_id', $vendor->id)
+            ->orderBy('service_bids.scheduled_at', 'asc')
+            // ->distinct('service_bids.reference_number')
+            ->get();
+
+        return response()->json([
+            'status' => true,
+            'message' => 'List transaksi vendor',
+            'data' => $serviceRequest,
+        ], 200);
+    }
+    public function listOrdersProvider(Request $request)
     {
         $user = $request->user();
         $vendor = ServiceProvider::where('user_id', $user->id)->first();
 
         //ambil semua service_request yang status_id 2 dan provider_id vendor
         $serviceRequest = ServiceRequest::join('customers', 'customers.id', '=', 'service_requests.customer_id')
-            ->join('service_bids', 'service_bids.reference_number', '=', 'service_requests.reference_number')
+            // ->join('service_bids', 'service_bids.reference_number', '=', 'service_requests.reference_number')
             ->join('specializations', 'specializations.id', '=', 'service_requests.specialization_id')
             ->join('users', 'users.id', '=', 'customers.user_id')
-            ->join('service_statuses', 'service_statuses.id', '=', 'service_bids.status_id')
+            ->join('service_statuses', 'service_statuses.id', '=', 'service_requests.status_id')
             ->leftJoin('service_progress_photos', 'service_progress_photos.reference_number', '=', 'service_requests.reference_number')
             ->select(
                 'service_requests.*',
@@ -1004,24 +1052,24 @@ class UserController extends Controller
                 'specializations.name as specialization_name',
                 'users.profile_photo as customer_profile_photo',
                 'users.email as customer_email',
-                'service_bids.bid_amount as bid_amount',
-                'service_bids.status_id as status_transaction',
+                // 'service_bids.bid_amount as bid_amount',
+                // 'service_bids.status_id as status_transaction',
                 'service_statuses.name as status_name',
                 'service_statuses.color as status_color',
-                'service_bids.id as service_bid_id',
+                // 'service_bids.id as service_bid_id',
                 'service_progress_photos.after_photo1 as progress_image_1',
                 'service_progress_photos.after_photo2 as progress_image_2',
                 'service_progress_photos.after_photo3 as progress_image_3',
                 'service_progress_photos.after_photo4 as progress_image_4',
             )
 
-            ->where(function ($query) use ($vendor) {
-                $query->where(function ($q) use ($vendor) {
-                    $q->whereIn('service_bids.status_id', [2, 3, 4, 5, 6, 7])
-                      ->where('service_bids.provider_id', $vendor->id);
-                })
-                ->where('service_requests.provider_id', $vendor->id);
-            })
+            // ->where(function ($query) use ($vendor) {
+            //     $query->where(function ($q) use ($vendor) {
+            //         $q->whereIn('service_bids.status_id', [2, 3, 4, 5, 6, 7])
+            //           ->where('service_bids.provider_id', $vendor->id);
+            //     })
+            // })
+            ->where('service_requests.provider_id', $vendor->id)
             ->orderBy('service_requests.scheduled_at', 'asc')
             // ->distinct('service_requests.reference_number')
             ->get();

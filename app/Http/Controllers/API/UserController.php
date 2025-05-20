@@ -1581,14 +1581,30 @@ class UserController extends Controller
         $user = $request->user();
         $provider = ServiceProvider::where('user_id', $user->id)->first();
 
-        $completedJobs = ServiceRequest::where('provider_id', $provider->id)
-            ->where('status_id', 6) // 6 = completed
-            ->whereMonth('updated_at', Carbon::now()->month)
+        $now = now();
+        $currentMonth = ServiceRequest::where('provider_id', $provider->id)
+            ->where('status_id', 6)
+            ->whereMonth('updated_at', $now->month)
+            ->whereYear('updated_at', $now->year)
             ->count();
+
+        $previousMonthDate = $now->copy()->subMonth();
+        $previousMonth = ServiceRequest::where('provider_id', $provider->id)
+            ->where('status_id', 6)
+            ->whereMonth('updated_at', $previousMonthDate->month)
+            ->whereYear('updated_at', $previousMonthDate->year)
+            ->count();
+        
+        $percentageChange = $previousMonth == 0
+        ? ($currentMonth > 0 ? 100 : 0)
+        : (($currentMonth - $previousMonth) / $previousMonth) * 100;
 
         return response()->json([
             'status' => true,
-            'data' => $completedJobs,
+            'data' => [
+                'total' => $currentMonth,
+                'percentage_change' => round($percentageChange, 2),
+            ],
             'message' => 'Jumlah pekerjaan yang selesai bulan ini',
         ]);
     }
@@ -1604,14 +1620,30 @@ class UserController extends Controller
             ], 404);
         }
 
-        $totalIncome = ServiceRequest::where('provider_id', $provider->id)
-            ->where('status_id', 6) // 6 = completed
-            ->whereMonth('updated_at', now()->month)
+        $now = now();
+        $currentIncome = ServiceRequest::where('provider_id', $provider->id)
+            ->where('status_id', 6)
+            ->whereMonth('updated_at', $now->month)
+            ->whereYear('updated_at', $now->year)
             ->sum('agreed_amount');
+
+        $previousMonthDate = $now->copy()->subMonth();
+        $previousIncome = ServiceRequest::where('provider_id', $provider->id)
+            ->where('status_id', 6)
+            ->whereMonth('updated_at', $previousMonthDate->month)
+            ->whereYear('updated_at', $previousMonthDate->year)
+            ->sum('agreed_amount');
+
+        $percentageChange = $previousIncome == 0
+            ? ($currentIncome > 0 ? 100 : 0)
+            : (($currentIncome - $previousIncome) / $previousIncome) * 100;
 
         return response()->json([
             'status' => true,
-            'data' => $totalIncome,
+            'data' => [
+                'total' => $currentIncome,
+                'percentage_change' => round($percentageChange, 2),
+            ],
             'message' => 'Total pendapatan bulan ini',
         ]);
     }
@@ -1628,7 +1660,7 @@ class UserController extends Controller
         }
 
         $history = ServiceRequest::where('provider_id', $provider->id)
-            ->where('status_id', 6)
+            ->whereIn('status_id', [6,7])
             ->whereMonth('updated_at', now()->month)
             ->limit(10)
             ->orderBy('updated_at', 'desc')

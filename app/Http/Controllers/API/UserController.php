@@ -1661,7 +1661,7 @@ class UserController extends Controller
 
         $history = ServiceRequest::where('provider_id', $provider->id)
             // ->whereIn('status_id', [6,7])
-            ->whereYear('updated_at', now()->year)
+            // ->whereYear('updated_at', now()->year)
             ->limit(10)
             ->orderBy('updated_at', 'desc')
             ->get([

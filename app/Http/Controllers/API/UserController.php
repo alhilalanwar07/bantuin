@@ -990,8 +990,8 @@ class UserController extends Controller
         $vendor = ServiceProvider::where('user_id', $user->id)->first();
 
         //ambil semua service_request yang status_id 2 dan provider_id vendor
-        $serviceBid = ServiceBid::join('customers', 'customers.id', '=', 'service_bids.customer_id')
-            ->join('service_requests', 'service_requests.reference_number', '=', 'service_bids.reference_number')
+        $serviceBid = ServiceBid::join('service_requests', 'service_requests.reference_number', '=', 'service_bids.reference_number')
+            ->join('customers', 'customers.id', '=', 'service_requests.customer_id')
             ->join('specializations', 'specializations.id', '=', 'service_requests.specialization_id')
             ->join('users', 'users.id', '=', 'customers.user_id')
             ->join('service_statuses', 'service_statuses.id', '=', 'service_bids.status_id')

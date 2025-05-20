@@ -1016,6 +1016,7 @@ class UserController extends Controller
             )
 
             ->where('service_bids.provider_id', $vendor->id)
+            ->where('service_request.provider_id', $vendor->id)
             ->whereIn('service_bids.status_id',[2,3,4,5,6,7])
             ->orderBy('.service_requests.scheduled_at', 'asc')
             ->get();
@@ -1660,18 +1661,17 @@ class UserController extends Controller
         }
 
         $history = ServiceRequest::where('provider_id', $provider->id)
-            // ->whereIn('status_id', [6,7])
-            // ->whereYear('updated_at', now()->year)
-            // ->limit(10)
-            // ->orderBy('updated_at', 'desc')
-            // ->get([
-            //     'reference_number',
-            //     'description',
-            //     'updated_at',
-            //     'agreed_amount',
-            //     'status_id',
-            // ]);
-            ->get();
+            ->whereIn('status_id', [6,7])
+            ->whereYear('updated_at', now()->year)
+            ->limit(10)
+            ->orderBy('updated_at', 'desc')
+            ->get([
+                'reference_number',
+                'description',
+                'updated_at',
+                'agreed_amount',
+                'status_id',
+            ]);
 
         return response()->json([
             'status' => true,

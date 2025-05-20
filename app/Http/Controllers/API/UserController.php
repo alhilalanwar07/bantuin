@@ -1020,10 +1020,10 @@ class UserController extends Controller
                     $q->whereIn('service_bids.status_id', [2, 3, 4, 5, 6, 7])
                       ->where('service_bids.provider_id', $vendor->id);
                 })
-                ->orWhere('service_requests.provider_id', $vendor->id);
+                ->where('service_requests.provider_id', $vendor->id);
             })
             ->orderBy('service_requests.scheduled_at', 'asc')
-            ->distinct('service_requests.reference_number')
+            // ->distinct('service_requests.reference_number')
             ->get();
 
         return response()->json([

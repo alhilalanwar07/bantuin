@@ -1023,7 +1023,7 @@ class UserController extends Controller
             // })
             ->where('service_bids.provider_id', $vendor->id)
             ->whereIn('service_bids.status_id', [2,3])
-            ->orderBy('service_bids.scheduled_at', 'asc')
+            ->orderBy('service_requests.scheduled_at', 'asc')
             // ->distinct('service_bids.reference_number')
             ->get();
 

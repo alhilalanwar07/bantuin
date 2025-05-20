@@ -1022,6 +1022,7 @@ class UserController extends Controller
             //     })
             // })
             ->where('service_bids.provider_id', $vendor->id)
+            ->whereIn('service_bids.status_id', [2,3])
             ->orderBy('service_bids.scheduled_at', 'asc')
             // ->distinct('service_bids.reference_number')
             ->get();
@@ -1029,7 +1030,7 @@ class UserController extends Controller
         return response()->json([
             'status' => true,
             'message' => 'List transaksi vendor',
-            'data' => $serviceRequest,
+            'data' => $serviceBid,
         ], 200);
     }
     public function listOrdersProvider(Request $request)

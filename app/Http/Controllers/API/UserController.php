@@ -1757,4 +1757,17 @@ class UserController extends Controller
             'data' => $ulasan,
         ]);
     }
+
+    public function getProviderRating(Request $request, $id)
+    {
+        $referenceNumber = ServiceRequest::where('provider_id', $id)->where('status_id', 6)->pluck('reference_number');
+
+        $ratings = Rating::whereIn('reference_number', $referenceNumber)->get();
+
+        return response()->json([
+            'status' => true,
+            'data' => $ratings,
+            'message' => 'Daftar rating untuk provider ini',
+        ]);
+    }
 }

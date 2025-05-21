@@ -1764,10 +1764,30 @@ class UserController extends Controller
 
         $ratings = Rating::whereIn('reference_number', $referenceNumber)->get();
 
+        $summary = [
+            'average' => round($ratings->avg('score'), 1),
+            'total' => $ratings->count(),
+            'distribution' => [
+                5 => $ratings->where('score', 5)->count(),
+                4 => $ratings->where('score', 4)->count(),
+                3 => $ratings->where('score', 3)->count(),
+                2 => $ratings->where('score', 2)->count(),
+                1 => $ratings->where('score', 1)->count(),
+            ],
+            'reviews' => $ratings->map(function ($rating) {
+                return [
+                    'score' => $rating->score,
+                    'comment' => $rating->comment,
+                    'reviewer' => $rating->reviewer->name,
+                    'date' => $rating->created_at->toDateString(),
+                ];
+            }),
+        ];
+
         return response()->json([
             'status' => true,
-            'data' => $ratings,
-            'message' => 'Daftar rating untuk provider ini',
+            'data' => $summary,
+            'message' => 'Rating untuk provider ini',
         ]);
     }
 }

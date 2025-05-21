@@ -1774,7 +1774,7 @@ class UserController extends Controller
                 2 => $ratings->where('score', 2)->count(),
                 1 => $ratings->where('score', 1)->count(),
             ],
-            'reviews' => $ratings->map(function ($rating) {
+            'reviews' => $ratings->sortByDesc('created_at')->values()->map(function ($rating) {
                 return [
                     'score' => $rating->score,
                     'comment' => $rating->review,

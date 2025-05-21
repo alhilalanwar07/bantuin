@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use DB;
 use Carbon\Carbon;
 use App\Models\User;
+use App\Models\Rating;
 use App\Models\Customer;
 use App\Models\ServiceBid;
 use App\Models\ServicePhoto;
@@ -1717,6 +1718,32 @@ class UserController extends Controller
             'status' => true,
             'data' => $history,
             'message' => 'history job bulan ini',
+        ]);
+    }
+
+    public function submitReview(Request $request)
+    {
+        $user = $request->user();
+        $customer = Customer::where('user_id', $user->id)->first();
+
+        if (!$customer) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Customer tidak ditemukan.',
+            ], 404);
+        }
+
+        $review = new Rating();
+        $review->reference_number = $request->reference_number;
+        $review->score = $request->rating;
+        $review->review = $request->comment;
+        $review->reviewer_id = $customer->id;
+        $review->save();
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Ulasanmu berhasil dikirim.',
+            'data' => $review,
         ]);
     }
 }

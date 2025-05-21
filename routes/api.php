@@ -62,6 +62,7 @@ Route::group(['middleware' => 'auth:sanctum'], function(){
     Route::get('/detail-provider/{id}', [UserController::class, 'detailProvider']);
     Route::post('/approve_bid', [UserController::class, 'approveBid']);
     Route::post('/approve-job-result', [UserController::class, 'approveJobResult']);
+    Route::post('/submit-review', [UserController::class, 'submitReview']);
 });
 
 // Service Provider Routes

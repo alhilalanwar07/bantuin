@@ -1434,12 +1434,6 @@ class UserController extends Controller
                 ->where('provider_id', '!=', $providerId)
                 ->update(['status_id' => 7]); // rejected
 
-            
-            //kurangi saldo yang dimiliki provider
-            // $provider = ServiceProvider::find($providerId);
-            // $provider->account_balance -=  2000;
-            // $provider->save();
-
             DB::commit();
 
             return response()->json([
@@ -1463,13 +1457,13 @@ class UserController extends Controller
     public function startWork(Request $request)
     {
         $user = $request->user();
-        $vendor = ServiceProvider::where('user_id', $user->id)->first();
+        $provider = ServiceProvider::where('user_id', $user->id)->first();
 
         try {
             DB::beginTransaction();
             //cancel job jika status_id = 2 (pickup) atau 3 (negotiation)
             $job = ServiceRequest::where('id', $request->idRequest)
-                ->where('provider_id', $vendor->id)
+                ->where('provider_id', $provider->id)
                 ->first();
             if (!$job) {
                 DB::rollback();
@@ -1482,12 +1476,18 @@ class UserController extends Controller
                 $job->save();
 
                 $bid = ServiceBid::where('reference_number', $job->reference_number)
-                    ->where('provider_id', $vendor->id)
+                    ->where('provider_id', $provider->id)
                     ->first();
                 if ($bid) {
                     $bid->status_id = 5; // 5 = in_progress
                     $bid->save();
                 }
+
+                //kurangi saldo yang dimiliki provider
+                // $provider = ServiceProvider::find($providerId);
+                $provider->account_balance -=  2000;
+                $provider->save();
+
 
     
                 DB::commit();

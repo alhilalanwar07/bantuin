@@ -1779,7 +1779,7 @@ class UserController extends Controller
                     'score' => $rating->score,
                     'comment' => $rating->review,
                     'reviewer' => $rating->reviewer->name,
-                    'customer_photo' => $rating->reviewer->profile_photo,
+                    'customer_photo' => $rating->reviewer->user->profile_photo,
                     'date' => $rating->created_at->toDateString(),
                 ];
             }),

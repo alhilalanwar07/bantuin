@@ -29,7 +29,7 @@ class Rating extends Model
 
     public function reviewer(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'reviewer_id');
+        return $this->belongsTo(Customer::class, 'reviewer_id');
     }
 
     public function provider(): BelongsTo

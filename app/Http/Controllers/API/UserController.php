@@ -1733,6 +1733,17 @@ class UserController extends Controller
             ], 404);
         }
 
+        //cek jika sudah ada review sebelumnya
+        $review = Rating::where('reference_number', $request->reference_number)
+            ->where('reviewer_id', $customer->id)
+            ->first();
+        if ($review) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Kamu sudah memberikan ulasan untuk pekerjaan ini.',
+            ], 400);
+        }
+
         $review = new Rating();
         $review->reference_number = $request->reference_number;
         $review->score = $request->rating;

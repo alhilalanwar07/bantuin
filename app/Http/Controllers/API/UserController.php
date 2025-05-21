@@ -1734,27 +1734,27 @@ class UserController extends Controller
         }
 
         //cek jika sudah ada review sebelumnya
-        $review = Rating::where('reference_number', $request->reference_number)
+        $ulasan = Rating::where('reference_number', $request->reference_number)
             ->where('reviewer_id', $customer->id)
             ->first();
-        if ($review) {
+        if ($ulasan) {
             return response()->json([
                 'status' => false,
                 'message' => 'Kamu sudah memberikan ulasan untuk pekerjaan ini.',
             ], 400);
         }
 
-        $review = new Rating();
-        $review->reference_number = $request->reference_number;
-        $review->score = $request->rating;
-        $review->review = $request->comment;
-        $review->reviewer_id = $customer->id;
-        $review->save();
+        $ulasan = new Rating();
+        $ulasan->reference_number = $request->reference_number;
+        $ulasan->score = $request->rating;
+        $ulasan->review = $request->review;
+        $ulasan->reviewer_id = $customer->id;
+        $ulasan->save();
 
         return response()->json([
             'status' => true,
             'message' => 'Ulasanmu berhasil dikirim.',
-            'data' => $review,
+            'data' => $ulasan,
         ]);
     }
 }

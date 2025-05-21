@@ -1777,7 +1777,7 @@ class UserController extends Controller
             'reviews' => $ratings->map(function ($rating) {
                 return [
                     'score' => $rating->score,
-                    'comment' => $rating->comment,
+                    'comment' => $rating->review,
                     'reviewer' => $rating->reviewer->name,
                     'date' => $rating->created_at->toDateString(),
                 ];

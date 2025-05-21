@@ -1436,9 +1436,9 @@ class UserController extends Controller
 
             
             //kurangi saldo yang dimiliki provider
-            $provider = ServiceProvider::find($providerId);
-            $provider->account_balance -=  2000;
-            $provider->save();
+            // $provider = ServiceProvider::find($providerId);
+            // $provider->account_balance -=  2000;
+            // $provider->save();
 
             DB::commit();
 

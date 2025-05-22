@@ -1796,7 +1796,7 @@ class UserController extends Controller
     {
         $topProviders = ServiceProvider::with([
                 'user:id,id,profile_photo', // pastikan 'id' disertakan
-                'serviceRequests.specialization:id,id,skill_name', // pastikan 'id' disertakan
+                'serviceRequests.specialization:id,id,name', // pastikan 'id' disertakan
             ])
             ->withCount(['serviceRequests as completed_requests_count' => function ($query) {
                 $query->where('status_id', 6);

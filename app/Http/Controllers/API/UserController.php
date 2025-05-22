@@ -1801,7 +1801,7 @@ class UserController extends Controller
                         ->select('id', 'provider_id', 'specialization_id', 'status_id');
                 },
 
-                'serviceRequests.specialization:id,skill_name',
+                'serviceRequests.specialization:id,name',
             ])
             ->withCount(['serviceRequests as completed_requests_count' => function ($query) {
                 $query->where('status_id', 6);

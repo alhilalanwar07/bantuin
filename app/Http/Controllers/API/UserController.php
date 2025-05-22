@@ -1795,7 +1795,11 @@ class UserController extends Controller
     public function topTenProvider(Request $request)
     {
         $topProviders = ServiceProvider::with([
-                'user:id,id,profile_photo', 
+                // 'user:id,id,profile_photo', 
+                'user' => function ($query) {
+                    $query->where('is_active',1)
+                    ->select('id', 'profile_photo','is_active');
+                },
                 'serviceRequests' => function ($query) {
                     $query->where('status_id', 6)
                         ->select('id', 'provider_id', 'specialization_id', 'status_id');
@@ -1832,6 +1836,50 @@ class UserController extends Controller
                 ];
             }),
             'message' => '10 Provider Teratas',
+        ]);
+    }
+
+    public function getAllProvider(Request $request)
+    {
+        $providers = ServiceProvider::with([
+            'user' => function ($query) {
+                $query->where('is_active', 1)
+                    ->select('id', 'profile_photo', 'is_active');
+                },
+            'specializations' => function ($query) {
+                $query->select('id', 'name', 'icon');
+                },
+            ])
+            ->whereHas('user')
+            ->get();
+
+        return response()->json([
+            'status' => true,
+            'data' => $providers,
+            'message' => 'List provider',
+        ]);
+    }
+
+    public function getAllProviderByCategory(Request $request, $id)
+    {
+        $providers = ServiceProvider::with([
+            'user' => function ($query) {
+                $query->where('is_active', 1)
+                    ->select('id', 'profile_photo', 'is_active');
+                },
+            'specializations' => function ($query) {
+                $query->select('id', 'name', 'icon');
+                },
+            ])
+            ->whereHas('user')
+            ->whereHas('specializations', function ($query) use ($id) {
+                $query->where('id', $id);
+            })
+            ->get();
+        return response()->json([
+            'status' => true,
+            'data' => $providers,
+            'message' => 'List provider by category',
         ]);
     }
 }

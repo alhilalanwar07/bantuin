@@ -65,6 +65,8 @@ Route::group(['middleware' => 'auth:sanctum'], function(){
     Route::post('/approve-job-result', [UserController::class, 'approveJobResult']);
     Route::post('/submit-review', [UserController::class, 'submitReview']);
     Route::get('/get-provider-rating/{id}', [UserController::class, 'getProviderRating']);
+    Route::get('/get-all-provider', [UserController::class, 'getAllProvider']);
+    Route::get('/get-all-provider-by-category/{id}', [UserController::class, 'getAllProviderByCategory']);
 });
 
 // Service Provider Routes

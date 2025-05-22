@@ -47,4 +47,9 @@ class ServiceProvider extends Model
     {
         return $this->hasMany(Rating::class, 'provider_id');
     }
+
+    public function specialization()
+    {
+        return $this->belongsTo(Specialization::class, 'specialization_id');
+    }
 }

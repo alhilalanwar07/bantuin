@@ -24,4 +24,9 @@ class Specialization extends Model
     {
         return $this->hasMany(ProviderCertification::class);
     }
+
+    public function serviceproviders()
+    {
+        return $this->hasMany(ServiceProvider::class);
+    }
 }

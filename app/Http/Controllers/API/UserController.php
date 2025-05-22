@@ -1796,20 +1796,21 @@ class UserController extends Controller
     {
         $topProviders = ServiceProvider::with([
             'user' => function ($query) {
-                $query->select('profile_photo');
+                $query->select('id','profile_photo');
             },
-        ])
-        ->with([
-            'certifications' =>function ($query) {
-                $query->select('skill_name');
-            },
-        ])
-        ->withCount(['serviceRequests as completed_requests_count' => function ($query) {
-            $query->where('status_id', 6);
-        }])
-        ->orderByDesc('completed_requests_count')
-        ->take(10)
-        ->get();
+            ])
+            ->with([
+                'certifications' =>function ($query) {
+                    $query->select('specialization_id','skill_name');
+                },
+            ])
+            ->withCount(['serviceRequests as completed_requests_count' => function ($query) {
+                $query->where('status_id', 6);
+            }])
+            ->orderByDesc('completed_requests_count')
+            ->where('status_id',  6)
+            ->take(10)
+            ->get();
 
         return response()->json([
             'status' => true,

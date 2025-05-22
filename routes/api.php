@@ -50,6 +50,7 @@ Route::group(['middleware' => 'auth:sanctum'], function(){
     Route::get('/job-completed-this-month', [UserController::class, 'jobCompletedThisMonth']);
     Route::get('/income-this-month', [UserController::class, 'incomeThisMonth']);
     Route::get('/history-job', [UserController::class, 'historyJob']);
+    Route::get('/top-ten-provider', [UserController::class, 'topTenProvider']);
     // API for customer
     Route::get('/customer-profile', [UserController::class, 'profilCustomer']);
     Route::post('/upload-customer-photo', [UserController::class, 'uploadFotoCustomer']);

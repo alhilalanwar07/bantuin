@@ -1791,4 +1791,20 @@ class UserController extends Controller
             'message' => 'Rating untuk provider ini',
         ]);
     }
+
+    public function topTenProvider(Request $request)
+    {
+        $topProviders = ServiceProvider::withCount(['serviceRequests as completed_requests_count' => function ($query) {
+            $query->where('status_id', 6);
+        }])
+        ->orderByDesc('completed_requests_count')
+        ->take(10)
+        ->get();
+
+        return response()->json([
+            'status' => true,
+            'data' => $topProviders,
+            'message' => '10 Provider Teratas',
+        ]);
+    }
 }

@@ -1795,8 +1795,13 @@ class UserController extends Controller
     public function topTenProvider(Request $request)
     {
         $topProviders = ServiceProvider::with([
-                'user:id,id,profile_photo', // pastikan 'id' disertakan
-                'serviceRequests.specialization:id,id,name', // pastikan 'id' disertakan
+                'user:id,id,profile_photo', 
+                'serviceRequests' => function ($query) {
+                    $query->where('status_id', 6)
+                        ->select('id', 'provider_id', 'specialization_id', 'status_id');
+                },
+
+                'serviceRequests.specialization:id,skill_name',
             ])
             ->withCount(['serviceRequests as completed_requests_count' => function ($query) {
                 $query->where('status_id', 6);

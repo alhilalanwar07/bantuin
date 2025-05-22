@@ -1825,6 +1825,7 @@ class UserController extends Controller
             'data' => $topProviders->map(function ($provider) {
                 return [
                     'id' => $provider->id,
+                    'name' => $provider->name,
                     'profile_photo' => $provider->user?->profile_photo,
                     'completed_requests_count' => $provider->completed_requests_count,
                     'skills' => $provider->unique_skills,

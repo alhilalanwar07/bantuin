@@ -1813,9 +1813,23 @@ class UserController extends Controller
             ->take(10)
             ->get();
 
+        $topProviders->each(function ($provider) {
+            $provider->unique_skills = $provider->serviceRequests
+                ->pluck('specialization.name')
+                ->unique()
+                ->values();
+        });
+
         return response()->json([
             'status' => true,
-            'data' => $topProviders,
+            'data' => $topProviders->map(function ($provider) {
+                return [
+                    'id' => $provider->id,
+                    'profile_photo' => $provider->user?->profile_photo,
+                    'completed_requests_count' => $provider->completed_requests_count,
+                    'skills' => $provider->unique_skills,
+                ];
+            }),
             'message' => '10 Provider Teratas',
         ]);
     }

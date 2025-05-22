@@ -1808,7 +1808,6 @@ class UserController extends Controller
                 $query->where('status_id', 6);
             }])
             ->orderByDesc('completed_requests_count')
-            ->where('status_id',  6)
             ->take(10)
             ->get();
 

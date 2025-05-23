@@ -56,9 +56,9 @@ class ServiceProvider extends Model
     public function getTotalRatingScoreAttribute()
     {
         return $this->serviceRequests()
-            ->with('ratings')
+            ->with('rating')
             ->get()
-            ->pluck('ratings')
+            ->pluck('rating')
             ->flatten()
             ->sum('score');
     }

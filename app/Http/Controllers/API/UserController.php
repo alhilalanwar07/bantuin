@@ -1864,7 +1864,7 @@ class UserController extends Controller
     {
         $providers = ServiceProvider::with([
             'user:id,profile_photo,is_active',
-            'providerCertifications' => function ($query) {
+            'certifications' => function ($query) {
                 $query->select('id', 'service_provider_id', 'specialization_id')
                       ->with('specialization:id,name'); 
                 },
@@ -1872,7 +1872,7 @@ class UserController extends Controller
             ->whereHas('user', function ($query) {
                 $query->where('is_active', 1);
             })
-            ->whereHas('providerCertifications', function ($query) use ($id) {
+            ->whereHas('certifications', function ($query) use ($id) {
                 $query->where('specialization_id', $id);
             })
             ->get();

@@ -6,10 +6,12 @@
     <title>@yield('code') - @yield('title') | BantuinDong</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ asset('css/custom-theme.css') }}">
     <style>
         body {
-            background: linear-gradient(135deg, #a4508b 0%, #f7667f 100%);
-            min-height: 100vh;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            min-height: 100dvh;
             font-family: 'Poppins', sans-serif;
             display: flex;
             align-items: center;
@@ -38,7 +40,7 @@
         .error-code {
             font-size: 120px;
             font-weight: bold;
-            background: linear-gradient(90deg, #a4508b 0%, #f7667f 100%);
+            background: linear-gradient(90deg, var(--primary) 0%, var(--secondary-light) 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             margin: 0;
@@ -58,7 +60,7 @@
         }
         .back-home {
             display: inline-block;
-            background: linear-gradient(90deg, #a4508b 0%, #f7667f 100%);
+            background: linear-gradient(90deg, var(--primary-dark) 0%, var(--secondary) 100%);
             color: #fff;
             font-weight: 600;
             padding: 12px 32px;
@@ -69,7 +71,8 @@
             transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
         }
         .back-home:hover {
-            background: linear-gradient(90deg, #f7667f 0%, #a4508b 100%);
+            background: linear-gradient(90deg, var(--secondary) 0%, var(--primary-dark) 100%);
+            box-shadow: 0 4px 16px rgba(var(--primary-dark), 0.18);
             transform: translateY(-2px) scale(1.04);
             box-shadow: 0 4px 16px rgba(164,80,139,0.18);
         }
@@ -95,6 +98,36 @@
             50% { opacity: 0.8; }
             100% { opacity: 1; }
         }
+        /* tampilan android/ios */
+        @media screen and (max-width: 768px) {
+            body {
+                padding: 20px;
+            }
+            .error-container {
+                padding: 30px;
+                max-width: 100%;
+            }
+            .error-code {
+                font-size: 90px;
+            }
+        }
+        /* tampilan apple watch */
+        @media screen and (max-width: 225px) {
+            .error-code {
+                font-size: 40px;
+            }
+           .error-message {
+                font-size: 10px;
+            }
+           .error-description {
+                font-size: 0.5rem;
+
+            }
+           .back-home {
+                padding: 5px 5px;
+                font-size: 0.5rem;
+            }
+           }
     </style>
 </head>
 <body>

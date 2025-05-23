@@ -52,4 +52,46 @@ class ServiceProvider extends Model
     {
         return $this->belongsTo(Specialization::class, 'specialization_id');
     }
+
+    public function getTotalRatingScoreAttribute()
+    {
+        return $this->serviceRequests()
+            ->with('rating')
+            ->get()
+            ->pluck('rating')
+            ->flatten()
+            ->sum('score');
+    }
+
+    public function getRatingSummaryAttribute()
+    {
+        $referenceNumbers = $this->serviceRequests()
+            ->where('status_id', 6)
+            ->pluck('reference_number');
+
+        $ratings = Rating::whereIn('reference_number', $referenceNumbers)
+            ->with(['reviewer.user']) // eager load untuk menghindari N+1
+            ->get();
+
+        return [
+            'average' => round($ratings->avg('score'), 1),
+            'total' => $ratings->count(),
+            'distribution' => [
+                5 => $ratings->where('score', 5)->count(),
+                4 => $ratings->where('score', 4)->count(),
+                3 => $ratings->where('score', 3)->count(),
+                2 => $ratings->where('score', 2)->count(),
+                1 => $ratings->where('score', 1)->count(),
+            ],
+            // 'reviews' => $ratings->sortByDesc('created_at')->values()->map(function ($rating) {
+            //     return [
+            //         'score' => $rating->score,
+            //         'comment' => $rating->review,
+            //         'reviewer' => $rating->reviewer->name ?? null,
+            //         'customer_photo' => $rating->reviewer->user->profile_photo ?? null,
+            //         'date' => $rating->created_at->toDateString(),
+            //     ];
+            // }),
+        ];
+    }
 }

@@ -1868,18 +1868,41 @@ class UserController extends Controller
                 $query->select('id', 'provider_id', 'specialization_id')
                       ->with('specialization:id,name'); 
                 },
+            // 'serviceRequests.rating:id,reference_number,score',
             ])
+            // ->withSum(['serviceRequests.rating as total_rating_score' => function ($query) {
+            //     $query->select(DB::raw('coalesce(sum(score), 0)'));
+            // }], 'score')
             ->whereHas('user', function ($query) {
                 $query->where('is_active', 1);
             })
             ->whereHas('certifications', function ($query) use ($id) {
-                $query->where('specialization_id', $id);
+                $query->select('id','skill_name','is_verified')
+                    ->where('specialization_id', $id);
             })
             ->get();
             
             return response()->json([
                 'status' => true,
-                'data' => $providers,
+                'data' => $providers->map(function ($provider) {
+                    return [
+                        'id' => $provider->id,
+                        'is_active' => $provider->user->is_active,
+                        'address' => $provider->address,
+                        'name' => $provider->name,
+                        'gender' => $provider->gender,
+                        'profile_photo' => $provider->user->profile_photo,
+                        'certifications' => $provider->certifications->map(function ($cert) {
+                            return [
+                                'id' => $cert->id,
+                                'specialization' => $cert->specialization,
+                                'skill_name' => $cert->skill_name,
+                                'is_verified' => $cert->is_verified,
+                            ];
+                        }),
+                        'rating_summary' => $provider->rating_summary, 
+                    ];
+                }),
                 'message' => 'List provider by category',
             ]);
     }

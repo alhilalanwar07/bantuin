@@ -1885,8 +1885,8 @@ class UserController extends Controller
 
     public function getSpecializations(Request $request)
     {
-        $specializations = Specialization::withCount('countServiceproviders')
-            ->orderByDesc('count_serviceproviders')
+        $specializations = Specialization::withCount('serviceProviders')
+            ->orderByDesc('service_providers_count')
             ->get();
 
         return response()->json([
@@ -1898,7 +1898,7 @@ class UserController extends Controller
                     'icon' => $spec->icon,
                     'description' => $spec->description,
                     'is_active' => $spec->is_active,
-                    'provider_count' => $spec->count_serviceproviders,
+                    'provider_count' => $spec->service_providers_count,
                 ];
             }),
             'message' => 'List specialization dengan jumlah provider',

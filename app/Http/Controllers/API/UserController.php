@@ -1943,7 +1943,7 @@ class UserController extends Controller
 
         $providers = ServiceProvider::with([
             'user' => function ($query) {
-                $query->select('id', 'name', 'address', 'profile_photo', 'is_active');
+                $query->select('id', 'name', 'profile_photo', 'is_active');
                 },
             'certifications' => function ($query) {
                 $query->select('id', 'provider_id', 'specialization_id')
@@ -1971,7 +1971,7 @@ class UserController extends Controller
                 return [
                     'id' => $provider->id,
                     'is_active' => $provider->user->is_active,
-                    'address' => $provider->user->address,
+                    'address' => $provider->address,
                     'name' => $provider->name,
                     'gender' => $provider->gender,
                     'profile_photo' =>$provider->user->profile_photo,

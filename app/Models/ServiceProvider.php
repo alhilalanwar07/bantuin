@@ -52,4 +52,14 @@ class ServiceProvider extends Model
     {
         return $this->belongsTo(Specialization::class, 'specialization_id');
     }
+
+    public function getTotalRatingScoreAttribute()
+    {
+        return $this->serviceRequests()
+            ->with('ratings')
+            ->get()
+            ->pluck('ratings')
+            ->flatten()
+            ->sum('score');
+    }
 }

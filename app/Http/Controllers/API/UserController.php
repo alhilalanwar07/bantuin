@@ -1868,18 +1868,35 @@ class UserController extends Controller
                 $query->select('id', 'provider_id', 'specialization_id')
                       ->with('specialization:id,name'); 
                 },
+            // 'serviceRequests.rating:id,reference_number,score',
             ])
+            // ->withSum(['serviceRequests.rating as total_rating_score' => function ($query) {
+            //     $query->select(DB::raw('coalesce(sum(score), 0)'));
+            // }], 'score')
             ->whereHas('user', function ($query) {
                 $query->where('is_active', 1);
             })
             ->whereHas('certifications', function ($query) use ($id) {
-                $query->where('specialization_id', $id);
+                $query->select('id','skill_name','is_verified')
+                    ->where('specialization_id', $id);
             })
             ->get();
             
             return response()->json([
                 'status' => true,
-                'data' => $providers,
+                'data' => $providers->map(function ($provider) {
+                    return [
+                        'id' => $provider->id,
+                        'user' => $provider->user,
+                        'certifications' => $provider->providerCertifications->map(function ($cert) {
+                            return [
+                                'id' => $cert->id,
+                                'specialization' => $cert->specialization,
+                            ];
+                        }),
+                        'total_rating_score' => $provider->total_rating_score, 
+                    ];
+                }),
                 'message' => 'List provider by category',
             ]);
     }

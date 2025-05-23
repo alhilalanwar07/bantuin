@@ -25,20 +25,8 @@ class Specialization extends Model
         return $this->hasMany(ProviderCertification::class);
     }
 
-    // public function serviceproviders()
-    // {
-    //     return $this->hasMany(ServiceProvider::class);
-    // }
-
-    public function serviceProviders()
+    public function serviceproviders()
     {
-        return $this->hasManyThrough(
-            ServiceProvider::class,
-            ProviderCertification::class,
-            'specialization_id', // foreign key di ProviderCertification
-            'id', // foreign key di ServiceProvider
-            'id', // local key di Specialization
-            'service_provider_id' // local key di ProviderCertification
-        )->distinct(); // jika kamu ingin hanya count unik
+        return $this->hasMany(ServiceProvider::class);
     }
 }

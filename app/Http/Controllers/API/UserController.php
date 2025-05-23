@@ -1885,22 +1885,28 @@ class UserController extends Controller
 
     public function getSpecializations(Request $request)
     {
-        $specializations = Specialization::withCount('serviceProviders')
-            ->orderByDesc('service_providers_count')
-            ->get();
+        $specializations = Specialization::with('providerCertifications.serviceProvider')
+            ->get()
+            ->map(function ($spec) {
+                $uniqueProviderCount = $spec->providerCertifications
+                    ->pluck('serviceProvider.id')
+                    ->unique()
+                    ->filter()
+                    ->count();
 
-        return response()->json([
-            'status' => true,
-            'data' => $specializations->map(function ($spec) {
                 return [
                     'id' => $spec->id,
                     'name' => $spec->name,
                     'icon' => $spec->icon,
                     'description' => $spec->description,
                     'is_active' => $spec->is_active,
-                    'provider_count' => $spec->service_providers_count,
+                    'provider_count' => $uniqueProviderCount,
                 ];
-            }),
+            });
+
+        return response()->json([
+            'status' => true,
+            'data' => $specializations,
             'message' => 'List specialization dengan jumlah provider',
         ]);
         

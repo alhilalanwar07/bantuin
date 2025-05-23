@@ -1885,11 +1885,11 @@ class UserController extends Controller
 
     public function getSpecializations(Request $request)
     {
-        $specializations = Specialization::with('providerCertifications.serviceProvider')
+        $specializations = Specialization::with('providerCertifications.provider')
             ->get()
             ->map(function ($spec) {
                 $uniqueProviderCount = $spec->providerCertifications
-                    ->pluck('serviceProvider.id')
+                    ->pluck('provider.id')
                     ->unique()
                     ->filter()
                     ->count();

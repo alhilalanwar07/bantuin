@@ -1887,8 +1887,10 @@ class UserController extends Controller
                 'data' => $providers->map(function ($provider) {
                     return [
                         'id' => $provider->id,
-                        'user' => $provider->user,
+                        'is_active' => $provider->user->is_active,
+                        'address' => $provider->address,
                         'name' => $provider->name,
+                        'gender' => $provider->gender,
                         'profile_photo' => $provider->user->profile_photo,
                         'certifications' => $provider->certifications->map(function ($cert) {
                             return [
@@ -1898,7 +1900,7 @@ class UserController extends Controller
                                 'is_verified' => $cert->is_verified,
                             ];
                         }),
-                        'total_rating_score' => $provider->total_rating_score, 
+                        'rating_summary' => $provider->rating_summary, 
                     ];
                 }),
                 'message' => 'List provider by category',

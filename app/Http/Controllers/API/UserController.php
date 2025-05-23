@@ -1885,8 +1885,8 @@ class UserController extends Controller
 
     public function getSpecializations(Request $request)
     {
-        $specializations = Specialization::withCount('providerCertifications')
-            ->orderByDesc('provider_certifications_count')
+        $specializations = Specialization::withCount('serviceProviders')
+            ->orderByDesc('service_providers_count')
             ->get();
 
         return response()->json([
@@ -1897,6 +1897,7 @@ class UserController extends Controller
                     'name' => $spec->name,
                     'icon' => $spec->icon,
                     'description' => $spec->description,
+                    'is_active' => $spec->is_active,
                     'provider_count' => $spec->service_providers_count,
                 ];
             }),

@@ -1963,7 +1963,7 @@ class UserController extends Controller
                     ->orWhere('address', 'like', "%$search%");
                 });
             })
-            ->when($specializationId, function ($query, $search) {
+            ->when($search, function ($query, $search) {
                 $query->whereHas('certifications.specialization', function ($q) use ($search) {
                     $q->where('name', 'like', "%$search%");
                 });

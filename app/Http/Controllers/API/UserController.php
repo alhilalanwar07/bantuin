@@ -1888,10 +1888,14 @@ class UserController extends Controller
                     return [
                         'id' => $provider->id,
                         'user' => $provider->user,
+                        'name' => $provider->name,
+                        'profile_photo' => $provider->user->profile_photo,
                         'certifications' => $provider->certifications->map(function ($cert) {
                             return [
                                 'id' => $cert->id,
                                 'specialization' => $cert->specialization,
+                                'skill_name' => $cert->skill_name,
+                                'is_verified' => $cert->is_verified,
                             ];
                         }),
                         'total_rating_score' => $provider->total_rating_score, 

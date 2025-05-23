@@ -1882,4 +1882,26 @@ class UserController extends Controller
             'message' => 'List provider by category',
         ]);
     }
+
+    public function getSpecialization(Request $request)
+    {
+        $specializations = Specialization::withCount('serviceProviders')
+            ->orderByDesc('service_providers_count')
+            ->get();
+
+        return response()->json([
+            'status' => true,
+            'data' => $specializations->map(function ($spec) {
+                return [
+                    'id' => $spec->id,
+                    'name' => $spec->name,
+                    'icon' => $spec->icon,
+                    'description' => $spec->description,
+                    'provider_count' => $spec->service_providers_count,
+                ];
+            }),
+            'message' => 'List specialization dengan jumlah provider',
+        ]);
+        
+    }
 }

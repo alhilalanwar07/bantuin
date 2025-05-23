@@ -21,12 +21,14 @@ Route::post('/register-customer', [UserController::class, 'registerCustomer']);
 Route::post('/register-service-provider', [UserController::class, 'registerServiceProvider']);
 Route::post('/login-customer', [UserController::class, 'loginCustomer']);
 Route::post('/login-vendor', [UserController::class, 'loginVendor']);
-Route::get('/list-specializations', [UserController::class, 'listSpecializations']);
 
 Route::group(['middleware' => 'auth:sanctum'], function(){
     Route::post('/fcm-token', [UserController::class, 'storeFcmToken']);
     Route::get('/logout', [UserController::class, 'logout']);
     Route::get('/advertise', [UserController::class, 'advertise']);
+    Route::get('/list-specializations', [UserController::class, 'listSpecializations']);
+    Route::get('/get-specializations', [UserController::class, 'getSpecializations']);
+
 
     // API for service provider
     Route::get('/profil-vendor', [UserController::class, 'profilVendor']);

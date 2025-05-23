@@ -1953,19 +1953,14 @@ class UserController extends Controller
             ->whereHas('user', function ($query) {
                 $query->where('is_active', 1);
             })
-            // ->whereHas('certifications', function ($query) use ($id) {
-            //     $query->select('id','skill_name','is_verified')
-            //         ->where('specialization_id', $id);
-            // })
             ->when($search, function ($query, $search) {
-                $query->whereHas('user', function ($q) use ($search) {
-                    $q->where('name', 'like', "%$search%")
-                    ->orWhere('address', 'like', "%$search%");
-                });
-            })
-            ->when($search, function ($query, $search) {
-                $query->whereHas('certifications.specialization', function ($q) use ($search) {
-                    $q->where('name', 'like', "%$search%");
+                $query->where(function ($q) use ($search) {
+                    $q->whereHas('user', function ($userQuery) use ($search) {
+                        $userQuery->where('name', 'like', "%$search%")
+                                  ->orWhere('address', 'like', "%$search%");
+                    })->orWhereHas('certifications.specialization', function ($specQuery) use ($search) {
+                        $specQuery->where('name', 'like', "%$search%");
+                    });
                 });
             })
             ->paginate($perPage);
@@ -1976,7 +1971,7 @@ class UserController extends Controller
                 return [
                     'id' => $provider->id,
                     'is_active' => $provider->user->is_active,
-                    'address' => $provider->address,
+                    'address' => $provider->user->address,
                     'name' => $provider->name,
                     'gender' => $provider->gender,
                     'profile_photo' =>$provider->user->profile_photo,

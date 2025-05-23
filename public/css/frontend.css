@@ -166,6 +166,90 @@ footer .social-icons a:hover {
     transform: translateY(-3px);
 }
 
+/* Service Category Slider */
+.service-category-slider {
+    position: relative;
+}
+#categorySliderRow {
+    overflow-x: auto;
+    flex-wrap: nowrap !important;
+    /* Hide scrollbar on mobile */
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+#categorySliderRow::-webkit-scrollbar {
+    display: none;
+}
+.service-card {
+    min-width: 220px;
+    margin-right: 1rem;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+    transition: transform 0.3s, box-shadow 0.3s;
+    padding: 2rem 1rem 1rem 1rem;
+    flex: 0 0 auto;
+}
+.service-card:last-child {
+    margin-right: 0;
+}
+@media (max-width: 767.98px) {
+    .service-category-slider {
+        padding-left: 0.5rem;
+        padding-right: 0.5rem;
+    }
+    #categorySliderRow {
+        margin-left: 0;
+        margin-right: 0;
+    }
+    .service-card {
+        min-width: 70vw;
+        max-width: 90vw;
+        margin-right: 1rem;
+        margin-left: 0;
+        padding: 1.5rem 0.5rem 1rem 0.5rem;
+    }
+    .row.g-4 {
+        --bs-gutter-x: 0.5rem;
+        --bs-gutter-y: 1rem;
+    }
+}
+@media (min-width: 768px) {
+    #categorySliderRow {
+        flex-wrap: wrap !important;
+        overflow-x: visible;
+    }
+    .service-card {
+        min-width: 0;
+        margin-right: 0;
+        margin-bottom: 1.5rem;
+        width: 100%;
+        padding: 2rem 1rem 1rem 1rem;
+    }
+    .category-prev, .category-next {
+        display: none !important;
+    }
+}
+
+/* Section padding for mobile */
+@media (max-width: 576px) {
+    section, .hero-section, .py-5 {
+        padding-left: 0.5rem !important;
+        padding-right: 0.5rem !important;
+    }
+    .container {
+        padding-left: 0 !important;
+        padding-right: 0 !important;
+        max-width: 100vw;
+    }
+    .hero-section h1 {
+        font-size: 2rem;
+    }
+    .hero-section .lead {
+        font-size: 1rem;
+    }
+}
+
 /* Responsive Adjustments */
 @media (max-width: 768px) {
     header h1 {
@@ -236,4 +320,109 @@ footer .social-icons a:hover {
     margin-top: 0.25rem;
     margin-right: 0.5rem;
     flex-shrink: 0;
+}
+
+/* Download Button Styles */
+.download-btn-big {
+    font-size: 1.1rem;
+    padding: 0.9rem 2.2rem !important;
+    border-radius: 2rem !important;
+    min-width: 180px;
+    min-height: 60px;
+    position: relative;
+    box-shadow: 0 8px 32px rgba(142,68,173,0.15);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+.download-btn-big img {
+    height: 48px !important;
+}
+.download-btn-big .badge {
+    font-size: 0.95rem;
+    top: 0.5rem !important;
+    left: 90% !important;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+.download-btn-big:hover, .download-btn-big:focus {
+    transform: scale(1.04) translateY(-2px);
+    box-shadow: 0 12px 32px rgba(142,68,173,0.18);
+}
+
+.btn-pulse {
+    animation: pulse-strong 1.2s infinite;
+}
+@keyframes pulse-strong {
+    0% { box-shadow: 0 0 0 0 rgba(142,68,173,0.25);}
+    70% { box-shadow: 0 0 0 18px rgba(142,68,173,0);}
+    100% { box-shadow: 0 0 0 0 rgba(142,68,173,0);}
+}
+
+/* Responsive for download section */
+@media (max-width: 576px) {
+    .download-btn-big {
+        min-width: 120px;
+        min-height: 48px;
+        font-size: 1rem;
+        padding: 0.7rem 1.2rem !important;
+    }
+    .download-btn-big img {
+        height: 36px !important;
+    }
+    .download-btn-big .badge {
+        font-size: 0.8rem;
+        left: 85% !important;
+    }
+}
+
+/* Download Link SVG */
+.download-link {
+    display: inline-block;
+    position: relative;
+    margin-bottom: 0.5rem;
+    transition: transform 0.2s, box-shadow 0.2s;
+    border-radius: 2rem;
+}
+.download-link:focus-visible {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
+}
+.download-link:hover .download-svg,
+.download-link:focus .download-svg {
+    transform: scale(1.05) translateY(-2px);
+    box-shadow: 0 8px 24px rgba(142,68,173,0.18);
+}
+.download-svg {
+    display: block;
+    height: 56px;
+    width: auto;
+    border-radius: 2rem;
+    box-shadow: 0 8px 32px rgba(142,68,173,0.10);
+    transition: transform 0.2s, box-shadow 0.2s;
+    background: #fff;
+    padding: 4px 12px;
+}
+.download-badge {
+    position: absolute;
+    top: 2px;
+    left: 90%;
+    transform: translateX(-50%);
+    font-size: 1rem;
+    padding: 0.25em 0.9em;
+    border-radius: 1rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    z-index: 2;
+    pointer-events: none;
+}
+@media (max-width: 576px) {
+    .download-svg {
+        height: 38px;
+        padding: 2px 6px;
+    }
+    .download-badge {
+        font-size: 0.8rem;
+        left: 85%;
+        padding: 0.18em 0.7em;
+    }
+    .download-link {
+        margin-bottom: 0.3rem;
+    }
 }

@@ -17,13 +17,11 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // Smooth scrolling for anchor links
-    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    document.querySelectorAll('a[data-scroll][href^="#"]').forEach(anchor => {
         anchor.addEventListener('click', function (e) {
             e.preventDefault();
-            
             const targetId = this.getAttribute('href');
-            if(targetId === '#') return;
-            
+            if(targetId === '#' || !targetId) return;
             const targetElement = document.querySelector(targetId);
             if(targetElement) {
                 targetElement.scrollIntoView({
@@ -32,6 +30,28 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     });
+
+    // Scrollspy: highlight nav-link saat section aktif
+    const sections = document.querySelectorAll('section[id], footer[id]');
+    const navLinks = document.querySelectorAll('.navbar-nav .nav-link[data-scroll]');
+    function activateNavLink() {
+        let scrollPos = window.scrollY || window.pageYOffset;
+        let offset = 80; // navbar height
+        sections.forEach(section => {
+            const top = section.offsetTop - offset;
+            const bottom = top + section.offsetHeight;
+            if (scrollPos >= top && scrollPos < bottom) {
+                navLinks.forEach(link => {
+                    link.classList.remove('active');
+                    if (link.getAttribute('href') === '#' + section.id) {
+                        link.classList.add('active');
+                    }
+                });
+            }
+        });
+    }
+    window.addEventListener('scroll', activateNavLink);
+    window.addEventListener('load', activateNavLink);
 
     // Initialize Notyf for notifications if available
     if(typeof Notyf !== 'undefined') {

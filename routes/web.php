@@ -8,8 +8,6 @@ use App\Http\Controllers\FrontendController;
 // disable register, reset password
 Auth::routes(['register' => false, 'reset' => false]);
 
-// Frontend routes
-Route::get('/', [FrontendController::class, 'index'])->name('frontend.home');
 
 
 Route::middleware('auth')->prefix('admin')->group(function () {
@@ -53,4 +51,6 @@ Route::get('/email/verify/{id}/{hash}', function ($id, $hash) {
     return view('email-verification.success');
     
 })->middleware(['signed'])->name('verification.verify');
+
+Route::view('about', 'frontend/home')->name('about');
 

@@ -11,6 +11,49 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Inisialisasi animasi scroll
     initScrollAnimations();
+    
+    // Navbar fade-in animation
+    const navbar = document.getElementById('mainNavbar');
+    if (navbar) {
+        navbar.style.opacity = 0;
+        navbar.style.transition = 'opacity 0.7s ease';
+        setTimeout(() => {
+            navbar.style.opacity = 1;
+        }, 100);
+    }
+    
+    // Animasi fade-in saat section masuk viewport
+    const fadeSections = document.querySelectorAll('section, footer');
+    const fadeInOnScroll = () => {
+        fadeSections.forEach(section => {
+            const rect = section.getBoundingClientRect();
+            if (rect.top < window.innerHeight - 100) {
+                section.classList.add('animate-fade-in');
+            }
+        });
+    };
+    window.addEventListener('scroll', fadeInOnScroll);
+    window.addEventListener('load', fadeInOnScroll);
+
+    // Efek pulse pada tombol utama (download/cta)
+    document.querySelectorAll('.btn-primary, .btn-light').forEach(btn => {
+        if (btn.closest('#cta') || btn.closest('.hero-section')) {
+            btn.classList.add('btn-pulse');
+        }
+    });
+    
+    // Slider kategori layanan (mobile friendly)
+    const sliderRow = document.getElementById('categorySliderRow');
+    const btnPrev = document.querySelector('.category-prev');
+    const btnNext = document.querySelector('.category-next');
+    if (sliderRow && btnPrev && btnNext) {
+        btnPrev.addEventListener('click', function() {
+            sliderRow.scrollBy({ left: -sliderRow.offsetWidth / 2, behavior: 'smooth' });
+        });
+        btnNext.addEventListener('click', function() {
+            sliderRow.scrollBy({ left: sliderRow.offsetWidth / 2, behavior: 'smooth' });
+        });
+    }
 });
 
 /**

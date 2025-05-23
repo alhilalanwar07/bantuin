@@ -1953,10 +1953,10 @@ class UserController extends Controller
             ->whereHas('user', function ($query) {
                 $query->where('is_active', 1);
             })
-            ->whereHas('certifications', function ($query) use ($id) {
-                $query->select('id','skill_name','is_verified')
-                    ->where('specialization_id', $id);
-            })
+            // ->whereHas('certifications', function ($query) use ($id) {
+            //     $query->select('id','skill_name','is_verified')
+            //         ->where('specialization_id', $id);
+            // })
             ->when($search, function ($query, $search) {
                 $query->whereHas('user', function ($q) use ($search) {
                     $q->where('name', 'like', "%$search%")

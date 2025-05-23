@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="600" height="400" viewBox="0 0 600 400" fill="none">
+  <!-- Background Elements -->
+  <circle cx="300" cy="200" r="150" fill="#E3F2FD" opacity="0.5"/>
+  <circle cx="350" cy="150" r="80" fill="#BBDEFB" opacity="0.7"/>
+  
+  <!-- Mobile Phone -->
+  <rect x="250" y="100" width="100" height="200" rx="10" fill="#424242"/>
+  <rect x="255" y="110" width="90" height="180" rx="5" fill="#FFFFFF"/>
+  
+  <!-- App Screen Elements -->
+  <rect x="265" y="120" width="70" height="12" rx="2" fill="#0D6EFD"/>
+  <rect x="265" y="140" width="70" height="40" rx="2" fill="#E3F2FD"/>
+  <rect x="265" y="190" width="30" height="30" rx="2" fill="#0D6EFD" opacity="0.7"/>
+  <rect x="305" y="190" width="30" height="30" rx="2" fill="#0D6EFD" opacity="0.5"/>
+  <rect x="265" y="230" width="70" height="10" rx="2" fill="#E0E0E0"/>
+  <rect x="265" y="250" width="70" height="10" rx="2" fill="#E0E0E0"/>
+  <rect x="265" y="270" width="70" height="10" rx="2" fill="#E0E0E0"/>
+  
+  <!-- People Icons -->
+  <circle cx="200" cy="150" r="25" fill="#0D6EFD" opacity="0.2"/>
+  <circle cx="200" cy="150" r="15" fill="#0D6EFD" opacity="0.5"/>
+  <circle cx="200" cy="135" r="8" fill="#0D6EFD"/>
+  <rect x="185" y="155" width="30" height="15" rx="7.5" fill="#0D6EFD" opacity="0.5"/>
+  
+  <circle cx="400" cy="180" r="25" fill="#0D6EFD" opacity="0.2"/>
+  <circle cx="400" cy="180" r="15" fill="#0D6EFD" opacity="0.5"/>
+  <circle cx="400" cy="165" r="8" fill="#0D6EFD"/>
+  <rect x="385" y="185" width="30" height="15" rx="7.5" fill="#0D6EFD" opacity="0.5"/>
+  
+  <circle cx="180" cy="250" r="25" fill="#0D6EFD" opacity="0.2"/>
+  <circle cx="180" cy="250" r="15" fill="#0D6EFD" opacity="0.5"/>
+  <circle cx="180" cy="235" r="8" fill="#0D6EFD"/>
+  <rect x="165" y="255" width="30" height="15" rx="7.5" fill="#0D6EFD" opacity="0.5"/>
+  
+  <!-- Connection Lines -->
+  <line x1="225" y1="150" x2="245" y2="150" stroke="#0D6EFD" stroke-width="2" stroke-dasharray="4 4"/>
+  <line x1="355" y1="180" x2="375" y2="180" stroke="#0D6EFD" stroke-width="2" stroke-dasharray="4 4"/>
+  <line x1="225" y1="250" x2="245" y2="250" stroke="#0D6EFD" stroke-width="2" stroke-dasharray="4 4"/>
+  
+  <!-- Shopping Bag Icon -->
+  <rect x="420" cy="250" width="40" height="40" rx="5" fill="#0D6EFD" opacity="0.1"/>
+  <path d="M440 240 L450 250 L460 240 L455 240 L455 230 L445 230 L445 240 Z" fill="#0D6EFD"/>
+  <rect x="435" y="250" width="30" height="25" rx="2" fill="#0D6EFD" opacity="0.5"/>
+  
+  <!-- Farm Icon -->
+  <rect x="150" y="300" width="40" height="40" rx="5" fill="#0D6EFD" opacity="0.1"/>
+  <path d="M170 290 L190 310 L150 310 Z" fill="#0D6EFD" opacity="0.5"/>
+  <rect x="160" y="310" width="20" height="20" fill="#0D6EFD" opacity="0.3"/>
+  <rect x="165" y="320" width="10" height="10" fill="#FFFFFF"/>
+  
+  <!-- Job Icon -->
+  <rect x="400" y="300" width="40" height="40" rx="5" fill="#0D6EFD" opacity="0.1"/>
+  <rect x="410" y="310" width="20" height="25" rx="2" fill="#0D6EFD" opacity="0.5"/>
+  <rect x="415" y="305" width="10" height="5" rx="2" fill="#0D6EFD" opacity="0.7"/>
+</svg>

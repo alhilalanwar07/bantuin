@@ -112,7 +112,7 @@
                 <p class="lead mb-4">Your email has been successfully verified. Thank you for completing this important step.</p>
                 
                 <p>You will be redirected to the dashboard in</p>
-                <div class="countdown" id="countdown">5</div>
+                <div class="countdown" id="countdown">10</div>
                 
                 <div class="mt-4">
                     <a href="/dashboard" class="btn btn-primary btn-lg">
@@ -125,7 +125,7 @@
 
     <script>
         // Countdown timer
-        let seconds = 5;
+        let seconds = 10;
         const countdownElement = document.getElementById('countdown');
         
         const countdownTimer = setInterval(() => {

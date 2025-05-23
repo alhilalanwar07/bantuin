@@ -1,0 +1,41 @@
+<svg width="400" height="400" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
+    <!-- Background Elements -->
+    <circle cx="200" cy="200" r="150" fill="#f8f9fa" />
+    <circle cx="100" cy="100" r="50" fill="#8e44ad" opacity="0.1" />
+    <circle cx="300" cy="300" r="70" fill="#e84393" opacity="0.1" />
+    
+    <!-- Person 1 (Professional) -->
+    <circle cx="150" cy="180" r="40" fill="#8e44ad" opacity="0.8" />
+    <rect x="130" y="220" width="40" height="80" rx="10" fill="#8e44ad" opacity="0.8" />
+    <rect x="110" y="240" width="20" height="60" rx="10" fill="#8e44ad" opacity="0.8" />
+    <rect x="170" y="240" width="20" height="60" rx="10" fill="#8e44ad" opacity="0.8" />
+    <circle cx="150" cy="170" r="15" fill="#fff" />
+    
+    <!-- Person 2 (Customer) -->
+    <circle cx="250" cy="180" r="40" fill="#e84393" opacity="0.8" />
+    <rect x="230" y="220" width="40" height="80" rx="10" fill="#e84393" opacity="0.8" />
+    <rect x="210" y="240" width="20" height="60" rx="10" fill="#e84393" opacity="0.8" />
+    <rect x="270" y="240" width="20" height="60" rx="10" fill="#e84393" opacity="0.8" />
+    <circle cx="250" cy="170" r="15" fill="#fff" />
+    
+    <!-- Handshake -->
+    <rect x="170" y="200" width="60" height="20" rx="10" fill="#333" />
+    <circle cx="170" cy="210" r="10" fill="#8e44ad" />
+    <circle cx="230" cy="210" r="10" fill="#e84393" />
+    
+    <!-- Tools/Equipment -->
+    <rect x="100" y="320" width="60" height="40" rx="5" fill="#f8f9fa" stroke="#8e44ad" stroke-width="2" />
+    <circle cx="115" cy="340" r="10" fill="#8e44ad" opacity="0.5" />
+    <circle cx="145" cy="340" r="10" fill="#8e44ad" opacity="0.5" />
+    
+    <!-- Mobile Phone -->
+    <rect x="240" y="320" width="30" height="50" rx="5" fill="#f8f9fa" stroke="#e84393" stroke-width="2" />
+    <rect x="245" y="325" width="20" height="30" rx="2" fill="#e84393" opacity="0.3" />
+    <circle cx="255" cy="365" r="5" fill="#e84393" opacity="0.5" />
+    
+    <!-- Stars/Rating -->
+    <polygon points="200,80 210,100 230,105 215,120 220,140 200,130 180,140 185,120 170,105 190,100" fill="#FFD700" />
+    
+    <!-- Text Elements -->
+    <text x="200" y="50" font-family="Arial" font-size="16" fill="#333" text-anchor="middle">Gabung Jadi Mitra</text>
+</svg>

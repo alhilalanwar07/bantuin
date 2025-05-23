@@ -1,0 +1,52 @@
+<svg width="400" height="600" viewBox="0 0 400 600" xmlns="http://www.w3.org/2000/svg">
+    <!-- Phone Frame -->
+    <rect x="50" y="20" width="300" height="560" rx="30" fill="#333" />
+    <rect x="60" y="40" width="280" height="520" rx="20" fill="#fff" />
+    
+    <!-- App Header -->
+    <rect x="60" y="40" width="280" height="60" fill="#8e44ad" />
+    <circle cx="90" cy="70" r="15" fill="#fff" />
+    <text x="120" y="75" font-family="Arial" font-size="16" fill="#fff">BantuIndong</text>
+    <circle cx="310" cy="70" r="15" fill="rgba(255,255,255,0.3)" />
+    
+    <!-- App Content -->
+    <!-- Service Categories -->
+    <rect x="80" y="120" width="100" height="100" rx="10" fill="#f8f9fa" stroke="#e6e6e6" />
+    <circle cx="130" cy="150" r="20" fill="#8e44ad" opacity="0.8" />
+    <text x="130" y="190" font-family="Arial" font-size="12" fill="#333" text-anchor="middle">Montir</text>
+    
+    <rect x="220" y="120" width="100" height="100" rx="10" fill="#f8f9fa" stroke="#e6e6e6" />
+    <circle cx="270" cy="150" r="20" fill="#e84393" opacity="0.8" />
+    <text x="270" y="190" font-family="Arial" font-size="12" fill="#333" text-anchor="middle">Listrik</text>
+    
+    <rect x="80" y="240" width="100" height="100" rx="10" fill="#f8f9fa" stroke="#e6e6e6" />
+    <circle cx="130" cy="270" r="20" fill="#8e44ad" opacity="0.8" />
+    <text x="130" y="310" font-family="Arial" font-size="12" fill="#333" text-anchor="middle">Tukang Cat</text>
+    
+    <rect x="220" y="240" width="100" height="100" rx="10" fill="#f8f9fa" stroke="#e6e6e6" />
+    <circle cx="270" cy="270" r="20" fill="#e84393" opacity="0.8" />
+    <text x="270" y="310" font-family="Arial" font-size="12" fill="#333" text-anchor="middle">Taman</text>
+    
+    <!-- Featured Service -->
+    <rect x="80" y="360" width="240" height="120" rx="10" fill="#f8f9fa" stroke="#e6e6e6" />
+    <rect x="80" y="360" width="240" height="40" rx="10 10 0 0" fill="#8e44ad" />
+    <text x="100" y="385" font-family="Arial" font-size="14" fill="#fff">Layanan Populer</text>
+    
+    <circle cx="110" cy="420" r="15" fill="#e84393" opacity="0.8" />
+    <text x="135" y="425" font-family="Arial" font-size="12" fill="#333">Perbaikan AC</text>
+    <text x="290" y="425" font-family="Arial" font-size="12" fill="#8e44ad" text-anchor="end">Rp150K</text>
+    
+    <circle cx="110" cy="460" r="15" fill="#8e44ad" opacity="0.8" />
+    <text x="135" y="465" font-family="Arial" font-size="12" fill="#333">Service Motor</text>
+    <text x="290" y="465" font-family="Arial" font-size="12" fill="#8e44ad" text-anchor="end">Rp100K</text>
+    
+    <!-- Bottom Navigation -->
+    <rect x="60" y="500" width="280" height="60" fill="#f8f9fa" />
+    <circle cx="100" cy="530" r="15" fill="#8e44ad" />
+    <circle cx="200" cy="530" r="15" fill="#e6e6e6" />
+    <circle cx="300" cy="530" r="15" fill="#e6e6e6" />
+    
+    <!-- Decorative Elements -->
+    <circle cx="40" cy="200" r="80" fill="#8e44ad" opacity="0.1" />
+    <circle cx="360" cy="400" r="100" fill="#e84393" opacity="0.1" />
+</svg>

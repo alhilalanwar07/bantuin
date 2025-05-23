@@ -1863,24 +1863,25 @@ class UserController extends Controller
     public function getAllProviderByCategory(Request $request, $id)
     {
         $providers = ServiceProvider::with([
-            'user' => function ($query) {
-                $query->where('is_active', 1)
-                    ->select('id', 'profile_photo', 'is_active');
-                },
-            'specialization' => function ($query) {
-                $query->select('id', 'name', 'icon');
+            'user:id,profile_photo,is_active',
+            'providerCertifications' => function ($query) {
+                $query->select('id', 'service_provider_id', 'specialization_id')
+                      ->with('specialization:id,name'); 
                 },
             ])
-            ->whereHas('user')
-            ->whereHas('specialization', function ($query) use ($id) {
-                $query->where('id', $id);
+            ->whereHas('user', function ($query) {
+                $query->where('is_active', 1);
+            })
+            ->whereHas('providerCertifications', function ($query) use ($id) {
+                $query->where('specialization_id', $id);
             })
             ->get();
-        return response()->json([
-            'status' => true,
-            'data' => $providers,
-            'message' => 'List provider by category',
-        ]);
+            
+            return response()->json([
+                'status' => true,
+                'data' => $providers,
+                'message' => 'List provider by category',
+            ]);
     }
 
     public function getSpecializations(Request $request)

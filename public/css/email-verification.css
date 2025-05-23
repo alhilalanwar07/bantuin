@@ -1,0 +1,209 @@
+/* Common styles */
+body {
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+    font-family: 'Poppins', sans-serif;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.verification-container {
+    text-align: center;
+    padding: 2rem;
+    border-radius: 1rem;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    max-width: 500px;
+    width: 90%;
+    background: rgba(255, 255, 255, 0.95);
+    position: relative;
+    z-index: 1;
+}
+
+h1 {
+    margin-bottom: 1.5rem;
+    font-weight: 700;
+}
+
+p {
+    color: #4a4a4a;
+    line-height: 1.6;
+    margin-bottom: 2rem;
+}
+
+.btn {
+    padding: 12px 30px;
+    border: none;
+    border-radius: 30px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: inline-block;
+    position: relative;
+    overflow: hidden;
+    color: white;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+}
+
+/* Success page styles */
+.success-page {
+    background: linear-gradient(135deg, #8A2BE2, #FF69B4);
+}
+
+.success-container .checkmark {
+    width: 100px;
+    height: 100px;
+    margin: 0 auto;
+}
+
+.success-container h1 {
+    color: #6a1b9a;
+}
+
+.success-container .btn {
+    background: linear-gradient(45deg, #9c27b0, #e91e63);
+}
+
+.success-container .btn:hover {
+    box-shadow: 0 10px 20px rgba(156, 39, 176, 0.3);
+}
+
+.checkmark__circle {
+    stroke-dasharray: 166;
+    stroke-dashoffset: 166;
+    stroke-width: 2;
+    stroke-miterlimit: 10;
+    stroke: #9c27b0;
+    fill: none;
+    animation: stroke 0.6s cubic-bezier(0.65, 0, 0.45, 1) forwards;
+}
+
+.checkmark__check {
+    transform-origin: 50% 50%;
+    stroke-dasharray: 48;
+    stroke-dashoffset: 48;
+    animation: stroke 0.3s cubic-bezier(0.65, 0, 0.45, 1) 0.8s forwards;
+}
+
+/* Error page styles */
+.error-page {
+    background: linear-gradient(135deg, #FF6B6B, #FF8E53);
+}
+
+.error-container .error-icon {
+    width: 100px;
+    height: 100px;
+    margin: 0 auto;
+    color: #FF6B6B;
+    font-size: 4rem;
+    animation: shake 0.5s ease-in-out;
+}
+
+.error-container h1 {
+    color: #FF6B6B;
+}
+
+.error-container .btn {
+    background: linear-gradient(45deg, #FF6B6B, #FF8E53);
+}
+
+.error-container .btn:hover {
+    box-shadow: 0 10px 20px rgba(255, 107, 107, 0.3);
+}
+
+/* Invalid link page styles */
+.invalid-page {
+    background: linear-gradient(135deg, #F7B733, #FC4A1A);
+}
+
+.invalid-container .warning-icon {
+    width: 100px;
+    height: 100px;
+    margin: 0 auto;
+    color: #F7B733;
+    font-size: 4rem;
+    animation: pulse 2s infinite;
+}
+
+.invalid-container h1 {
+    color: #FC4A1A;
+}
+
+.invalid-container .btn {
+    background: linear-gradient(45deg, #F7B733, #FC4A1A);
+}
+
+.invalid-container .btn:hover {
+    box-shadow: 0 10px 20px rgba(247, 183, 51, 0.3);
+}
+
+/* Particles and glow effect */
+.particle {
+    position: absolute;
+    border-radius: 50%;
+    animation: float 3s infinite ease-in-out;
+}
+
+.glow {
+    position: absolute;
+    width: 200%;
+    height: 200%;
+    animation: rotate 20s linear infinite;
+    z-index: 0;
+}
+
+/* Success page glow */
+.success-page .glow {
+    background: radial-gradient(circle, rgba(156,39,176,0.2) 0%, rgba(233,30,99,0.1) 50%, rgba(255,255,255,0) 100%);
+}
+
+/* Error page glow */
+.error-page .glow {
+    background: radial-gradient(circle, rgba(255,107,107,0.2) 0%, rgba(255,142,83,0.1) 50%, rgba(255,255,255,0) 100%);
+}
+
+/* Invalid page glow */
+.invalid-page .glow {
+    background: radial-gradient(circle, rgba(247,183,51,0.2) 0%, rgba(252,74,26,0.1) 50%, rgba(255,255,255,0) 100%);
+}
+
+/* Animations */
+@keyframes stroke {
+    100% {
+        stroke-dashoffset: 0;
+    }
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-10px); }
+    75% { transform: translateX(10px); }
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+}
+
+@keyframes float {
+    0%, 100% {
+        transform: translateY(0) translateX(0) scale(0.8);
+        opacity: 1;
+    }
+    50% {
+        transform: translateY(-100px) translateX(50px) scale(1.2);
+        opacity: 0.5;
+    }
+}
+
+@keyframes rotate {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}

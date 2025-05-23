@@ -1,32 +1,24 @@
-<!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+@extends('layouts.frontend')
 
-<head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <!-- Primary Meta Tags -->
-    <title>{{ config('app.name') }}</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <meta name="title" content="{{ config('app.name') }}">
-    <meta name="author" content="Themesberg">
-    <meta name="description" content="{{ config('app.name') }}">
-    <meta name="keywords" content="sistem, informasi, funsional, spj" />
-    <link rel="canonical" href="{{ url('/') }}">
+@section('content')
+    <livewire:frontend.landing-page />
+@endsection
 
-    <!-- Open Graph / Facebook -->
-    <meta property="og:type" content="website">
-    <meta property="og:url" content="{{ url('/') }}">
-    <meta property="og:title" content="{{ config('app.name') }}">
-    <meta property="og:description" content="{{ config('app.name') }}">
-    <meta property="og:image" content="{{ url('/') }}">
+@push('styles')
+    <link type="text/css" href="{{ url('/') }}/css/landing-page.css" rel="stylesheet">
+@endpush
 
-    <!-- Twitter -->
-    <meta property="twitter:card" content="summary_large_image">
-    <meta property="twitter:url" content="{{ url('/') }}">
-    <meta property="twitter:title" content="{{ config('app.name') }}">
-    <meta property="twitter:description" content="{{ config('app.name') }}">
-    <meta property="twitter:image" content="{{ url('/') }}">
-
-    <!-- Favicon -->
+@push('scripts')
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Tambahkan kelas animasi ke elemen-elemen tertentu
+        const animateElements = document.querySelectorAll('.mockup-image');
+        animateElements.forEach(element => {
+            element.classList.add('float-animation');
+        });
+    });
+</script>
+@endpush
     <link rel="apple-touch-icon" sizes="120x120" href="{{ url('/') }}/assets/img/favicon/apple-touch-icon.png">
     <link rel="icon" type="image/png" sizes="32x32" href="{{ url('/') }}/assets/img/favicon/favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="{{ url('/') }}/assets/img/favicon/favicon-16x16.png">

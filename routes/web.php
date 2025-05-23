@@ -50,11 +50,7 @@ Route::get('/email/verify/{id}/{hash}', function ($id, $hash) {
     }
 
     $user->markEmailAsVerified();
-
     return view('email-verification.success');
+    
 })->middleware(['signed'])->name('verification.verify');
-
-Route::get('/email/verify', function () {
-    return view('email-verification.success');
-});
 

@@ -1862,17 +1862,15 @@ class UserController extends Controller
 
     public function getAllProviderByCategory(Request $request, $id)
     {
+        //get name specialization
+        $specialization = Specialization::where('id',$id)->first();
         $providers = ServiceProvider::with([
             'user:id,profile_photo,is_active',
             'certifications' => function ($query) {
                 $query->select('id', 'provider_id', 'specialization_id')
                       ->with('specialization:id,name'); 
                 },
-            // 'serviceRequests.rating:id,reference_number,score',
             ])
-            // ->withSum(['serviceRequests.rating as total_rating_score' => function ($query) {
-            //     $query->select(DB::raw('coalesce(sum(score), 0)'));
-            // }], 'score')
             ->whereHas('user', function ($query) {
                 $query->where('is_active', 1);
             })
@@ -1884,6 +1882,7 @@ class UserController extends Controller
             
             return response()->json([
                 'status' => true,
+                'skill_name' => $specialization->name,
                 'data' => $providers->map(function ($provider) {
                     return [
                         'id' => $provider->id,

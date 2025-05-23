@@ -1833,6 +1833,7 @@ class UserController extends Controller
                     'profile_photo' => $provider->user?->profile_photo,
                     'completed_requests_count' => $provider->completed_requests_count,
                     'skills' => $provider->unique_skills,
+                    'rating_summary' => $provider->rating_summary, 
                 ];
             }),
             'message' => '10 Provider Teratas',

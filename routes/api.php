@@ -69,6 +69,7 @@ Route::group(['middleware' => 'auth:sanctum'], function(){
     Route::get('/get-provider-rating/{id}', [UserController::class, 'getProviderRating']);
     Route::get('/get-all-provider', [UserController::class, 'getAllProvider']);
     Route::get('/get-all-provider-by-category/{id}', [UserController::class, 'getAllProviderByCategory']);
+    Route::get('/search-provider', [UserController::class, 'searchProvider']);
 });
 
 // Service Provider Routes

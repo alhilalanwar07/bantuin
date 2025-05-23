@@ -1833,6 +1833,7 @@ class UserController extends Controller
                     'profile_photo' => $provider->user?->profile_photo,
                     'completed_requests_count' => $provider->completed_requests_count,
                     'skills' => $provider->unique_skills,
+                    'rating_summary' => $provider->rating_summary, 
                 ];
             }),
             'message' => '10 Provider Teratas',
@@ -1862,17 +1863,15 @@ class UserController extends Controller
 
     public function getAllProviderByCategory(Request $request, $id)
     {
+        //get name specialization
+        $specialization = Specialization::where('id',$id)->first();
         $providers = ServiceProvider::with([
             'user:id,profile_photo,is_active',
             'certifications' => function ($query) {
                 $query->select('id', 'provider_id', 'specialization_id')
                       ->with('specialization:id,name'); 
                 },
-            // 'serviceRequests.rating:id,reference_number,score',
             ])
-            // ->withSum(['serviceRequests.rating as total_rating_score' => function ($query) {
-            //     $query->select(DB::raw('coalesce(sum(score), 0)'));
-            // }], 'score')
             ->whereHas('user', function ($query) {
                 $query->where('is_active', 1);
             })
@@ -1884,6 +1883,7 @@ class UserController extends Controller
             
             return response()->json([
                 'status' => true,
+                'skill_name' => $specialization->name,
                 'data' => $providers->map(function ($provider) {
                     return [
                         'id' => $provider->id,
@@ -1934,5 +1934,62 @@ class UserController extends Controller
             'message' => 'List specialization dengan jumlah provider',
         ]);
         
+    }
+
+    public function searchProvider(Request $request)
+    {
+        $search = $request->query('search');
+        $perPage = $request->query('per_page', 10);
+
+        $providers = ServiceProvider::with([
+            'user' => function ($query) {
+                $query->select('id', 'name', 'profile_photo', 'is_active');
+                },
+            'certifications' => function ($query) {
+                $query->select('id', 'provider_id', 'specialization_id')
+                      ->with('specialization:id,name'); 
+                },
+            ])
+            ->whereHas('user', function ($query) {
+                $query->where('is_active', 1);
+            })
+            ->when($search, function ($query, $search) {
+                $query->where(function ($q) use ($search) {
+                    $q->whereHas('user', function ($userQuery) use ($search) {
+                        $userQuery->where('name', 'like', "%$search%")
+                                  ->orWhere('address', 'like', "%$search%");
+                    })->orWhereHas('certifications.specialization', function ($specQuery) use ($search) {
+                        $specQuery->where('name', 'like', "%$search%");
+                    });
+                });
+            })
+            ->paginate($perPage);
+
+        return response()->json([
+            'status' => true,
+            'data' => $providers->map(function ($provider){
+                return [
+                    'id' => $provider->id,
+                    'is_active' => $provider->user->is_active,
+                    'address' => $provider->address,
+                    'name' => $provider->name,
+                    'gender' => $provider->gender,
+                    'profile_photo' =>$provider->user->profile_photo,
+                    'certifications' => $provider->certifications->map(function ($cert) {
+                        return [
+                            'id' => $cert->id,
+                            'specialization' => $cert->specialization,
+                            'skill_name' => $cert->skill_name,
+                            'is_verified' => $cert->is_verified,
+                        ];
+                    }),
+                    'rating_summary' => $provider->rating_summary,
+                ];
+            }),
+            'current_page' => $providers->currentPage(),
+            'last_page' => $providers->lastPage(),
+            'total' => $providers->total(),
+            'message' => 'Hasil pencarian provider',
+        ]);
     }
 }

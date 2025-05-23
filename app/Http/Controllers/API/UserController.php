@@ -1883,7 +1883,7 @@ class UserController extends Controller
         ]);
     }
 
-    public function getSpecialization(Request $request)
+    public function getSpecializations(Request $request)
     {
         $specializations = Specialization::withCount('serviceProviders')
             ->orderByDesc('service_providers_count')

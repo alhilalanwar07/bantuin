@@ -1935,4 +1935,66 @@ class UserController extends Controller
         ]);
         
     }
+
+    public function searchProvider(Request $request)
+    {
+        $search = $request->query('search');
+        $perPage = $request->query('per_page', 10);
+
+        $providers = ServiceProvider::with([
+            'user' => function ($query) {
+                $query->select('id', 'name', 'address', 'profile_photo', 'is_active');
+                },
+            'certifications' => function ($query) {
+                $query->select('id', 'provider_id', 'specialization_id')
+                      ->with('specialization:id,name'); 
+                },
+            ])
+            ->whereHas('user', function ($query) {
+                $query->where('is_active', 1);
+            })
+            ->whereHas('certifications', function ($query) use ($id) {
+                $query->select('id','skill_name','is_verified')
+                    ->where('specialization_id', $id);
+            })
+            ->when($search, function ($query, $search) {
+                $query->whereHas('user', function ($q) use ($search) {
+                    $q->where('name', 'like', "%$search%")
+                    ->orWhere('address', 'like', "%$search%");
+                });
+            })
+            ->when($specializationId, function ($query, $search) {
+                $query->whereHas('certifications.specialization', function ($q) use ($search) {
+                    $q->where('name', 'like', "%$search%");
+                });
+            })
+            ->paginate($perPage);
+
+        return response()->json([
+            'status' => true,
+            'data' => $providers->map(function ($provider){
+                return [
+                    'id' => $provider->id,
+                    'is_active' => $provider->user->is_active,
+                    'address' => $provider->address,
+                    'name' => $provider->name,
+                    'gender' => $provider->gender,
+                    'profile_photo' =>$provider->user->profile_photo,
+                    'certifications' => $provider->certifications->map(function ($cert) {
+                        return [
+                            'id' => $cert->id,
+                            'specialization' => $cert->specialization,
+                            'skill_name' => $cert->skill_name,
+                            'is_verified' => $cert->is_verified,
+                        ];
+                    }),
+                    'rating_summary' => $provider->rating_summary,
+                ];
+            }),
+            'current_page' => $providers->currentPage(),
+            'last_page' => $providers->lastPage(),
+            'total' => $providers->total(),
+            'message' => 'Hasil pencarian provider',
+        ]);
+    }
 }

@@ -1865,7 +1865,7 @@ class UserController extends Controller
         $providers = ServiceProvider::with([
             'user:id,profile_photo,is_active',
             'certifications' => function ($query) {
-                $query->select('id', 'service_provider_id', 'specialization_id')
+                $query->select('id', 'provider_id', 'specialization_id')
                       ->with('specialization:id,name'); 
                 },
             ])

@@ -1867,12 +1867,12 @@ class UserController extends Controller
                 $query->where('is_active', 1)
                     ->select('id', 'profile_photo', 'is_active');
                 },
-            'specializations' => function ($query) {
+            'specialization' => function ($query) {
                 $query->select('id', 'name', 'icon');
                 },
             ])
             ->whereHas('user')
-            ->whereHas('specializations', function ($query) use ($id) {
+            ->whereHas('specialization', function ($query) use ($id) {
                 $query->where('id', $id);
             })
             ->get();

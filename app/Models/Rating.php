@@ -36,11 +36,4 @@ class Rating extends Model
     {
         return $this->belongsTo(ServiceProvider::class, 'provider_id');
     }
-
-    public function scopeFeatured($query)
-    {
-        return $query->where('status', 'approved')
-            ->where('score', '>=', 4)
-            ->latest();
-    }
 }

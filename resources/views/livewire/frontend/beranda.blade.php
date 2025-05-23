@@ -4,33 +4,6 @@ use Livewire\Volt\Component;
 use App\Models\Rating;
 
 new class extends Component {
-    public $featuredRatings;
-    public $footerAdded = false;
-    public $socialLinks = [
-        'facebook' => '#',
-        'instagram' => '#',
-        'youtube' => '#'
-    ];
-
-    public function mount(): void
-    {
-        $this->loadFeaturedRatings();
-    }
-
-    public function loadFeaturedRatings(): void
-    {
-        $this->featuredRatings = Rating::featured()->get();
-    }
-
-    public function refreshTestimonials(): void
-    {
-        $this->loadFeaturedRatings();
-    }
-
-    public function setFooterAdded(): void
-    {
-        $this->footerAdded = true;
-    }
 }; ?>
 <div>
     <!-- Hero Section -->

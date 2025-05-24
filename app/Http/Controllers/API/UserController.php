@@ -2053,7 +2053,7 @@ class UserController extends Controller
             DB::commit();
             return response()->json([
                 'status' => true,
-                'message' => 'Saldo berhasil ditambahkan.',
+                'message' => 'Top up diproses.',
                 'data' => [
                     'topup_id' => $recordTopup->id,
                     'snap_token' => $snapToken,
@@ -2088,7 +2088,7 @@ class UserController extends Controller
         if ($transaction == 'settlement' && $fraud == 'accept') {
             $topup->update(['status' => 'success']);
 
-            $provider = $topup->provider;
+            $provider = ServiceProvider::where('id', $topup->provider_id)->first();
             $provider->account_balance += $topup->amount;
             $provider->save();
         } elseif (in_array($transaction, ['cancel', 'deny', 'expire'])) {

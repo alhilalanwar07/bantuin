@@ -2099,7 +2099,7 @@ class UserController extends Controller
 
             return response()->json([
                 'status' => true,
-                'message' => 'Pembayaran berhasil.',
+                'message' => 'Pembayaran berhasil, saldo kamu telah ditambahkan. Jumlah saldo: ' . $provider->account_balance,
                 'data' => [
                     'provider_id' => $provider->id,
                     'account_balance' => $provider->account_balance,

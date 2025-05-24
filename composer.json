@@ -13,6 +13,7 @@
         "laravel/ui": "^4.5",
         "livewire/livewire": "^3.5",
         "livewire/volt": "^1.6",
+        "midtrans/midtrans-php": "^2.6",
         "spatie/laravel-activitylog": "^4.10"
     },
     "require-dev": {

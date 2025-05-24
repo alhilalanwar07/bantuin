@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Models\Rating;
 use App\Models\Customer;
 use App\Models\ServiceBid;
+use App\Models\RecordTopup;
 use App\Models\ServicePhoto;
 use Illuminate\Http\Request;
 use App\Models\Advertisement;
@@ -1991,5 +1992,111 @@ class UserController extends Controller
             'total' => $providers->total(),
             'message' => 'Hasil pencarian provider',
         ]);
+    }
+
+    public function topUpSaldo(Request $request)
+    {
+        $user = $request->user();
+        $provider = ServiceProvider::where('user_id', $user->id)->first();
+        $clientID = env('MIDTRANS_CLIENT_KEY');
+
+        if (!$provider) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Provider tidak ditemukan.',
+            ], 404);
+        }
+
+        $topUpAmount = $request->amount;
+
+        if ($topUpAmount <= 0) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Jumlah top up harus lebih besar dari nol.',
+            ], 400);
+        }
+
+        try {
+            DB::beginTransaction();
+            $orderId = 'TOPUP-' . strtoupper(uniqid());
+            $recordTopup = RecordTopup::create([
+                'provider_id' => $provider->id,
+                'amount' => $topUpAmount,
+                'status' => 'pending', // assuming the top-up is successful
+                'order_id' => $orderId,
+            ]);
+
+            \Midtrans\Config::$serverKey = config('midtrans.server_key');
+            \Midtrans\Config::$isProduction = false;
+            \Midtrans\Config::$isSanitized = true;
+            \Midtrans\Config::$is3ds = true;
+
+            $params = array(
+                'transaction_details' => array(
+                    'order_id' => $orderId,
+                    'gross_amount' => $topUpAmount,
+                ),
+                'customer_details' => array(
+                    'first_name' => $provider->name,
+                    'email' => $user->email,
+                ),
+            );
+            
+            $snapToken = \Midtrans\Snap::getSnapToken($params);
+            
+            $recordTopup->snap_token = $snapToken;
+            $recordTopup->save();
+            // $provider->account_balance += $topUpAmount;
+            // $provider->save();
+
+
+            DB::commit();
+            return response()->json([
+                'status' => true,
+                'message' => 'Saldo berhasil ditambahkan.',
+                'data' => [
+                    'topup_id' => $recordTopup->id,
+                    'snap_token' => $snapToken,
+                    'amount' => $topUpAmount,
+                    'client_id' => $clientID,
+                ],
+            ], 200);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'status' => false,
+                'message' => 'Terjadi kesalahan saat menambahkan saldo.',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    public function handleCallback(Request $request)
+    {
+        $notif = new \Midtrans\Notification();
+
+        $transaction = $notif->transaction_status;
+        $orderId = $notif->order_id;
+        $fraud = $notif->fraud_status;
+
+        $topup = RecordTopup::where('order_id', $orderId)->first();
+
+        if (!$topup) {
+            return response()->json(['message' => 'Topup tidak ditemukan.'], 404);
+        }
+
+        if ($transaction == 'settlement' && $fraud == 'accept') {
+            $topup->update(['status' => 'success']);
+
+            $provider = $topup->provider;
+            $provider->account_balance += $topup->amount;
+            $provider->save();
+        } elseif (in_array($transaction, ['cancel', 'deny', 'expire'])) {
+            $topup->update(['status' => 'failed']);
+        } elseif ($transaction == 'pending') {
+            $topup->update(['status' => 'pending']);
+        }
+
+        return response()->json(['message' => 'Callback diproses.']);
     }
 }

@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class RecordTopup extends Model
 {
     protected $fillable = [
+        'order_id',
         'provider_id',
         'amount',
         'snap_token',

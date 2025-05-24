@@ -53,6 +53,9 @@ Route::group(['middleware' => 'auth:sanctum'], function(){
     Route::get('/income-this-month', [UserController::class, 'incomeThisMonth']);
     Route::get('/history-job', [UserController::class, 'historyJob']);
     Route::get('/top-ten-provider', [UserController::class, 'topTenProvider']);
+    Route::post('/topup-saldo', [UserController::class, 'topUpSaldo']);
+    Route::post('/midtrans/callback', [MidtransController::class, 'handleCallback']);
+
     // API for customer
     Route::get('/customer-profile', [UserController::class, 'profilCustomer']);
     Route::post('/upload-customer-photo', [UserController::class, 'uploadFotoCustomer']);
@@ -70,6 +73,7 @@ Route::group(['middleware' => 'auth:sanctum'], function(){
     Route::get('/get-all-provider', [UserController::class, 'getAllProvider']);
     Route::get('/get-all-provider-by-category/{id}', [UserController::class, 'getAllProviderByCategory']);
     Route::get('/search-provider', [UserController::class, 'searchProvider']);
+
 });
 
 // Service Provider Routes

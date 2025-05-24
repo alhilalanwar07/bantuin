@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('record_topups', function (Blueprint $table) {
             $table->id();
+            $table->text('order_id');
             $table->foreignId('provider_id')->constrained('service_providers')->onDelete('cascade');
             $table->integer('amount');
             $table->text('snap_token')->nullable();

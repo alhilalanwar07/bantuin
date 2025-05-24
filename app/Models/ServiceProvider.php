@@ -94,4 +94,13 @@ class ServiceProvider extends Model
             // }),
         ];
     }
+
+    public function topups(): HasMany
+    {
+        return $this->hasMany(RecordTopup::class, 'provider_id');
+    }
+    public function getFormattedAccountBalanceAttribute()
+    {
+        return number_format($this->account_balance, 0, ',', '.');
+    }
 }

@@ -2027,7 +2027,7 @@ class UserController extends Controller
             ]);
 
             \Midtrans\Config::$serverKey  = env('MIDTRANS_SERVER_KEY');
-            \Midtrans\Config::$isProduction = false;
+            \Midtrans\Config::$isProduction = true;
             \Midtrans\Config::$isSanitized = true;
             \Midtrans\Config::$is3ds = true;
 

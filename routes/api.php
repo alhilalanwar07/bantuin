@@ -54,8 +54,7 @@ Route::group(['middleware' => 'auth:sanctum'], function(){
     Route::get('/history-job', [UserController::class, 'historyJob']);
     Route::get('/top-ten-provider', [UserController::class, 'topTenProvider']);
     Route::post('/topup-saldo', [UserController::class, 'topUpSaldo']);
-    Route::post('/midtrans/callback', [MidtransController::class, 'handleCallback']);
-
+    Route::post('/success-payment', [UserController::class, 'successPayment']);
     // API for customer
     Route::get('/customer-profile', [UserController::class, 'profilCustomer']);
     Route::post('/upload-customer-photo', [UserController::class, 'uploadFotoCustomer']);

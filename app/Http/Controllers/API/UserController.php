@@ -2071,32 +2071,77 @@ class UserController extends Controller
         }
     }
 
-    public function handleCallback(Request $request)
+    public function successPayment(Request $request)
     {
-        $notif = new \Midtrans\Notification();
+        $user = $request->user();
+        $provider = ServiceProvider::where('user_id', $user->id)->first();
 
-        $transaction = $notif->transaction_status;
-        $orderId = $notif->order_id;
-        $fraud = $notif->fraud_status;
-
-        $topup = RecordTopup::where('order_id', $orderId)->first();
-
-        if (!$topup) {
-            return response()->json(['message' => 'Topup tidak ditemukan.'], 404);
+        if (!$provider) {
+            return response()->json(['message' => 'Provider tidak ditemukan.'], 404);
         }
 
-        if ($transaction == 'settlement' && $fraud == 'accept') {
-            $topup->update(['status' => 'success']);
-
-            $provider = ServiceProvider::where('id', $topup->provider_id)->first();
-            $provider->account_balance += $topup->amount;
+        DB::beginTransaction();
+        try {
+            $topUp = RecordTopup::where('snap_token', $request->snap_token)->first();
+            if (!$topUp) {
+                DB::rollBack();
+                return response()->json(['message' => 'Top up tidak ditemukan.'], 404);
+            }
+            if ($topUp->status === 'success') {
+                DB::rollBack();
+                return response()->json(['message' => 'Top up sudah berhasil.'], 400);
+            }
+            $topUp->status = 'success';
+            $topUp->save();
+            $provider->account_balance += $topUp->amount;
             $provider->save();
-        } elseif (in_array($transaction, ['cancel', 'deny', 'expire'])) {
-            $topup->update(['status' => 'failed']);
-        } elseif ($transaction == 'pending') {
-            $topup->update(['status' => 'pending']);
-        }
+            DB::commit();
 
-        return response()->json(['message' => 'Callback diproses.']);
+            return response()->json([
+                'status' => true,
+                'message' => 'Pembayaran berhasil.',
+                'data' => [
+                    'provider_id' => $provider->id,
+                    'account_balance' => $provider->account_balance,
+                ],
+            ]);
+
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            return response()->json([
+                'status' => false,
+                'message' => 'Pembayaran gagal.',
+                'error' => $th->getMessage(),
+            ], 500);
+        }
     }
+
+    // public function handleCallback(Request $request)
+    // {
+    //     $notif = new \Midtrans\Notification();
+
+    //     $transaction = $notif->transaction_status;
+    //     $orderId = $notif->order_id;
+    //     $fraud = $notif->fraud_status;
+
+    //     $topup = RecordTopup::where('order_id', $orderId)->first();
+
+    //     if (!$topup) {
+    //         return response()->json(['message' => 'Topup tidak ditemukan.'], 404);
+    //     }
+
+    //     if ($transaction == 'settlement' && $fraud == 'accept') {
+    //         $topup->update(['status' => 'success']);
+
+    //         $provider = ServiceProvider::where('id', $topup->provider_id)->first();
+    //         $provider->account_balance += $topup->amount;
+    //         $provider->save();
+    //     } elseif (in_array($transaction, ['cancel', 'deny', 'expire'])) {
+    //         $topup->update(['status' => 'failed']);
+    //     } elseif ($transaction == 'pending') {
+    //         $topup->update(['status' => 'pending']);
+    //     }
+
+    //     return response()->json(['message' => 'Callback diproses.']);
+    // }
 }
